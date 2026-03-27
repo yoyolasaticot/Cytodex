@@ -81,7 +81,7 @@ const initialCards = [
   },
 ];
 
-function computeBadge(completed, total) {
+function computeBadge(completed: number, total: number): "Bronze" | "Argent" | "Or" | null {
   const ratio = total === 0 ? 0 : (completed / total) * 100;
   if (ratio >= 100) return "Or";
   if (ratio >= 70) return "Argent";
