@@ -1,13 +1,52 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Camera, Lock, Medal, User, BookOpen, ChevronRight, ImagePlus, CheckCircle2 } from "lucide-react";
+import { Lock, Medal, User, BookOpen, ChevronRight, ImagePlus, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+type BadgeLevel = "Bronze" | "Argent" | "Or" | null;
+
+type Screen = "cover" | "home" | "dex";
+
+type CytodexCard = {
+  id: number;
+  title: string;
+  category: string;
+  found: boolean;
+  completed: boolean;
+  image: string;
+  characteristics: string;
+  pathologies: string;
+};
+
+type CardUpdate = Partial<Pick<CytodexCard, "characteristics" | "pathologies" | "completed">>;
+
+type CoverScreenProps = {
+  onLogin: () => void;
+};
+
+type HomeScreenProps = {
+  cards: CytodexCard[];
+  onOpenDex: () => void;
+};
+
+type DexCardProps = {
+  card: CytodexCard;
+  onUpload: (id: number) => void;
+  onUpdate: (id: number, patch: CardUpdate) => void;
+};
+
+type DexScreenProps = {
+  cards: CytodexCard[];
+  onBack: () => void;
+  onUpload: (id: number) => void;
+  onUpdate: (id: number, patch: CardUpdate) => void;
+};
 
 const categories = [
   "Pathologies du globule rouge",
@@ -18,7 +57,7 @@ const categories = [
   "Leucémies",
 ];
 
-const initialCards = [
+const initialCards: CytodexCard[] = [
   {
     id: 1,
     title: "Schizocyte",
@@ -81,7 +120,7 @@ const initialCards = [
   },
 ];
 
-function computeBadge(completed: number, total: number): "Bronze" | "Argent" | "Or" | null {
+function computeBadge(completed: number, total: number): BadgeLevel {
   const ratio = total === 0 ? 0 : (completed / total) * 100;
   if (ratio >= 100) return "Or";
   if (ratio >= 70) return "Argent";
@@ -89,14 +128,14 @@ function computeBadge(completed: number, total: number): "Bronze" | "Argent" | "
   return null;
 }
 
-function badgeStyle(level) {
+function badgeStyle(level: BadgeLevel): string {
   if (level === "Or") return "bg-yellow-100 text-yellow-900 border-yellow-300";
   if (level === "Argent") return "bg-slate-100 text-slate-800 border-slate-300";
   if (level === "Bronze") return "bg-amber-100 text-amber-900 border-amber-300";
   return "bg-muted text-muted-foreground border-dashed";
 }
 
-function CoverScreen({ onLogin }) {
+function CoverScreen({ onLogin }: CoverScreenProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -149,7 +188,7 @@ function CoverScreen({ onLogin }) {
   );
 }
 
-function HomeScreen({ cards, onOpenDex }) {
+function HomeScreen({ cards, onOpenDex }: HomeScreenProps) {
   const badgeData = useMemo(() => {
     return categories.map((category) => {
       const inCategory = cards.filter((c) => c.category === category);
@@ -219,7 +258,7 @@ function HomeScreen({ cards, onOpenDex }) {
   );
 }
 
-function DexCard({ card, onUpload, onUpdate }) {
+function DexCard({ card, onUpload, onUpdate }: DexCardProps) {
   const [characteristics, setCharacteristics] = useState(card.characteristics);
   const [pathologies, setPathologies] = useState(card.pathologies);
 
@@ -310,7 +349,7 @@ function DexCard({ card, onUpload, onUpdate }) {
   );
 }
 
-function DexScreen({ cards, onBack, onUpload, onUpdate }) {
+function DexScreen({ cards, onBack, onUpload, onUpdate }: DexScreenProps) {
   const [activeCategory, setActiveCategory] = useState(categories[0]);
   const filteredCards = cards.filter((c) => c.category === activeCategory);
 
@@ -348,10 +387,10 @@ function DexScreen({ cards, onBack, onUpload, onUpdate }) {
 }
 
 export default function CytodexPrototypeApp() {
-  const [screen, setScreen] = useState("cover");
+  const [screen, setScreen] = useState<Screen>("cover");
   const [cards, setCards] = useState(initialCards);
 
-  const uploadMock = (id) => {
+  const uploadMock = (id: number): void => {
     setCards((prev) =>
       prev.map((card) =>
         card.id === id
@@ -366,7 +405,7 @@ export default function CytodexPrototypeApp() {
     );
   };
 
-  const updateCard = (id, patch) => {
+  const updateCard = (id: number, patch: CardUpdate): void => {
     setCards((prev) => prev.map((card) => (card.id === id ? { ...card, ...patch } : card)));
   };
 
