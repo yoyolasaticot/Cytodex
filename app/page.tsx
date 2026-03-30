@@ -7,10 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type BadgeLevel = "Bronze" | "Argent" | "Or" | null;
-type Screen = "cover" | "home" | "dex";
+type Screen = "cover" | "home" | "categories" | "dex";
 
 type CytodexCard = {
   id: number;
@@ -42,8 +41,15 @@ type DexCardProps = {
   onUpdate: (id: number, patch: CardUpdate) => void;
 };
 
+type CategoryScreenProps = {
+  cards: CytodexCard[];
+  onBack: () => void;
+  onOpenCategory: (category: string) => void;
+};
+
 type DexScreenProps = {
   cards: CytodexCard[];
+  category: string;
   onBack: () => void;
   onAddPhotos: (id: number, files: FileList | null) => void;
   onReplacePhoto: (id: number, index: number, files: FileList | null) => void;
@@ -230,7 +236,7 @@ function HomeScreen({ cards, onOpenDex }: HomeScreenProps) {
               <p className="text-muted-foreground mt-2">Vue synthétique avec progression globale et emplacements de badges.</p>
             </div>
             <Button onClick={onOpenDex} className="rounded-2xl h-11 px-5">
-              Accéder aux fiches <ChevronRight className="ml-2 h-4 w-4" />
+              Accéder aux thèmes <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -433,45 +439,114 @@ function DexCard({ card, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }:
   );
 }
 
-function DexScreen({ cards, onBack, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }: DexScreenProps) {
-  const [activeCategory, setActiveCategory] = useState(categories[0]);
-  const filteredCards = cards.filter((c) => c.category === activeCategory);
+function CategoryScreen({ cards, onBack, onOpenCategory }: CategoryScreenProps) {
+  const categoryStats = categories.map((category) => {
+    const categoryCards = cards.filter((card) => card.category === category);
+    const completed = categoryCards.filter((card) => card.completed).length;
+    const found = categoryCards.filter((card) => card.found).length;
+    return { category, total: categoryCards.length, completed, found, badge: computeBadge(completed, categoryCards.length) };
+  });
 
   return (
     <div className="min-h-screen bg-slate-100 p-3 sm:p-6 md:p-8 pb-24">
-      <div className="mx-auto max-w-7xl space-y-6">
+      <div className="mx-auto max-w-5xl space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">CytoDex</p>
-            <h2 className="text-3xl font-bold mt-2">Fiches des anomalies</h2>
+            <h2 className="text-3xl font-bold mt-2">Thèmes des fiches</h2>
+            <p className="text-muted-foreground mt-2">Choisir un grand cadre nosologique avant de feuilleter les fiches.</p>
           </div>
           <Button variant="outline" className="rounded-2xl" onClick={onBack}>
             Retour à l’accueil
           </Button>
         </div>
 
-        <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-          <TabsList className="w-full h-auto flex md:flex-wrap justify-start rounded-2xl p-2 bg-white border overflow-x-auto whitespace-nowrap gap-2">
-            {categories.map((category) => (
-              <TabsTrigger key={category} value={category} className="rounded-xl px-4 py-3 text-left whitespace-normal md:whitespace-normal h-auto min-h-11 shrink-0">
-                {category}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-          {filteredCards.map((card) => (
-            <DexCard
-              key={card.id}
-              card={card}
-              onAddPhotos={onAddPhotos}
-              onReplacePhoto={onReplacePhoto}
-              onRemovePhoto={onRemovePhoto}
-              onUpdate={onUpdate}
-            />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {categoryStats.map(({ category, total, completed, found, badge }) => (
+            <Card key={category} className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden cursor-pointer hover:shadow-md transition-shadow" onClick={() => onOpenCategory(category)}>
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Catégorie</p>
+                    <h3 className="text-2xl font-bold mt-1">{category}</h3>
+                  </div>
+                  <Badge variant="secondary" className={`rounded-full px-3 py-1.5 text-sm ${badgeStyle(badge)}`}>
+                    {badge ?? "Aucun badge"}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="rounded-2xl bg-slate-50 p-4 border">
+                    <p className="text-muted-foreground">Fiches trouvées</p>
+                    <p className="text-xl font-semibold mt-1">{found} / {total}</p>
+                  </div>
+                  <div className="rounded-2xl bg-slate-50 p-4 border">
+                    <p className="text-muted-foreground">Fiches complétées</p>
+                    <p className="text-xl font-semibold mt-1">{completed} / {total}</p>
+                  </div>
+                </div>
+                <Button className="w-full rounded-2xl min-h-11">
+                  Ouvrir la catégorie <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function DexScreen({ cards, category, onBack, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }: DexScreenProps) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const filteredCards = cards.filter((c) => c.category === category);
+  const activeCard = filteredCards[activeIndex] ?? null;
+
+  const goPrev = () => setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev));
+  const goNext = () => setActiveIndex((prev) => (prev < filteredCards.length - 1 ? prev + 1 : prev));
+
+  return (
+    <div className="min-h-screen bg-slate-100 p-3 sm:p-6 md:p-8 pb-24">
+      <div className="mx-auto max-w-4xl space-y-6">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">CytoDex</p>
+            <h2 className="text-3xl font-bold mt-2">{category}</h2>
+            <p className="text-muted-foreground mt-2">Défilement fiche par fiche à l’intérieur de la catégorie.</p>
+          </div>
+          <Button variant="outline" className="rounded-2xl" onClick={onBack}>
+            Retour aux thèmes
+          </Button>
+        </div>
+
+        <div className="rounded-[1.5rem] sm:rounded-[2rem] bg-white border p-4 flex items-center justify-between gap-3">
+          <Button variant="outline" className="rounded-2xl min-h-11" onClick={goPrev} disabled={activeIndex === 0}>
+            Précédente
+          </Button>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Fiche</p>
+            <p className="font-semibold">{filteredCards.length === 0 ? 0 : activeIndex + 1} / {filteredCards.length}</p>
+          </div>
+          <Button variant="outline" className="rounded-2xl min-h-11" onClick={goNext} disabled={activeIndex >= filteredCards.length - 1}>
+            Suivante
+          </Button>
+        </div>
+
+        {activeCard ? (
+          <DexCard
+            key={activeCard.id}
+            card={activeCard}
+            onAddPhotos={onAddPhotos}
+            onReplacePhoto={onReplacePhoto}
+            onRemovePhoto={onRemovePhoto}
+            onUpdate={onUpdate}
+          />
+        ) : (
+          <Card className="rounded-[1.5rem] sm:rounded-[2rem]">
+            <CardContent className="p-8 text-center text-muted-foreground">
+              Aucune fiche dans cette catégorie.
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
@@ -480,6 +555,7 @@ function DexScreen({ cards, onBack, onAddPhotos, onReplacePhoto, onRemovePhoto, 
 export default function CytodexPrototypeApp() {
   const [screen, setScreen] = useState<Screen>("cover");
   const [cards, setCards] = useState<CytodexCard[]>(initialCards);
+  const [selectedCategory, setSelectedCategory] = useState<string>(categories[0]);
 
   const addPhotos = async (id: number, files: FileList | null): Promise<void> => {
     const newUrls = await fileListToUrls(files);
@@ -536,13 +612,27 @@ export default function CytodexPrototypeApp() {
   }
 
   if (screen === "home") {
-    return <HomeScreen cards={cards} onOpenDex={() => setScreen("dex")} />;
+    return <HomeScreen cards={cards} onOpenDex={() => setScreen("categories")} />;
+  }
+
+  if (screen === "categories") {
+    return (
+      <CategoryScreen
+        cards={cards}
+        onBack={() => setScreen("home")}
+        onOpenCategory={(category) => {
+          setSelectedCategory(category);
+          setScreen("dex");
+        }}
+      />
+    );
   }
 
   return (
     <DexScreen
       cards={cards}
-      onBack={() => setScreen("home")}
+      category={selectedCategory}
+      onBack={() => setScreen("categories")}
       onAddPhotos={addPhotos}
       onReplacePhoto={replacePhoto}
       onRemovePhoto={removePhoto}
