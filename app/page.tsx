@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { Lock, Medal, User, BookOpen, ChevronRight, ImagePlus, CheckCircle2 } from "lucide-react";
+import React, { ChangeEvent, useMemo, useRef, useState } from "react";
+import { Lock, Medal, User, BookOpen, ChevronRight, ImagePlus, CheckCircle2, Trash2, RefreshCw, Camera } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type BadgeLevel = "Bronze" | "Argent" | "Or" | null;
-
 type Screen = "cover" | "home" | "dex";
 
 type CytodexCard = {
@@ -19,12 +18,12 @@ type CytodexCard = {
   category: string;
   found: boolean;
   completed: boolean;
-  image: string;
+  images: string[];
   characteristics: string;
   pathologies: string;
 };
 
-type CardUpdate = Partial<Pick<CytodexCard, "characteristics" | "pathologies" | "completed">>;
+type CardUpdate = Partial<Pick<CytodexCard, "characteristics" | "pathologies" | "completed" | "found" | "images">>;
 
 type CoverScreenProps = {
   onLogin: () => void;
@@ -37,14 +36,18 @@ type HomeScreenProps = {
 
 type DexCardProps = {
   card: CytodexCard;
-  onUpload: (id: number) => void;
+  onAddPhotos: (id: number, files: FileList | null) => void;
+  onReplacePhoto: (id: number, index: number, files: FileList | null) => void;
+  onRemovePhoto: (id: number, index: number) => void;
   onUpdate: (id: number, patch: CardUpdate) => void;
 };
 
 type DexScreenProps = {
   cards: CytodexCard[];
   onBack: () => void;
-  onUpload: (id: number) => void;
+  onAddPhotos: (id: number, files: FileList | null) => void;
+  onReplacePhoto: (id: number, index: number, files: FileList | null) => void;
+  onRemovePhoto: (id: number, index: number) => void;
   onUpdate: (id: number, patch: CardUpdate) => void;
 };
 
@@ -64,7 +67,7 @@ const initialCards: CytodexCard[] = [
     category: "Pathologies du globule rouge",
     found: true,
     completed: true,
-    image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop",
+    images: ["https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop"],
     characteristics: "Fragments érythrocytaires irréguliers, anguleux, de petite taille.",
     pathologies: "Microangiopathie thrombotique, CIVD, hémolyse mécanique.",
   },
@@ -74,7 +77,7 @@ const initialCards: CytodexCard[] = [
     category: "Pathologies du globule rouge",
     found: true,
     completed: false,
-    image: "https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=1200&auto=format&fit=crop",
+    images: ["https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=1200&auto=format&fit=crop"],
     characteristics: "",
     pathologies: "",
   },
@@ -84,7 +87,7 @@ const initialCards: CytodexCard[] = [
     category: "Pathologies du lymphocyte",
     found: false,
     completed: false,
-    image: "",
+    images: [],
     characteristics: "",
     pathologies: "",
   },
@@ -94,7 +97,7 @@ const initialCards: CytodexCard[] = [
     category: "Pathologies du lymphocyte",
     found: false,
     completed: false,
-    image: "",
+    images: [],
     characteristics: "",
     pathologies: "",
   },
@@ -104,7 +107,7 @@ const initialCards: CytodexCard[] = [
     category: "Leucémies",
     found: true,
     completed: true,
-    image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=1200&auto=format&fit=crop",
+    images: ["https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=1200&auto=format&fit=crop"],
     characteristics: "Grande cellule, chromatine fine, nucléoles visibles, rapport N/C élevé.",
     pathologies: "Leucémie aiguë myéloïde.",
   },
@@ -114,7 +117,7 @@ const initialCards: CytodexCard[] = [
     category: "Leucémies",
     found: false,
     completed: false,
-    image: "",
+    images: [],
     characteristics: "",
     pathologies: "",
   },
@@ -135,20 +138,36 @@ function badgeStyle(level: BadgeLevel): string {
   return "bg-muted text-muted-foreground border-dashed";
 }
 
+function fileListToUrls(files: FileList | null): Promise<string[]> {
+  if (!files || files.length === 0) return Promise.resolve([]);
+
+  const readers = Array.from(files).map(
+    (file) =>
+      new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error("Impossible de lire l'image."));
+        reader.readAsDataURL(file);
+      })
+  );
+
+  return Promise.all(readers);
+}
+
 function CoverScreen({ onLogin }: CoverScreenProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#7f1d1d,_#1f2937_65%)] flex items-center justify-center p-6">
-      <div className="w-full max-w-5xl grid md:grid-cols-2 rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 bg-black/20 backdrop-blur">
-        <div className="relative min-h-[560px] bg-gradient-to-br from-red-950 via-red-900 to-red-800 p-10 text-white flex flex-col justify-between">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#7f1d1d,_#1f2937_65%)] flex items-center justify-center p-3 sm:p-6">
+      <div className="w-full max-w-5xl grid md:grid-cols-2 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 bg-black/20 backdrop-blur">
+        <div className="relative min-h-[320px] md:min-h-[560px] bg-gradient-to-br from-red-950 via-red-900 to-red-800 p-6 sm:p-8 md:p-10 text-white flex flex-col justify-between">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-sm tracking-wide">
               <BookOpen className="h-4 w-4" />
               Couverture du CytoDex
             </div>
-            <h1 className="mt-8 text-5xl font-bold tracking-tight">CytoDex</h1>
+            <h1 className="mt-6 md:mt-8 text-4xl sm:text-5xl font-bold tracking-tight">CytoDex</h1>
             <p className="mt-4 max-w-md text-red-100 text-lg leading-relaxed">
               Atlas pédagogique personnel des anomalies cytologiques en hématologie.
             </p>
@@ -160,7 +179,7 @@ function CoverScreen({ onLogin }: CoverScreenProps) {
           </div>
         </div>
 
-        <div className="min-h-[560px] bg-background p-8 md:p-10 flex items-center">
+        <div className="min-h-[420px] md:min-h-[560px] bg-background p-5 sm:p-8 md:p-10 flex items-center">
           <Card className="w-full border-0 shadow-none">
             <CardHeader className="px-0">
               <CardTitle className="text-3xl">Connexion</CardTitle>
@@ -177,7 +196,7 @@ function CoverScreen({ onLogin }: CoverScreenProps) {
                 <label className="text-sm font-medium">Mot de passe</label>
                 <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
               </div>
-              <Button className="w-full rounded-2xl h-12 text-base" onClick={onLogin}>
+              <Button className="w-full rounded-2xl h-12 sm:h-14 text-base" onClick={onLogin}>
                 Ouvrir le CytoDex
               </Button>
             </CardContent>
@@ -201,7 +220,7 @@ function HomeScreen({ cards, onOpenDex }: HomeScreenProps) {
   }, [cards]);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-8">
+    <div className="min-h-screen bg-slate-50 p-3 sm:p-6 md:p-8 pb-24">
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="rounded-[2rem] bg-white p-6 shadow-sm border">
           <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -216,7 +235,7 @@ function HomeScreen({ cards, onOpenDex }: HomeScreenProps) {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-[1.2fr_1fr] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-4 sm:gap-6">
           <Card className="rounded-[2rem]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -258,29 +277,50 @@ function HomeScreen({ cards, onOpenDex }: HomeScreenProps) {
   );
 }
 
-function DexCard({ card, onUpload, onUpdate }: DexCardProps) {
+function DexCard({ card, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }: DexCardProps) {
   const [characteristics, setCharacteristics] = useState(card.characteristics);
   const [pathologies, setPathologies] = useState(card.pathologies);
+  const addPhotoInputRef = useRef<HTMLInputElement | null>(null);
+  const replacePhotoRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   const saveForm = () => {
     onUpdate(card.id, {
       characteristics,
       pathologies,
-      completed: Boolean(card.found && characteristics.trim() && pathologies.trim()),
+      completed: Boolean(card.images.length > 0 && characteristics.trim() && pathologies.trim()),
     });
   };
 
+  const hiddenCaptureInput = (refCallback: (node: HTMLInputElement | null) => void, onChange: (e: ChangeEvent<HTMLInputElement>) => void, multiple = false) => (
+    <input
+      ref={refCallback}
+      type="file"
+      accept="image/*"
+      capture="environment"
+      multiple={multiple}
+      className="hidden"
+      onChange={onChange}
+    />
+  );
+
   if (!card.found) {
     return (
-      <Card className="rounded-[2rem] overflow-hidden border-slate-300 bg-slate-200 text-slate-600">
+      <Card className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border-slate-300 bg-slate-200 text-slate-600">
         <div className="aspect-[4/3] flex items-center justify-center border-b border-dashed border-slate-400 bg-slate-300">
           <div className="text-center p-6">
             <Lock className="mx-auto h-10 w-10 mb-3" />
             <p className="font-semibold">Fiche non trouvée</p>
-            <p className="text-sm mt-1">Importer une photo pour débloquer cette anomalie.</p>
-            <Button className="mt-4 rounded-2xl" variant="secondary" onClick={() => onUpload(card.id)}>
-              <ImagePlus className="mr-2 h-4 w-4" />
-              Importer une photo
+            <p className="text-sm mt-1">La fiche se débloque uniquement après une photo prise en direct.</p>
+            {hiddenCaptureInput(
+              (node) => {
+                addPhotoInputRef.current = node;
+              },
+              (e) => onAddPhotos(card.id, e.target.files),
+              true
+            )}
+            <Button className="mt-4 rounded-2xl min-h-11 w-full sm:w-auto" variant="secondary" onClick={() => addPhotoInputRef.current?.click()}>
+              <Camera className="mr-2 h-4 w-4" />
+              Prendre une photo
             </Button>
           </div>
         </div>
@@ -290,7 +330,7 @@ function DexCard({ card, onUpload, onUpdate }: DexCardProps) {
             <h3 className="text-2xl font-bold mt-1">{card.title}</h3>
           </div>
           <div className="rounded-xl border border-dashed border-slate-400 p-4 text-sm">
-            Champs verrouillés jusqu’à validation de l’image.
+            Champs verrouillés jusqu’à validation d’une image prise en direct.
           </div>
         </CardContent>
       </Card>
@@ -298,9 +338,9 @@ function DexCard({ card, onUpload, onUpdate }: DexCardProps) {
   }
 
   return (
-    <Card className="rounded-[2rem] overflow-hidden">
+    <Card className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
       <div className="aspect-[4/3] bg-slate-100 overflow-hidden">
-        <img src={card.image} alt={card.title} className="h-full w-full object-cover" />
+        {card.images[0] ? <img src={card.images[0]} alt={card.title} className="h-full w-full object-cover" /> : <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">Aucune image</div>}
       </div>
       <CardContent className="p-5 space-y-4">
         <div className="flex items-start justify-between gap-3">
@@ -310,21 +350,65 @@ function DexCard({ card, onUpload, onUpdate }: DexCardProps) {
             <p className="text-sm text-muted-foreground mt-1">{card.category}</p>
           </div>
           {card.completed ? (
-            <Badge className="rounded-full px-3 py-1 text-sm">
+            <Badge className="rounded-full px-3 py-1.5 text-sm">
               <CheckCircle2 className="h-4 w-4 mr-1" />
               Complétée
             </Badge>
           ) : (
-            <Badge variant="secondary" className="rounded-full px-3 py-1 text-sm">
+            <Badge variant="secondary" className="rounded-full px-3 py-1.5 text-sm">
               À compléter
             </Badge>
           )}
         </div>
 
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <label className="text-sm font-medium">Photographies prises en direct</label>
+            {hiddenCaptureInput(
+              (node) => {
+                addPhotoInputRef.current = node;
+              },
+              (e) => onAddPhotos(card.id, e.target.files),
+              true
+            )}
+            <Button type="button" variant="outline" className="rounded-2xl min-h-11" onClick={() => addPhotoInputRef.current?.click()}>
+              <Camera className="mr-2 h-4 w-4" />
+              Ajouter des photos
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {card.images.map((image, index) => (
+              <div key={`${card.id}-${index}`} className="rounded-2xl overflow-hidden border bg-slate-50">
+                <div className="aspect-square overflow-hidden">
+                  <img src={image} alt={`${card.title} ${index + 1}`} className="h-full w-full object-cover" />
+                </div>
+                <div className="p-2 space-y-2">
+                  {hiddenCaptureInput(
+                    (node) => {
+                      replacePhotoRefs.current[index] = node;
+                    },
+                    (e) => onReplacePhoto(card.id, index, e.target.files),
+                    false
+                  )}
+                  <Button type="button" variant="outline" className="w-full rounded-xl min-h-10 text-xs" onClick={() => replacePhotoRefs.current[index]?.click()}>
+                    <RefreshCw className="mr-2 h-3.5 w-3.5" />
+                    Remplacer
+                  </Button>
+                  <Button type="button" variant="outline" className="w-full rounded-xl min-h-10 text-xs" onClick={() => onRemovePhoto(card.id, index)}>
+                    <Trash2 className="mr-2 h-3.5 w-3.5" />
+                    Supprimer
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="space-y-2">
           <label className="text-sm font-medium">Caractéristiques de l’anomalie</label>
           <textarea
-            className="min-h-[120px] w-full rounded-2xl border bg-background p-3 text-sm outline-none"
+            className="min-h-[120px] w-full rounded-2xl border bg-background p-3 text-base sm:text-sm outline-none"
             value={characteristics}
             onChange={(e) => setCharacteristics(e.target.value)}
             placeholder="Décrire les caractéristiques morphologiques..."
@@ -334,14 +418,14 @@ function DexCard({ card, onUpload, onUpdate }: DexCardProps) {
         <div className="space-y-2">
           <label className="text-sm font-medium">Pathologies associées</label>
           <textarea
-            className="min-h-[110px] w-full rounded-2xl border bg-background p-3 text-sm outline-none"
+            className="min-h-[110px] w-full rounded-2xl border bg-background p-3 text-base sm:text-sm outline-none"
             value={pathologies}
             onChange={(e) => setPathologies(e.target.value)}
             placeholder="Renseigner les pathologies dans lesquelles cette anomalie est rencontrée..."
           />
         </div>
 
-        <Button className="w-full rounded-2xl" onClick={saveForm}>
+        <Button className="w-full rounded-2xl min-h-11" onClick={saveForm}>
           Enregistrer la fiche
         </Button>
       </CardContent>
@@ -349,12 +433,12 @@ function DexCard({ card, onUpload, onUpdate }: DexCardProps) {
   );
 }
 
-function DexScreen({ cards, onBack, onUpload, onUpdate }: DexScreenProps) {
+function DexScreen({ cards, onBack, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }: DexScreenProps) {
   const [activeCategory, setActiveCategory] = useState(categories[0]);
   const filteredCards = cards.filter((c) => c.category === activeCategory);
 
   return (
-    <div className="min-h-screen bg-slate-100 p-6 md:p-8">
+    <div className="min-h-screen bg-slate-100 p-3 sm:p-6 md:p-8 pb-24">
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
@@ -367,18 +451,25 @@ function DexScreen({ cards, onBack, onUpload, onUpdate }: DexScreenProps) {
         </div>
 
         <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-          <TabsList className="w-full h-auto flex flex-wrap justify-start rounded-2xl p-2 bg-white border">
+          <TabsList className="w-full h-auto flex md:flex-wrap justify-start rounded-2xl p-2 bg-white border overflow-x-auto whitespace-nowrap gap-2">
             {categories.map((category) => (
-              <TabsTrigger key={category} value={category} className="rounded-xl px-4 py-2 text-left whitespace-normal h-auto">
+              <TabsTrigger key={category} value={category} className="rounded-xl px-4 py-3 text-left whitespace-normal md:whitespace-normal h-auto min-h-11 shrink-0">
                 {category}
               </TabsTrigger>
             ))}
           </TabsList>
         </Tabs>
 
-        <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {filteredCards.map((card) => (
-            <DexCard key={card.id} card={card} onUpload={onUpload} onUpdate={onUpdate} />
+            <DexCard
+              key={card.id}
+              card={card}
+              onAddPhotos={onAddPhotos}
+              onReplacePhoto={onReplacePhoto}
+              onRemovePhoto={onRemovePhoto}
+              onUpdate={onUpdate}
+            />
           ))}
         </div>
       </div>
@@ -388,20 +479,51 @@ function DexScreen({ cards, onBack, onUpload, onUpdate }: DexScreenProps) {
 
 export default function CytodexPrototypeApp() {
   const [screen, setScreen] = useState<Screen>("cover");
-  const [cards, setCards] = useState(initialCards);
+  const [cards, setCards] = useState<CytodexCard[]>(initialCards);
 
-  const uploadMock = (id: number): void => {
+  const addPhotos = async (id: number, files: FileList | null): Promise<void> => {
+    const newUrls = await fileListToUrls(files);
+    if (newUrls.length === 0) return;
+
     setCards((prev) =>
       prev.map((card) =>
         card.id === id
           ? {
               ...card,
               found: true,
-              image:
-                "https://images.unsplash.com/photo-1583912267550-d8c8c87b7f20?q=80&w=1200&auto=format&fit=crop",
+              images: [...card.images, ...newUrls],
             }
           : card
       )
+    );
+  };
+
+  const replacePhoto = async (id: number, index: number, files: FileList | null): Promise<void> => {
+    const newUrls = await fileListToUrls(files);
+    if (newUrls.length === 0) return;
+
+    setCards((prev) =>
+      prev.map((card) => {
+        if (card.id !== id) return card;
+        const nextImages = [...card.images];
+        nextImages[index] = newUrls[0];
+        return { ...card, images: nextImages };
+      })
+    );
+  };
+
+  const removePhoto = (id: number, index: number): void => {
+    setCards((prev) =>
+      prev.map((card) => {
+        if (card.id !== id) return card;
+        const nextImages = card.images.filter((_, currentIndex) => currentIndex !== index);
+        return {
+          ...card,
+          images: nextImages,
+          found: nextImages.length > 0,
+          completed: nextImages.length > 0 && Boolean(card.characteristics.trim() && card.pathologies.trim()),
+        };
+      })
     );
   };
 
@@ -417,5 +539,14 @@ export default function CytodexPrototypeApp() {
     return <HomeScreen cards={cards} onOpenDex={() => setScreen("dex")} />;
   }
 
-  return <DexScreen cards={cards} onBack={() => setScreen("home")} onUpload={uploadMock} onUpdate={updateCard} />;
+  return (
+    <DexScreen
+      cards={cards}
+      onBack={() => setScreen("home")}
+      onAddPhotos={addPhotos}
+      onReplacePhoto={replacePhoto}
+      onRemovePhoto={removePhoto}
+      onUpdate={updateCard}
+    />
+  );
 }
