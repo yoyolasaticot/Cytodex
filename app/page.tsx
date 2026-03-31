@@ -1,7 +1,25 @@
 "use client";
 
-import React, { ChangeEvent, useMemo, useRef, useState } from "react";
-import { Lock, Medal, User, BookOpen, ChevronRight, ImagePlus, CheckCircle2, Trash2, RefreshCw, Camera } from "lucide-react";
+import React, {
+  ChangeEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { User as SupabaseUser } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
+import {
+  Lock,
+  Medal,
+  User,
+  BookOpen,
+  ChevronRight,
+  CheckCircle2,
+  Trash2,
+  RefreshCw,
+  Camera,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,15 +40,34 @@ type CytodexCard = {
   pathologies: string;
 };
 
-type CardUpdate = Partial<Pick<CytodexCard, "characteristics" | "pathologies" | "completed" | "found" | "images">>;
+type CardUpdate = Partial<
+  Pick<
+    CytodexCard,
+    "characteristics" | "pathologies" | "completed" | "found" | "images"
+  >
+>;
 
 type CoverScreenProps = {
-  onLogin: () => void;
+  email: string;
+  password: string;
+  loading: boolean;
+  onEmailChange: (value: string) => void;
+  onPasswordChange: (value: string) => void;
+  onLogin: () => Promise<void>;
+  onSignup: () => Promise<void>;
 };
 
 type HomeScreenProps = {
   cards: CytodexCard[];
+  user: SupabaseUser;
   onOpenDex: () => void;
+  onLogout: () => Promise<void>;
+};
+
+type CategoryScreenProps = {
+  cards: CytodexCard[];
+  onBack: () => void;
+  onOpenCategory: (category: string) => void;
 };
 
 type DexCardProps = {
@@ -39,12 +76,6 @@ type DexCardProps = {
   onReplacePhoto: (id: number, index: number, files: FileList | null) => void;
   onRemovePhoto: (id: number, index: number) => void;
   onUpdate: (id: number, patch: CardUpdate) => void;
-};
-
-type CategoryScreenProps = {
-  cards: CytodexCard[];
-  onBack: () => void;
-  onOpenCategory: (category: string) => void;
 };
 
 type DexScreenProps = {
@@ -73,8 +104,11 @@ const initialCards: CytodexCard[] = [
     category: "Pathologies du globule rouge",
     found: true,
     completed: true,
-    images: ["https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop"],
-    characteristics: "Fragments érythrocytaires irréguliers, anguleux, de petite taille.",
+    images: [
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop",
+    ],
+    characteristics:
+      "Fragments érythrocytaires irréguliers, anguleux, de petite taille.",
     pathologies: "Microangiopathie thrombotique, CIVD, hémolyse mécanique.",
   },
   {
@@ -83,7 +117,9 @@ const initialCards: CytodexCard[] = [
     category: "Pathologies du globule rouge",
     found: true,
     completed: false,
-    images: ["https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=1200&auto=format&fit=crop"],
+    images: [
+      "https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=1200&auto=format&fit=crop",
+    ],
     characteristics: "",
     pathologies: "",
   },
@@ -113,8 +149,11 @@ const initialCards: CytodexCard[] = [
     category: "Leucémies",
     found: true,
     completed: true,
-    images: ["https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=1200&auto=format&fit=crop"],
-    characteristics: "Grande cellule, chromatine fine, nucléoles visibles, rapport N/C élevé.",
+    images: [
+      "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=1200&auto=format&fit=crop",
+    ],
+    characteristics:
+      "Grande cellule, chromatine fine, nucléoles visibles, rapport N/C élevé.",
     pathologies: "Leucémie aiguë myéloïde.",
   },
   {
@@ -144,26 +183,20 @@ function badgeStyle(level: BadgeLevel): string {
   return "bg-muted text-muted-foreground border-dashed";
 }
 
-function fileListToUrls(files: FileList | null): Promise<string[]> {
-  if (!files || files.length === 0) return Promise.resolve([]);
-
-  const readers = Array.from(files).map(
-    (file) =>
-      new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result));
-        reader.onerror = () => reject(new Error("Impossible de lire l'image."));
-        reader.readAsDataURL(file);
-      })
-  );
-
-  return Promise.all(readers);
+function fileListToUrls(files: FileList | null): string[] {
+  if (!files || files.length === 0) return [];
+  return Array.from(files).map((file) => URL.createObjectURL(file));
 }
 
-function CoverScreen({ onLogin }: CoverScreenProps) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
+function CoverScreen({
+  email,
+  password,
+  loading,
+  onEmailChange,
+  onPasswordChange,
+  onLogin,
+  onSignup,
+}: CoverScreenProps) {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#7f1d1d,_#1f2937_65%)] flex items-center justify-center p-3 sm:p-6">
       <div className="w-full max-w-5xl grid md:grid-cols-2 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 bg-black/20 backdrop-blur">
@@ -173,15 +206,22 @@ function CoverScreen({ onLogin }: CoverScreenProps) {
               <BookOpen className="h-4 w-4" />
               Couverture du CytoDex
             </div>
-            <h1 className="mt-6 md:mt-8 text-4xl sm:text-5xl font-bold tracking-tight">CytoDex</h1>
+            <h1 className="mt-6 md:mt-8 text-4xl sm:text-5xl font-bold tracking-tight">
+              CytoDex
+            </h1>
             <p className="mt-4 max-w-md text-red-100 text-lg leading-relaxed">
-              Atlas pédagogique personnel des anomalies cytologiques en hématologie.
+              Atlas pédagogique personnel des anomalies cytologiques en
+              hématologie.
             </p>
           </div>
 
           <div className="rounded-3xl border border-white/15 bg-white/10 p-6">
-            <p className="text-sm uppercase tracking-[0.3em] text-red-100">Édition étudiant</p>
-            <p className="mt-3 text-2xl font-semibold">Ouvre ton CytoDex et poursuis ta collection.</p>
+            <p className="text-sm uppercase tracking-[0.3em] text-red-100">
+              Édition étudiant
+            </p>
+            <p className="mt-3 text-2xl font-semibold">
+              Ouvre ton CytoDex et poursuis ta collection.
+            </p>
           </div>
         </div>
 
@@ -190,20 +230,46 @@ function CoverScreen({ onLogin }: CoverScreenProps) {
             <CardHeader className="px-0">
               <CardTitle className="text-3xl">Connexion</CardTitle>
               <p className="text-muted-foreground">
-                L’écran de connexion correspond à la couverture du CytoDex. Une fois authentifié, le livre s’ouvre sur l’accueil.
+                Chaque utilisateur possède son propre compte et sa propre
+                progression.
               </p>
             </CardHeader>
+
             <CardContent className="px-0 space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Email</label>
-                <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="etudiant@chu.fr" />
+                <Input
+                  value={email}
+                  onChange={(e) => onEmailChange(e.target.value)}
+                  placeholder="etudiant@chu.fr"
+                />
               </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Mot de passe</label>
-                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => onPasswordChange(e.target.value)}
+                  placeholder="••••••••"
+                />
               </div>
-              <Button className="w-full rounded-2xl h-12 sm:h-14 text-base" onClick={onLogin}>
-                Ouvrir le CytoDex
+
+              <Button
+                className="w-full rounded-2xl h-12 sm:h-14 text-base"
+                onClick={onLogin}
+                disabled={loading}
+              >
+                {loading ? "Connexion..." : "Se connecter"}
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full rounded-2xl h-12 sm:h-14 text-base"
+                onClick={onSignup}
+                disabled={loading}
+              >
+                {loading ? "Création..." : "Créer un compte"}
               </Button>
             </CardContent>
           </Card>
@@ -213,7 +279,12 @@ function CoverScreen({ onLogin }: CoverScreenProps) {
   );
 }
 
-function HomeScreen({ cards, onOpenDex }: HomeScreenProps) {
+function HomeScreen({
+  cards,
+  user,
+  onOpenDex,
+  onLogout,
+}: HomeScreenProps) {
   const badgeData = useMemo(() => {
     return categories.map((category) => {
       const inCategory = cards.filter((c) => c.category === category);
@@ -231,13 +302,27 @@ function HomeScreen({ cards, onOpenDex }: HomeScreenProps) {
         <div className="rounded-[2rem] bg-white p-6 shadow-sm border">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">CytoDex</p>
+              <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">
+                CytoDex
+              </p>
               <h2 className="text-3xl font-bold mt-2">Accueil utilisateur</h2>
-              <p className="text-muted-foreground mt-2">Vue synthétique avec progression globale et emplacements de badges.</p>
+              <p className="text-muted-foreground mt-2">
+                Connecté en tant que {user.email}
+              </p>
             </div>
-            <Button onClick={onOpenDex} className="rounded-2xl h-11 px-5">
-              Accéder aux thèmes <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
+
+            <div className="flex gap-3 flex-wrap">
+              <Button onClick={onOpenDex} className="rounded-2xl h-11 px-5">
+                Accéder aux thèmes <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={onLogout}
+                className="rounded-2xl h-11 px-5"
+              >
+                Déconnexion
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -250,11 +335,22 @@ function HomeScreen({ cards, onOpenDex }: HomeScreenProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-5xl font-bold">{Math.round((cards.filter((c) => c.completed).length / cards.length) * 100)}%</div>
+              <div className="text-5xl font-bold">
+                {Math.round(
+                  (cards.filter((c) => c.completed).length / cards.length) * 100
+                )}
+                %
+              </div>
               <p className="mt-2 text-muted-foreground">
-                {cards.filter((c) => c.completed).length} fiches complétées sur {cards.length}
+                {cards.filter((c) => c.completed).length} fiches complétées sur{" "}
+                {cards.length}
               </p>
-              <Progress value={(cards.filter((c) => c.completed).length / cards.length) * 100} className="mt-5 h-3" />
+              <Progress
+                value={
+                  (cards.filter((c) => c.completed).length / cards.length) * 100
+                }
+                className="mt-5 h-3"
+              />
             </CardContent>
           </Card>
 
@@ -267,9 +363,14 @@ function HomeScreen({ cards, onOpenDex }: HomeScreenProps) {
             </CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {badgeData.map(({ category, badge }) => (
-                <div key={category} className={`rounded-2xl border p-4 ${badgeStyle(badge)}`}>
+                <div
+                  key={category}
+                  className={`rounded-2xl border p-4 ${badgeStyle(badge)}`}
+                >
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-medium leading-tight">{category}</p>
+                    <p className="text-sm font-medium leading-tight">
+                      {category}
+                    </p>
                     <Medal className="h-5 w-5 shrink-0" />
                   </div>
                   <p className="mt-3 text-sm">{badge ?? "Emplacement vide"}</p>
@@ -283,21 +384,131 @@ function HomeScreen({ cards, onOpenDex }: HomeScreenProps) {
   );
 }
 
-function DexCard({ card, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }: DexCardProps) {
+function CategoryScreen({
+  cards,
+  onBack,
+  onOpenCategory,
+}: CategoryScreenProps) {
+  const categoryStats = categories.map((category) => {
+    const categoryCards = cards.filter((card) => card.category === category);
+    const completed = categoryCards.filter((card) => card.completed).length;
+    const found = categoryCards.filter((card) => card.found).length;
+
+    return {
+      category,
+      total: categoryCards.length,
+      completed,
+      found,
+      badge: computeBadge(completed, categoryCards.length),
+    };
+  });
+
+  return (
+    <div className="min-h-screen bg-slate-100 p-3 sm:p-6 md:p-8 pb-24">
+      <div className="mx-auto max-w-5xl space-y-6">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">
+              CytoDex
+            </p>
+            <h2 className="text-3xl font-bold mt-2">Thèmes des fiches</h2>
+            <p className="text-muted-foreground mt-2">
+              Choisir un grand cadre nosologique avant de feuilleter les fiches.
+            </p>
+          </div>
+
+          <Button variant="outline" className="rounded-2xl" onClick={onBack}>
+            Retour à l’accueil
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {categoryStats.map(({ category, total, completed, found, badge }) => (
+            <Card
+              key={category}
+              className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => onOpenCategory(category)}
+            >
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                      Catégorie
+                    </p>
+                    <h3 className="text-2xl font-bold mt-1">{category}</h3>
+                  </div>
+
+                  <Badge
+                    variant="secondary"
+                    className={`rounded-full px-3 py-1.5 text-sm ${badgeStyle(
+                      badge
+                    )}`}
+                  >
+                    {badge ?? "Aucun badge"}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="rounded-2xl bg-slate-50 p-4 border">
+                    <p className="text-muted-foreground">Fiches trouvées</p>
+                    <p className="text-xl font-semibold mt-1">
+                      {found} / {total}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl bg-slate-50 p-4 border">
+                    <p className="text-muted-foreground">Fiches complétées</p>
+                    <p className="text-xl font-semibold mt-1">
+                      {completed} / {total}
+                    </p>
+                  </div>
+                </div>
+
+                <Button className="w-full rounded-2xl min-h-11">
+                  Ouvrir la catégorie <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DexCard({
+  card,
+  onAddPhotos,
+  onReplacePhoto,
+  onRemovePhoto,
+  onUpdate,
+}: DexCardProps) {
   const [characteristics, setCharacteristics] = useState(card.characteristics);
   const [pathologies, setPathologies] = useState(card.pathologies);
   const addPhotoInputRef = useRef<HTMLInputElement | null>(null);
   const replacePhotoRefs = useRef<Array<HTMLInputElement | null>>([]);
 
+  useEffect(() => {
+    setCharacteristics(card.characteristics);
+    setPathologies(card.pathologies);
+  }, [card]);
+
   const saveForm = () => {
     onUpdate(card.id, {
       characteristics,
       pathologies,
-      completed: Boolean(card.images.length > 0 && characteristics.trim() && pathologies.trim()),
+      completed: Boolean(
+        card.images.length > 0 &&
+          characteristics.trim() &&
+          pathologies.trim()
+      ),
     });
   };
 
-  const hiddenCaptureInput = (refCallback: (node: HTMLInputElement | null) => void, onChange: (e: ChangeEvent<HTMLInputElement>) => void, multiple = false) => (
+  const hiddenCaptureInput = (
+    refCallback: (node: HTMLInputElement | null) => void,
+    onChange: (e: ChangeEvent<HTMLInputElement>) => void,
+    multiple = false
+  ) => (
     <input
       ref={refCallback}
       type="file"
@@ -316,7 +527,10 @@ function DexCard({ card, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }:
           <div className="text-center p-6">
             <Lock className="mx-auto h-10 w-10 mb-3" />
             <p className="font-semibold">Fiche non trouvée</p>
-            <p className="text-sm mt-1">La fiche se débloque uniquement après une photo prise en direct.</p>
+            <p className="text-sm mt-1">
+              La fiche se débloque uniquement après une photo prise en direct.
+            </p>
+
             {hiddenCaptureInput(
               (node) => {
                 addPhotoInputRef.current = node;
@@ -324,12 +538,18 @@ function DexCard({ card, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }:
               (e) => onAddPhotos(card.id, e.target.files),
               true
             )}
-            <Button className="mt-4 rounded-2xl min-h-11 w-full sm:w-auto" variant="secondary" onClick={() => addPhotoInputRef.current?.click()}>
+
+            <Button
+              className="mt-4 rounded-2xl min-h-11 w-full sm:w-auto"
+              variant="secondary"
+              onClick={() => addPhotoInputRef.current?.click()}
+            >
               <Camera className="mr-2 h-4 w-4" />
               Prendre une photo
             </Button>
           </div>
         </div>
+
         <CardContent className="p-5 space-y-3">
           <div>
             <p className="text-xs uppercase tracking-[0.2em]">Anomalie</p>
@@ -346,22 +566,37 @@ function DexCard({ card, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }:
   return (
     <Card className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
       <div className="aspect-[4/3] bg-slate-100 overflow-hidden">
-        {card.images[0] ? <img src={card.images[0]} alt={card.title} className="h-full w-full object-cover" /> : <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">Aucune image</div>}
+        {card.images[0] ? (
+          <img src={card.images[0]} alt={card.title} className="h-full w-full object-cover" />
+        ) : (
+          <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
+            Aucune image
+          </div>
+        )}
       </div>
+
       <CardContent className="p-5 space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Anomalie</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Anomalie
+            </p>
             <h3 className="text-2xl font-bold mt-1">{card.title}</h3>
-            <p className="text-sm text-muted-foreground mt-1">{card.category}</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {card.category}
+            </p>
           </div>
+
           {card.completed ? (
             <Badge className="rounded-full px-3 py-1.5 text-sm">
               <CheckCircle2 className="h-4 w-4 mr-1" />
               Complétée
             </Badge>
           ) : (
-            <Badge variant="secondary" className="rounded-full px-3 py-1.5 text-sm">
+            <Badge
+              variant="secondary"
+              className="rounded-full px-3 py-1.5 text-sm"
+            >
               À compléter
             </Badge>
           )}
@@ -369,7 +604,10 @@ function DexCard({ card, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }:
 
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <label className="text-sm font-medium">Photographies prises en direct</label>
+            <label className="text-sm font-medium">
+              Photographies prises en direct
+            </label>
+
             {hiddenCaptureInput(
               (node) => {
                 addPhotoInputRef.current = node;
@@ -377,7 +615,13 @@ function DexCard({ card, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }:
               (e) => onAddPhotos(card.id, e.target.files),
               true
             )}
-            <Button type="button" variant="outline" className="rounded-2xl min-h-11" onClick={() => addPhotoInputRef.current?.click()}>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-2xl min-h-11"
+              onClick={() => addPhotoInputRef.current?.click()}
+            >
               <Camera className="mr-2 h-4 w-4" />
               Ajouter des photos
             </Button>
@@ -385,10 +629,18 @@ function DexCard({ card, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }:
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {card.images.map((image, index) => (
-              <div key={`${card.id}-${index}`} className="rounded-2xl overflow-hidden border bg-slate-50">
+              <div
+                key={`${card.id}-${index}`}
+                className="rounded-2xl overflow-hidden border bg-slate-50"
+              >
                 <div className="aspect-square overflow-hidden">
-                  <img src={image} alt={`${card.title} ${index + 1}`} className="h-full w-full object-cover" />
+                  <img
+                    src={image}
+                    alt={`${card.title} ${index + 1}`}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
+
                 <div className="p-2 space-y-2">
                   {hiddenCaptureInput(
                     (node) => {
@@ -397,11 +649,23 @@ function DexCard({ card, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }:
                     (e) => onReplacePhoto(card.id, index, e.target.files),
                     false
                   )}
-                  <Button type="button" variant="outline" className="w-full rounded-xl min-h-10 text-xs" onClick={() => replacePhotoRefs.current[index]?.click()}>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full rounded-xl min-h-10 text-xs"
+                    onClick={() => replacePhotoRefs.current[index]?.click()}
+                  >
                     <RefreshCw className="mr-2 h-3.5 w-3.5" />
                     Remplacer
                   </Button>
-                  <Button type="button" variant="outline" className="w-full rounded-xl min-h-10 text-xs" onClick={() => onRemovePhoto(card.id, index)}>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full rounded-xl min-h-10 text-xs"
+                    onClick={() => onRemovePhoto(card.id, index)}
+                  >
                     <Trash2 className="mr-2 h-3.5 w-3.5" />
                     Supprimer
                   </Button>
@@ -412,7 +676,9 @@ function DexCard({ card, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }:
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Caractéristiques de l’anomalie</label>
+          <label className="text-sm font-medium">
+            Caractéristiques de l’anomalie
+          </label>
           <textarea
             className="min-h-[120px] w-full rounded-2xl border bg-background p-3 text-base sm:text-sm outline-none"
             value={characteristics}
@@ -439,94 +705,73 @@ function DexCard({ card, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }:
   );
 }
 
-function CategoryScreen({ cards, onBack, onOpenCategory }: CategoryScreenProps) {
-  const categoryStats = categories.map((category) => {
-    const categoryCards = cards.filter((card) => card.category === category);
-    const completed = categoryCards.filter((card) => card.completed).length;
-    const found = categoryCards.filter((card) => card.found).length;
-    return { category, total: categoryCards.length, completed, found, badge: computeBadge(completed, categoryCards.length) };
-  });
-
-  return (
-    <div className="min-h-screen bg-slate-100 p-3 sm:p-6 md:p-8 pb-24">
-      <div className="mx-auto max-w-5xl space-y-6">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">CytoDex</p>
-            <h2 className="text-3xl font-bold mt-2">Thèmes des fiches</h2>
-            <p className="text-muted-foreground mt-2">Choisir un grand cadre nosologique avant de feuilleter les fiches.</p>
-          </div>
-          <Button variant="outline" className="rounded-2xl" onClick={onBack}>
-            Retour à l’accueil
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          {categoryStats.map(({ category, total, completed, found, badge }) => (
-            <Card key={category} className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden cursor-pointer hover:shadow-md transition-shadow" onClick={() => onOpenCategory(category)}>
-              <CardContent className="p-6 space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Catégorie</p>
-                    <h3 className="text-2xl font-bold mt-1">{category}</h3>
-                  </div>
-                  <Badge variant="secondary" className={`rounded-full px-3 py-1.5 text-sm ${badgeStyle(badge)}`}>
-                    {badge ?? "Aucun badge"}
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-2xl bg-slate-50 p-4 border">
-                    <p className="text-muted-foreground">Fiches trouvées</p>
-                    <p className="text-xl font-semibold mt-1">{found} / {total}</p>
-                  </div>
-                  <div className="rounded-2xl bg-slate-50 p-4 border">
-                    <p className="text-muted-foreground">Fiches complétées</p>
-                    <p className="text-xl font-semibold mt-1">{completed} / {total}</p>
-                  </div>
-                </div>
-                <Button className="w-full rounded-2xl min-h-11">
-                  Ouvrir la catégorie <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DexScreen({ cards, category, onBack, onAddPhotos, onReplacePhoto, onRemovePhoto, onUpdate }: DexScreenProps) {
+function DexScreen({
+  cards,
+  category,
+  onBack,
+  onAddPhotos,
+  onReplacePhoto,
+  onRemovePhoto,
+  onUpdate,
+}: DexScreenProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const filteredCards = cards.filter((c) => c.category === category);
   const activeCard = filteredCards[activeIndex] ?? null;
 
-  const goPrev = () => setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev));
-  const goNext = () => setActiveIndex((prev) => (prev < filteredCards.length - 1 ? prev + 1 : prev));
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [category]);
+
+  const goPrev = () =>
+    setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev));
+  const goNext = () =>
+    setActiveIndex((prev) =>
+      prev < filteredCards.length - 1 ? prev + 1 : prev
+    );
 
   return (
     <div className="min-h-screen bg-slate-100 p-3 sm:p-6 md:p-8 pb-24">
       <div className="mx-auto max-w-4xl space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">CytoDex</p>
+            <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">
+              CytoDex
+            </p>
             <h2 className="text-3xl font-bold mt-2">{category}</h2>
-            <p className="text-muted-foreground mt-2">Défilement fiche par fiche à l’intérieur de la catégorie.</p>
+            <p className="text-muted-foreground mt-2">
+              Défilement fiche par fiche à l’intérieur de la catégorie.
+            </p>
           </div>
+
           <Button variant="outline" className="rounded-2xl" onClick={onBack}>
             Retour aux thèmes
           </Button>
         </div>
 
         <div className="rounded-[1.5rem] sm:rounded-[2rem] bg-white border p-4 flex items-center justify-between gap-3">
-          <Button variant="outline" className="rounded-2xl min-h-11" onClick={goPrev} disabled={activeIndex === 0}>
+          <Button
+            variant="outline"
+            className="rounded-2xl min-h-11"
+            onClick={goPrev}
+            disabled={activeIndex === 0}
+          >
             Précédente
           </Button>
+
           <div className="text-center">
             <p className="text-sm text-muted-foreground">Fiche</p>
-            <p className="font-semibold">{filteredCards.length === 0 ? 0 : activeIndex + 1} / {filteredCards.length}</p>
+            <p className="font-semibold">
+              {filteredCards.length === 0 ? 0 : activeIndex + 1} /{" "}
+              {filteredCards.length}
+            </p>
           </div>
-          <Button variant="outline" className="rounded-2xl min-h-11" onClick={goNext} disabled={activeIndex >= filteredCards.length - 1}>
+
+          <Button
+            variant="outline"
+            className="rounded-2xl min-h-11"
+            onClick={goNext}
+            disabled={activeIndex >= filteredCards.length - 1}
+          >
             Suivante
           </Button>
         </div>
@@ -552,13 +797,81 @@ function DexScreen({ cards, category, onBack, onAddPhotos, onReplacePhoto, onRem
   );
 }
 
-export default function CytodexPrototypeApp() {
+export default function Page() {
   const [screen, setScreen] = useState<Screen>("cover");
   const [cards, setCards] = useState<CytodexCard[]>(initialCards);
-  const [selectedCategory, setSelectedCategory] = useState<string>(categories[0]);
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    categories[0]
+  );
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
 
-  const addPhotos = async (id: number, files: FileList | null): Promise<void> => {
-    const newUrls = await fileListToUrls(files);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ?? null);
+      if (data.user) {
+        setScreen("home");
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      setScreen(currentUser ? "home" : "cover");
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleLogin = async (): Promise<void> => {
+    setAuthLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      alert(error.message);
+    }
+
+    setAuthLoading(false);
+  };
+
+  const handleSignup = async (): Promise<void> => {
+    setAuthLoading(true);
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          display_name: email.split("@")[0] ?? "",
+        },
+      },
+    });
+
+    if (error) {
+      alert(error.message);
+    } else {
+      alert("Compte créé. Tu peux maintenant te connecter.");
+    }
+
+    setAuthLoading(false);
+  };
+
+  const handleLogout = async (): Promise<void> => {
+    await supabase.auth.signOut();
+  };
+
+  const addPhotos = (id: number, files: FileList | null): void => {
+    const newUrls = fileListToUrls(files);
     if (newUrls.length === 0) return;
 
     setCards((prev) =>
@@ -574,8 +887,12 @@ export default function CytodexPrototypeApp() {
     );
   };
 
-  const replacePhoto = async (id: number, index: number, files: FileList | null): Promise<void> => {
-    const newUrls = await fileListToUrls(files);
+  const replacePhoto = (
+    id: number,
+    index: number,
+    files: FileList | null
+  ): void => {
+    const newUrls = fileListToUrls(files);
     if (newUrls.length === 0) return;
 
     setCards((prev) =>
@@ -592,27 +909,51 @@ export default function CytodexPrototypeApp() {
     setCards((prev) =>
       prev.map((card) => {
         if (card.id !== id) return card;
-        const nextImages = card.images.filter((_, currentIndex) => currentIndex !== index);
+        const nextImages = card.images.filter(
+          (_, currentIndex) => currentIndex !== index
+        );
+
         return {
           ...card,
           images: nextImages,
           found: nextImages.length > 0,
-          completed: nextImages.length > 0 && Boolean(card.characteristics.trim() && card.pathologies.trim()),
+          completed:
+            nextImages.length > 0 &&
+            Boolean(card.characteristics.trim() && card.pathologies.trim()),
         };
       })
     );
   };
 
   const updateCard = (id: number, patch: CardUpdate): void => {
-    setCards((prev) => prev.map((card) => (card.id === id ? { ...card, ...patch } : card)));
+    setCards((prev) =>
+      prev.map((card) => (card.id === id ? { ...card, ...patch } : card))
+    );
   };
 
-  if (screen === "cover") {
-    return <CoverScreen onLogin={() => setScreen("home")} />;
+  if (!user || screen === "cover") {
+    return (
+      <CoverScreen
+        email={email}
+        password={password}
+        loading={authLoading}
+        onEmailChange={setEmail}
+        onPasswordChange={setPassword}
+        onLogin={handleLogin}
+        onSignup={handleSignup}
+      />
+    );
   }
 
   if (screen === "home") {
-    return <HomeScreen cards={cards} onOpenDex={() => setScreen("categories")} />;
+    return (
+      <HomeScreen
+        cards={cards}
+        user={user}
+        onOpenDex={() => setScreen("categories")}
+        onLogout={handleLogout}
+      />
+    );
   }
 
   if (screen === "categories") {
