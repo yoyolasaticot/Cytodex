@@ -168,6 +168,20 @@ const initialCards: CytodexCard[] = [
   },
 ];
 
+function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function validateCredentials(email: string, password: string): string | null {
+  if (!email.trim()) return "L'adresse email est obligatoire.";
+  if (!isValidEmail(email.trim())) return "L'adresse email n'est pas valide.";
+  if (!password.trim()) return "Le mot de passe est obligatoire.";
+  if (password.trim().length < 8) {
+    return "Le mot de passe doit contenir au moins 8 caractères.";
+  }
+  return null;
+}
+
 function computeBadge(completed: number, total: number): BadgeLevel {
   const ratio = total === 0 ? 0 : (completed / total) * 100;
   if (ratio >= 100) return "Or";
@@ -239,20 +253,21 @@ function CoverScreen({
               <div className="space-y-2">
                 <label className="text-sm font-medium">Email</label>
                 <Input
-                  value={email}
-                  onChange={(e) => onEmailChange(e.target.value)}
-                  placeholder="etudiant@chu.fr"
-                />
+  type="email"
+  placeholder="etudiant@chu.fr"
+  value={email}
+  onChange={(e) => onEmailChange(e.target.value)}
+/>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Mot de passe</label>
                 <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => onPasswordChange(e.target.value)}
-                  placeholder="••••••••"
-                />
+  type="password"
+  value={password}
+  onChange={(e) => onPasswordChange(e.target.value)}
+  placeholder="••••••••"
+/>
               </div>
 
               <Button
@@ -830,39 +845,51 @@ export default function Page() {
   }, []);
 
   const handleLogin = async (): Promise<void> => {
+    const validationError = validateCredentials(email, password);
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
+  
     setAuthLoading(true);
-
+  
     const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      email: email.trim(),
+      password: password.trim(),
     });
-
+  
     if (error) {
       alert(error.message);
     }
-
+  
     setAuthLoading(false);
   };
 
   const handleSignup = async (): Promise<void> => {
+    const validationError = validateCredentials(email, password);
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
+  
     setAuthLoading(true);
-
+  
     const { error } = await supabase.auth.signUp({
-      email,
-      password,
+      email: email.trim(),
+      password: password.trim(),
       options: {
         data: {
-          display_name: email.split("@")[0] ?? "",
+          display_name: email.trim().split("@")[0] ?? "",
         },
       },
     });
-
+  
     if (error) {
       alert(error.message);
     } else {
       alert("Compte créé. Tu peux maintenant te connecter.");
     }
-
+  
     setAuthLoading(false);
   };
 
