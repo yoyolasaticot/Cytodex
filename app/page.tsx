@@ -857,18 +857,25 @@ export default function Page() {
   const [authLoading, setAuthLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user ?? null);
-      if (data.user) {
+    supabase.auth.getUser().then(async ({ data }) => {
+      const currentUser = data.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        const userCards = await loadCards(currentUser.id);
+        setCards(userCards);
         setScreen("home");
       }
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
+      if (currentUser) {
+        const userCards = await loadCards(currentUser.id);
+        setCards(userCards);
+      }
       setScreen(currentUser ? "home" : "cover");
     });
 
@@ -930,12 +937,69 @@ export default function Page() {
     await supabase.auth.signOut();
   };
 
+  const loadCards = async (userId: string): Promise<CytodexCard[]> => {
+    const { data, error } = await supabase
+      .from('cards')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error loading cards:', error);
+      return initialCards; // Fallback to initial cards
+    }
+
+    if (data && data.length > 0) {
+      return data.map(card => ({
+        id: card.id,
+        title: card.title,
+        category: card.category,
+        found: card.found,
+        completed: card.completed,
+        images: card.images || [],
+        characteristics: card.characteristics || '',
+        pathologies: card.pathologies || '',
+      }));
+    }
+
+    // If no cards in DB, initialize with default cards
+    const defaultCards = initialCards.map(card => ({ ...card, user_id: userId }));
+    const { error: insertError } = await supabase
+      .from('cards')
+      .insert(defaultCards);
+
+    if (insertError) {
+      console.error('Error initializing cards:', insertError);
+    }
+
+    return initialCards;
+  };
+
+  const saveCard = async (card: CytodexCard, userId: string): Promise<void> => {
+    const { error } = await supabase
+      .from('cards')
+      .upsert({
+        id: card.id,
+        user_id: userId,
+        title: card.title,
+        category: card.category,
+        found: card.found,
+        completed: card.completed,
+        images: card.images,
+        characteristics: card.characteristics,
+        pathologies: card.pathologies,
+      });
+
+    if (error) {
+      console.error('Error saving card:', error);
+    }
+  };
+
   const addPhotos = (id: number, files: FileList | null): void => {
     const newUrls = fileListToUrls(files);
     if (newUrls.length === 0) return;
 
-    setCards((prev) =>
-      prev.map((card) =>
+    setCards((prev) => {
+      const updatedCards = prev.map((card) =>
         card.id === id
           ? {
               ...card,
@@ -943,8 +1007,13 @@ export default function Page() {
               images: [...card.images, ...newUrls],
             }
           : card
-      )
-    );
+      );
+      const updatedCard = updatedCards.find(card => card.id === id);
+      if (updatedCard && user) {
+        saveCard(updatedCard, user.id);
+      }
+      return updatedCards;
+    });
   };
 
   const replacePhoto = (
@@ -955,19 +1024,24 @@ export default function Page() {
     const newUrls = fileListToUrls(files);
     if (newUrls.length === 0) return;
 
-    setCards((prev) =>
-      prev.map((card) => {
+    setCards((prev) => {
+      const updatedCards = prev.map((card) => {
         if (card.id !== id) return card;
         const nextImages = [...card.images];
         nextImages[index] = newUrls[0];
         return { ...card, images: nextImages };
-      })
-    );
+      });
+      const updatedCard = updatedCards.find(card => card.id === id);
+      if (updatedCard && user) {
+        saveCard(updatedCard, user.id);
+      }
+      return updatedCards;
+    });
   };
 
   const removePhoto = (id: number, index: number): void => {
-    setCards((prev) =>
-      prev.map((card) => {
+    setCards((prev) => {
+      const updatedCards = prev.map((card) => {
         if (card.id !== id) return card;
         const nextImages = card.images.filter(
           (_, currentIndex) => currentIndex !== index
@@ -981,14 +1055,24 @@ export default function Page() {
             nextImages.length > 0 &&
             Boolean(card.characteristics.trim() && card.pathologies.trim()),
         };
-      })
-    );
+      });
+      const updatedCard = updatedCards.find(card => card.id === id);
+      if (updatedCard && user) {
+        saveCard(updatedCard, user.id);
+      }
+      return updatedCards;
+    });
   };
 
   const updateCard = (id: number, patch: CardUpdate): void => {
-    setCards((prev) =>
-      prev.map((card) => (card.id === id ? { ...card, ...patch } : card))
-    );
+    setCards((prev) => {
+      const updatedCards = prev.map((card) => (card.id === id ? { ...card, ...patch } : card));
+      const updatedCard = updatedCards.find(card => card.id === id);
+      if (updatedCard && user) {
+        saveCard(updatedCard, user.id);
+      }
+      return updatedCards;
+    });
   };
 
   if (!user || screen === "cover") {
