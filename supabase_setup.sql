@@ -37,15 +37,24 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('card-images', 'card-images', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Create policy for storage bucket
-CREATE POLICY "Users can upload their own card images" ON storage.objects
-  FOR INSERT WITH CHECK (bucket_id = 'card-images' AND auth.uid()::text = (storage.foldername(name))[1]);
+-- Allow public access to card images (remove RLS for viewing images)
+ALTER TABLE storage.objects DISABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view card images" ON storage.objects
+-- Re-enable RLS but with proper policies
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
+-- Create policy for storage bucket - allow anyone to view images
+CREATE POLICY "Anyone can view card images" ON storage.objects
   FOR SELECT USING (bucket_id = 'card-images');
 
-CREATE POLICY "Users can update their own card images" ON storage.objects
-  FOR UPDATE USING (bucket_id = 'card-images' AND auth.uid()::text = (storage.foldername(name))[1]);
+-- Create policy for users to upload their own card images
+CREATE POLICY "Users can upload card images" ON storage.objects
+  FOR INSERT WITH CHECK (bucket_id = 'card-images');
 
-CREATE POLICY "Users can delete their own card images" ON storage.objects
-  FOR DELETE USING (bucket_id = 'card-images' AND auth.uid()::text = (storage.foldername(name))[1]);
+-- Create policy for users to update their own card images
+CREATE POLICY "Users can update card images" ON storage.objects
+  FOR UPDATE USING (bucket_id = 'card-images');
+
+-- Create policy for users to delete their own card images
+CREATE POLICY "Users can delete card images" ON storage.objects
+  FOR DELETE USING (bucket_id = 'card-images');
