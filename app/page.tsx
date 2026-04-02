@@ -97,69 +97,6 @@ const categories = [
   "Leucémies",
 ];
 
-const initialCards: CytodexCard[] = [
-  {
-    id: 1,
-    title: "Schizocyte",
-    category: "Pathologies du globule rouge",
-    found: false,
-    completed: false,
-    images: [],
-    characteristics: "",
-    pathologies: "",
-  },
-  {
-    id: 2,
-    title: "Drépanocyte",
-    category: "Pathologies du globule rouge",
-    found: false,
-    completed: false,
-    images: [],
-    characteristics: "",
-    pathologies: "",
-  },
-  {
-    id: 3,
-    title: "Lymphocyte hyperbasophile",
-    category: "Pathologies du lymphocyte",
-    found: false,
-    completed: false,
-    images: [],
-    characteristics: "",
-    pathologies: "",
-  },
-  {
-    id: 4,
-    title: "Cellule chevelue",
-    category: "Pathologies du lymphocyte",
-    found: false,
-    completed: false,
-    images: [],
-    characteristics: "",
-    pathologies: "",
-  },
-  {
-    id: 5,
-    title: "Blaste myéloïde",
-    category: "Leucémies",
-    found: false,
-    completed: false,
-    images: [],
-    characteristics: "",
-    pathologies: "",
-  },
-  {
-    id: 6,
-    title: "Auer rod",
-    category: "Leucémies",
-    found: false,
-    completed: false,
-    images: [],
-    characteristics: "",
-    pathologies: "",
-  },
-];
-
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
@@ -870,7 +807,7 @@ function DexScreen({
 
 export default function Page() {
   const [screen, setScreen] = useState<Screen>("cover");
-  const [cards, setCards] = useState<CytodexCard[]>(initialCards);
+  const [cards, setCards] = useState<CytodexCard[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>(
     categories[0]
   );
@@ -960,77 +897,69 @@ export default function Page() {
     await supabase.auth.signOut();
   };
 
-  const ensureAnomalyReference = async (): Promise<void> => {
-    try {
-      const ids = initialCards.map((c) => c.id);
-      const { data: existing } = await supabase
-        .from('anomalies_reference')
-        .select('id')
-        .in('id', ids);
-
-      const existingIds = new Set((existing || []).map((x: any) => x.id));
-      const missing = initialCards.filter((c) => !existingIds.has(c.id));
-      if (missing.length > 0) {
-        await supabase
-          .from('anomalies_reference')
-          .insert(missing.map((c) => ({ id: c.id })));
-      }
-    } catch (err) {
-      console.warn('Could not ensure anomalies_reference table', err);
-    }
-  };
-
   const loadCards = async (userId: string): Promise<CytodexCard[]> => {
-    const { data: cardData, error: cardError } = await supabase
+    // Fetch all anomalies_reference
+    const { data: anomalies, error: anomaliesError } = await supabase
+      .from('anomalies_reference')
+      .select('*');
+
+    if (anomaliesError) {
+      console.error('Error loading anomalies:', anomaliesError);
+      alert('Erreur chargement anomalies: ' + JSON.stringify(anomaliesError));
+      return [];
+    }
+
+    // Fetch user_cards for this user
+    const { data: userCards, error: userCardsError } = await supabase
       .from('user_cards')
       .select('*')
       .eq('user_id', userId);
 
-    if (cardError) {
-      console.error('Error loading cards:', cardError);
-      alert('Erreur chargement cartons: ' + JSON.stringify(cardError));
-      return initialCards;
+    if (userCardsError) {
+      console.error('Error loading user cards:', userCardsError);
+      alert('Erreur chargement user cards: ' + JSON.stringify(userCardsError));
+      return [];
     }
 
-    const cardIds = (cardData || []).map((card: any) => card.id);
-    const { data: photoData, error: photoError } = await supabase
+    // Fetch photos for user_cards
+    const userCardIds = (userCards || []).map((uc: any) => uc.id);
+    const { data: photos, error: photosError } = await supabase
       .from('user_photos')
       .select('*')
-      .in('user_card_id', cardIds.length ? cardIds : [0]);
+      .in('user_card_id', userCardIds.length ? userCardIds : [0]);
 
-    if (photoError) {
-      console.error('Error loading photos:', photoError);
-      alert('Erreur chargement photos: ' + JSON.stringify(photoError));
+    if (photosError) {
+      console.error('Error loading photos:', photosError);
+      alert('Erreur chargement photos: ' + JSON.stringify(photosError));
     }
 
-    if (cardData && cardData.length > 0) {
-      const photosByCardId = new Map<number, string[]>();
-      (photoData || []).forEach((photo: any) => {
-        const cId = photo.user_card_id;
-        if (!photosByCardId.has(cId)) photosByCardId.set(cId, []);
-        photosByCardId.get(cId)?.push(photo.image_url);
-      });
+    // Group photos by user_card_id
+    const photosByCardId = new Map<number, string[]>();
+    (photos || []).forEach((photo: any) => {
+      const cId = photo.user_card_id;
+      if (!photosByCardId.has(cId)) photosByCardId.set(cId, []);
+      photosByCardId.get(cId)?.push(photo.image_url);
+    });
 
-      return cardData.map((dbCard: any) => {
-        const anomalyId = dbCard.anomaly_id || dbCard['anomaly-id'];
-        const template = initialCards.find((c) => c.id === anomalyId);
-        return {
-          id: anomalyId,
-          title: template?.title ?? `Anomalie ${anomalyId}`,
-          category: template?.category ?? 'Inconnu',
-          found: dbCard.found,
-          completed: dbCard.completed,
-          images: photosByCardId.get(dbCard.id) ?? [],
-          characteristics: dbCard.characteristics ?? '',
-          pathologies: dbCard.pathologies ?? '',
-        };
-      });
-    }
+    // Map anomalies to CytodexCard, merging with user_cards if exist
+    const userCardsMap = new Map<number, any>();
+    (userCards || []).forEach((uc: any) => {
+      userCardsMap.set(uc.anomaly_id, uc);
+    });
 
-    // Do not automatically insert default cards if they do not exist, to avoid
-    // FK constraint violations with anomalies_reference.
-    // We rely on initialCards fallback until the user has existing user_cards entries.
-    return initialCards;
+    return (anomalies || []).map((anomaly: any) => {
+      const userCard = userCardsMap.get(anomaly.id);
+      return {
+        id: anomaly.id,
+        title: anomaly.title,
+        category: anomaly.category,
+        found: userCard?.found ?? false,
+        completed: userCard?.completed ?? false,
+        images: userCard ? (photosByCardId.get(userCard.id) ?? []) : [],
+        characteristics: userCard?.characteristics ?? '',
+        pathologies: userCard?.pathologies ?? '',
+      };
+    });
   };
 
   const saveCard = async (card: CytodexCard, userId: string): Promise<void> => {
