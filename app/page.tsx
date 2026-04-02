@@ -1,7 +1,6 @@
 "use client";
 
 import React, {
-  ChangeEvent,
   useEffect,
   useMemo,
   useRef,
@@ -30,7 +29,8 @@ type BadgeLevel = "Bronze" | "Argent" | "Or" | null;
 type Screen = "cover" | "home" | "categories" | "dex";
 
 type CytodexCard = {
-  id: number;
+  id: number; // user_cards.id
+  cardTemplateId: number;
   title: string;
   category: string;
   found: boolean;
@@ -59,6 +59,7 @@ type CoverScreenProps = {
 
 type HomeScreenProps = {
   cards: CytodexCard[];
+  categories: string[];
   user: SupabaseUser;
   onOpenDex: () => void;
   onLogout: () => Promise<void>;
@@ -66,6 +67,7 @@ type HomeScreenProps = {
 
 type CategoryScreenProps = {
   cards: CytodexCard[];
+  categories: string[];
   onBack: () => void;
   onOpenCategory: (category: string) => void;
 };
@@ -73,7 +75,11 @@ type CategoryScreenProps = {
 type DexCardProps = {
   card: CytodexCard;
   onAddPhotos: (id: number, files: FileList | null) => Promise<void>;
-  onReplacePhoto: (id: number, index: number, files: FileList | null) => Promise<void>;
+  onReplacePhoto: (
+    id: number,
+    index: number,
+    files: FileList | null
+  ) => Promise<void>;
   onRemovePhoto: (id: number, index: number) => void;
   onUpdate: (id: number, patch: CardUpdate) => void;
 };
@@ -83,19 +89,46 @@ type DexScreenProps = {
   category: string;
   onBack: () => void;
   onAddPhotos: (id: number, files: FileList | null) => Promise<void>;
-  onReplacePhoto: (id: number, index: number, files: FileList | null) => Promise<void>;
+  onReplacePhoto: (
+    id: number,
+    index: number,
+    files: FileList | null
+  ) => Promise<void>;
   onRemovePhoto: (id: number, index: number) => void;
   onUpdate: (id: number, patch: CardUpdate) => void;
 };
 
-const categories = [
-  "Pathologies du globule rouge",
-  "Pathologies du lymphocyte",
-  "Pathologies du neutrophile",
-  "Pathologies du monocyte",
-  "Pathologies plaquettaires",
-  "Leucémies",
-];
+type TemplateRow = {
+  id: number;
+  title: string;
+  category: string;
+  is_active: boolean;
+};
+
+type UserCardRow = {
+  id: number;
+  user_id: string;
+  card_template_id: number;
+  found: boolean;
+  completed: boolean;
+  images: string[] | null;
+  characteristics: string | null;
+  pathologies: string | null;
+  card_templates:
+    | {
+        id: number;
+        title: string;
+        category: string;
+        is_active: boolean;
+      }
+    | {
+        id: number;
+        title: string;
+        category: string;
+        is_active: boolean;
+      }[]
+    | null;
+};
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -121,43 +154,115 @@ function computeBadge(completed: number, total: number): BadgeLevel {
 
 function badgeStyle(level: BadgeLevel): string {
   if (level === "Or") return "bg-yellow-100 text-yellow-900 border-yellow-300";
-  if (level === "Argent") return "bg-slate-100 text-slate-800 border-slate-300";
+  if (level === "Argent") {
+    return "bg-slate-100 text-slate-800 border-slate-300";
+  }
   if (level === "Bronze") return "bg-amber-100 text-amber-900 border-amber-300";
   return "bg-muted text-muted-foreground border-dashed";
 }
 
-function fileListToUrls(files: FileList | null, userId: string): Promise<string[]> {
-  if (!files || files.length === 0) return Promise.resolve([]);
+async function fileListToUrls(
+  files: FileList | null,
+  userId: string
+): Promise<string[]> {
+  if (!files || files.length === 0) return [];
+
   const uploadPromises = Array.from(files).map(async (file) => {
-    const fileName = `card-${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
+    const extension = file.name.split(".").pop() || "jpg";
+    const fileName = `card-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2)}.${extension}`;
     const path = `${userId}/${fileName}`;
-    const { error } = await supabase.storage
-      .from('card-images')
-      .upload(path, file);
+
+    const { error } = await supabase.storage.from("card-images").upload(path, file);
+
     if (error) {
-      console.error('Error uploading file:', error);
+      console.error("Error uploading file:", error);
       return null;
     }
+
     return path;
   });
 
-  return Promise.all(uploadPromises).then(urls => urls.filter((url): url is string => url !== null));
+  const uploaded = await Promise.all(uploadPromises);
+  return uploaded.filter((url): url is string => url !== null);
 }
 
 async function getSignedUrl(path: string): Promise<string> {
-  if (!path) return '';
-  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
 
   const { data, error } = await supabase.storage
-    .from('card-images')
+    .from("card-images")
     .createSignedUrl(path, 60 * 60);
 
   if (error || !data?.signedUrl) {
-    console.error('Error creating signed URL for', path, error);
-    return '';
+    console.error("Error creating signed URL for", path, error);
+    return "";
   }
 
   return data.signedUrl;
+}
+
+function normalizeTemplate(
+  value: UserCardRow["card_templates"]
+): TemplateRow | null {
+  if (!value) return null;
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value;
+}
+
+async function syncUserCards(userId: string): Promise<void> {
+  const { data: templates, error: templatesError } = await supabase
+    .from("card_templates")
+    .select("id, is_active")
+    .eq("is_active", true);
+
+  if (templatesError) {
+    console.error("Error loading card templates:", templatesError);
+    throw templatesError;
+  }
+
+  const activeTemplates = (templates || []) as Pick<TemplateRow, "id" | "is_active">[];
+
+  if (activeTemplates.length === 0) return;
+
+  const { data: existingRows, error: existingError } = await supabase
+    .from("user_cards")
+    .select("card_template_id")
+    .eq("user_id", userId);
+
+  if (existingError) {
+    console.error("Error loading user_cards:", existingError);
+    throw existingError;
+  }
+
+  const existingTemplateIds = new Set(
+    (existingRows || []).map((row: { card_template_id: number }) => row.card_template_id)
+  );
+
+  const missingRows = activeTemplates
+    .filter((template) => !existingTemplateIds.has(template.id))
+    .map((template) => ({
+      user_id: userId,
+      card_template_id: template.id,
+      found: false,
+      completed: false,
+      images: [],
+      characteristics: "",
+      pathologies: "",
+    }));
+
+  if (missingRows.length === 0) return;
+
+  const { error: insertError } = await supabase
+    .from("user_cards")
+    .insert(missingRows);
+
+  if (insertError) {
+    console.error("Error inserting missing user_cards:", insertError);
+    throw insertError;
+  }
 }
 
 function CoverScreen({
@@ -211,21 +316,21 @@ function CoverScreen({
               <div className="space-y-2">
                 <label className="text-sm font-medium">Email</label>
                 <Input
-  type="email"
-  placeholder="etudiant@chu.fr"
-  value={email}
-  onChange={(e) => onEmailChange(e.target.value)}
-/>
+                  type="email"
+                  placeholder="etudiant@chu.fr"
+                  value={email}
+                  onChange={(e) => onEmailChange(e.target.value)}
+                />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Mot de passe</label>
                 <Input
-  type="password"
-  value={password}
-  onChange={(e) => onPasswordChange(e.target.value)}
-  placeholder="••••••••"
-/>
+                  type="password"
+                  value={password}
+                  onChange={(e) => onPasswordChange(e.target.value)}
+                  placeholder="••••••••"
+                />
               </div>
 
               <Button
@@ -254,6 +359,7 @@ function CoverScreen({
 
 function HomeScreen({
   cards,
+  categories,
   user,
   onOpenDex,
   onLogout,
@@ -267,7 +373,10 @@ function HomeScreen({
         badge: computeBadge(completed, inCategory.length),
       };
     });
-  }, [cards]);
+  }, [cards, categories]);
+
+  const completedCount = cards.filter((c) => c.completed).length;
+  const globalProgress = cards.length === 0 ? 0 : Math.round((completedCount / cards.length) * 100);
 
   return (
     <div className="min-h-screen bg-slate-50 p-3 sm:p-6 md:p-8 pb-24">
@@ -308,22 +417,11 @@ function HomeScreen({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-5xl font-bold">
-                {Math.round(
-                  (cards.filter((c) => c.completed).length / cards.length) * 100
-                )}
-                %
-              </div>
+              <div className="text-5xl font-bold">{globalProgress}%</div>
               <p className="mt-2 text-muted-foreground">
-                {cards.filter((c) => c.completed).length} fiches complétées sur{" "}
-                {cards.length}
+                {completedCount} fiches complétées sur {cards.length}
               </p>
-              <Progress
-                value={
-                  (cards.filter((c) => c.completed).length / cards.length) * 100
-                }
-                className="mt-5 h-3"
-              />
+              <Progress value={globalProgress} className="mt-5 h-3" />
             </CardContent>
           </Card>
 
@@ -359,6 +457,7 @@ function HomeScreen({
 
 function CategoryScreen({
   cards,
+  categories,
   onBack,
   onOpenCategory,
 }: CategoryScreenProps) {
@@ -475,7 +574,7 @@ function DexCard({
     const loadUrls = async () => {
       const urls = await Promise.all(card.images.map((img) => getSignedUrl(img)));
       if (!isCancelled) {
-        setSignedImageUrls(urls.filter((url) => url));
+        setSignedImageUrls(urls.filter(Boolean));
       }
     };
 
@@ -488,14 +587,13 @@ function DexCard({
 
   useEffect(() => {
     if (videoRef.current && isCapturing) {
-      videoRef.current.play().catch(err => console.error('Error playing video:', err));
+      videoRef.current.play().catch((err) => console.error("Error playing video:", err));
     }
   }, [isCapturing]);
 
   useEffect(() => {
     if (videoRef.current && cameraStream) {
       videoRef.current.srcObject = cameraStream;
-      alert('Stream assigned to video');
     }
   }, [cameraStream]);
 
@@ -512,61 +610,66 @@ function DexCard({
   };
 
   const startCamera = async (index?: number) => {
-    alert('Starting camera...');
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-      alert('Camera access granted');
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+      });
       setCameraStream(stream);
       setIsCapturing(true);
       if (index !== undefined) setReplacingIndex(index);
-      alert('Camera started, overlay should appear');
     } catch (err) {
-      alert('Error accessing camera: ' + err);
+      alert("Erreur d'accès à la caméra : " + String(err));
     }
   };
 
   const capturePhoto = () => {
-    console.log('Capturing photo...');
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
-      if (context) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0);
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-            const fileList = dataTransfer.files;
-            if (replacingIndex !== null) {
-              onReplacePhoto(card.id, replacingIndex, fileList);
-            } else {
-              onAddPhotos(card.id, fileList);
-            }
-            stopCamera();
-            setReplacingIndex(null);
-            console.log('Photo captured and saved');
-          }
-        }, 'image/jpeg');
-      } else {
-        console.error('Could not get canvas context');
-      }
-    } else {
-      console.error('videoRef or canvasRef is null');
-    }
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+
+    if (!context) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0);
+
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+
+        const file = new File([blob], `capture-${Date.now()}.jpg`, {
+          type: "image/jpeg",
+        });
+
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        const fileList = dataTransfer.files;
+
+        if (replacingIndex !== null) {
+          onReplacePhoto(card.id, replacingIndex, fileList);
+        } else {
+          onAddPhotos(card.id, fileList);
+        }
+
+        stopCamera();
+      },
+      "image/jpeg",
+      0.92
+    );
   };
 
   const stopCamera = () => {
     if (cameraStream) {
-      cameraStream.getTracks().forEach(track => track.stop());
+      cameraStream.getTracks().forEach((track) => track.stop());
       setCameraStream(null);
     }
+
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+
     setIsCapturing(false);
     setReplacingIndex(null);
   };
@@ -586,7 +689,7 @@ function DexCard({
               <Button
                 className="mt-4 rounded-2xl min-h-11 w-full sm:w-auto"
                 variant="secondary"
-                onClick={() => { alert('Button clicked'); startCamera(); }}
+                onClick={() => startCamera()}
               >
                 <Camera className="mr-2 h-4 w-4" />
                 Prendre une photo
@@ -607,15 +710,32 @@ function DexCard({
 
         {isCapturing && (
           <div className="fixed inset-0 bg-black z-[9999] flex flex-col h-screen">
-            <video ref={videoRef} autoPlay playsInline muted className="flex-1 object-cover w-full h-full"></video>
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-70 flex justify-between gap-2 z-[10000]">
-              <Button onClick={stopCamera} variant="outline" className="bg-white text-black hover:bg-gray-200">Annuler</Button>
-              <Button onClick={capturePhoto} className="bg-blue-600 text-white hover:bg-blue-700">Capturer</Button>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="flex-1 object-cover w-full h-full"
+            />
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/70 flex justify-between gap-2 z-[10000]">
+              <Button
+                onClick={stopCamera}
+                variant="outline"
+                className="bg-white text-black hover:bg-gray-200"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={capturePhoto}
+                className="bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Capturer
+              </Button>
             </div>
           </div>
         )}
 
-        <canvas ref={canvasRef} className="hidden"></canvas>
+        <canvas ref={canvasRef} className="hidden" />
       </>
     );
   }
@@ -624,138 +744,159 @@ function DexCard({
     <>
       <Card className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
         <div className="aspect-[4/3] bg-slate-100 overflow-hidden">
-        {signedImageUrls[0] ? (
-          <img src={signedImageUrls[0]} alt={card.title} className="h-full w-full object-cover" />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
-            Aucune image
-          </div>
-        )}
-      </div>
-
-      <CardContent className="p-5 space-y-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              Anomalie
-            </p>
-            <h3 className="text-2xl font-bold mt-1">{card.title}</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              {card.category}
-            </p>
-          </div>
-
-          {card.completed ? (
-            <Badge className="rounded-full px-3 py-1.5 text-sm">
-              <CheckCircle2 className="h-4 w-4 mr-1" />
-              Complétée
-            </Badge>
+          {signedImageUrls[0] ? (
+            <img
+              src={signedImageUrls[0]}
+              alt={card.title}
+              className="h-full w-full object-cover"
+            />
           ) : (
-            <Badge
-              variant="secondary"
-              className="rounded-full px-3 py-1.5 text-sm"
-            >
-              À compléter
-            </Badge>
+            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
+              Aucune image
+            </div>
           )}
         </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <label className="text-sm font-medium">
-              Photographies prises en direct
-            </label>
+        <CardContent className="p-5 space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                Anomalie
+              </p>
+              <h3 className="text-2xl font-bold mt-1">{card.title}</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {card.category}
+              </p>
+            </div>
 
+            {card.completed ? (
+              <Badge className="rounded-full px-3 py-1.5 text-sm">
+                <CheckCircle2 className="h-4 w-4 mr-1" />
+                Complétée
+              </Badge>
+            ) : (
+              <Badge
+                variant="secondary"
+                className="rounded-full px-3 py-1.5 text-sm"
+              >
+                À compléter
+              </Badge>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <label className="text-sm font-medium">
+                Photographies prises en direct
+              </label>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-2xl min-h-11"
+                onClick={() => startCamera()}
+              >
+                <Camera className="mr-2 h-4 w-4" />
+                Ajouter des photos
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {signedImageUrls.map((imageUrl, index) => (
+                <div
+                  key={`${card.id}-${index}`}
+                  className="rounded-2xl overflow-hidden border bg-slate-50"
+                >
+                  <div className="aspect-square overflow-hidden">
+                    <img
+                      src={imageUrl}
+                      alt={`${card.title} ${index + 1}`}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+
+                  <div className="p-2 space-y-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full rounded-xl min-h-10 text-xs"
+                      onClick={() => startCamera(index)}
+                    >
+                      <RefreshCw className="mr-2 h-3.5 w-3.5" />
+                      Remplacer
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full rounded-xl min-h-10 text-xs"
+                      onClick={() => onRemovePhoto(card.id, index)}
+                    >
+                      <Trash2 className="mr-2 h-3.5 w-3.5" />
+                      Supprimer
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Caractéristiques de l’anomalie
+            </label>
+            <textarea
+              className="min-h-[120px] w-full rounded-2xl border bg-background p-3 text-base sm:text-sm outline-none"
+              value={characteristics}
+              onChange={(e) => setCharacteristics(e.target.value)}
+              placeholder="Décrire les caractéristiques morphologiques..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Pathologies associées</label>
+            <textarea
+              className="min-h-[110px] w-full rounded-2xl border bg-background p-3 text-base sm:text-sm outline-none"
+              value={pathologies}
+              onChange={(e) => setPathologies(e.target.value)}
+              placeholder="Renseigner les pathologies dans lesquelles cette anomalie est rencontrée..."
+            />
+          </div>
+
+          <Button className="w-full rounded-2xl min-h-11" onClick={saveForm}>
+            Enregistrer la fiche
+          </Button>
+        </CardContent>
+      </Card>
+
+      {isCapturing && (
+        <div className="fixed inset-0 bg-black z-[9999] flex flex-col h-screen">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="flex-1 object-cover w-full h-full"
+          />
+          <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/70 flex justify-between gap-2 z-[10000]">
             <Button
-              type="button"
+              onClick={stopCamera}
               variant="outline"
-              className="rounded-2xl min-h-11"
-              onClick={() => { alert('Button clicked'); startCamera(); }}
+              className="bg-white text-black hover:bg-gray-200"
             >
-              <Camera className="mr-2 h-4 w-4" />
-              Ajouter des photos
+              Annuler
+            </Button>
+            <Button
+              onClick={capturePhoto}
+              className="bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Capturer
             </Button>
           </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {signedImageUrls.map((imageUrl, index) => (
-              <div
-                key={`${card.id}-${index}`}
-                className="rounded-2xl overflow-hidden border bg-slate-50"
-              >
-                <div className="aspect-square overflow-hidden">
-                  <img
-                    src={imageUrl}
-                    alt={`${card.title} ${index + 1}`}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-
-                <div className="p-2 space-y-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full rounded-xl min-h-10 text-xs"
-                    onClick={() => startCamera(index)}
-                  >
-                    <RefreshCw className="mr-2 h-3.5 w-3.5" />
-                    Remplacer
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full rounded-xl min-h-10 text-xs"
-                    onClick={() => onRemovePhoto(card.id, index)}
-                  >
-                    <Trash2 className="mr-2 h-3.5 w-3.5" />
-                    Supprimer
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
+      )}
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">
-            Caractéristiques de l’anomalie
-          </label>
-          <textarea
-            className="min-h-[120px] w-full rounded-2xl border bg-background p-3 text-base sm:text-sm outline-none"
-            value={characteristics}
-            onChange={(e) => setCharacteristics(e.target.value)}
-            placeholder="Décrire les caractéristiques morphologiques..."
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Pathologies associées</label>
-          <textarea
-            className="min-h-[110px] w-full rounded-2xl border bg-background p-3 text-base sm:text-sm outline-none"
-            value={pathologies}
-            onChange={(e) => setPathologies(e.target.value)}
-            placeholder="Renseigner les pathologies dans lesquelles cette anomalie est rencontrée..."
-          />
-        </div>
-
-        <Button className="w-full rounded-2xl min-h-11" onClick={saveForm}>
-          Enregistrer la fiche
-        </Button>
-      </CardContent>
-    </Card>
-
-    {isCapturing && (
-      <div className="fixed inset-0 bg-black z-[9999] flex flex-col h-screen">
-        <video ref={videoRef} autoPlay playsInline muted className="flex-1 object-cover w-full h-full"></video>
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-70 flex justify-between gap-2 z-[10000]">
-          <Button onClick={stopCamera} variant="outline" className="bg-white text-black hover:bg-gray-200">Annuler</Button>
-          <Button onClick={capturePhoto} className="bg-blue-600 text-white hover:bg-blue-700">Capturer</Button>
-        </div>
-      </div>
-    )}
-
-    <canvas ref={canvasRef} className="hidden"></canvas>
+      <canvas ref={canvasRef} className="hidden" />
     </>
   );
 }
@@ -779,6 +920,7 @@ function DexScreen({
 
   const goPrev = () =>
     setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev));
+
   const goNext = () =>
     setActiveIndex((prev) =>
       prev < filteredCards.length - 1 ? prev + 1 : prev
@@ -855,22 +997,93 @@ function DexScreen({
 export default function Page() {
   const [screen, setScreen] = useState<Screen>("cover");
   const [cards, setCards] = useState<CytodexCard[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    categories[0]
-  );
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
 
+  const categories = useMemo(() => {
+    return Array.from(new Set(cards.map((c) => c.category)));
+  }, [cards]);
+
+  useEffect(() => {
+    if (!selectedCategory && categories.length > 0) {
+      setSelectedCategory(categories[0]);
+    }
+
+    if (
+      selectedCategory &&
+      categories.length > 0 &&
+      !categories.includes(selectedCategory)
+    ) {
+      setSelectedCategory(categories[0]);
+    }
+  }, [categories, selectedCategory]);
+
+  const loadCards = async (userId: string): Promise<CytodexCard[]> => {
+    await syncUserCards(userId);
+
+    const { data, error } = await supabase
+      .from("user_cards")
+      .select(`
+        id,
+        user_id,
+        card_template_id,
+        found,
+        completed,
+        images,
+        characteristics,
+        pathologies,
+        card_templates (
+          id,
+          title,
+          category,
+          is_active
+        )
+      `)
+      .eq("user_id", userId)
+      .order("id", { ascending: true });
+
+    if (error) {
+      console.error("Error loading cards:", error);
+      alert("Erreur chargement cartes: " + JSON.stringify(error));
+      return [];
+    }
+
+    return ((data || []) as UserCardRow[])
+      .map((row) => {
+        const template = normalizeTemplate(row.card_templates);
+        if (!template || !template.is_active) return null;
+
+        return {
+          id: row.id,
+          cardTemplateId: row.card_template_id,
+          title: template.title,
+          category: template.category,
+          found: row.found,
+          completed: row.completed,
+          images: row.images || [],
+          characteristics: row.characteristics || "",
+          pathologies: row.pathologies || "",
+        } satisfies CytodexCard;
+      })
+      .filter((row): row is CytodexCard => row !== null);
+  };
+
+  const refreshUserData = async (currentUser: SupabaseUser) => {
+    const userCards = await loadCards(currentUser.id);
+    setCards(userCards);
+    setScreen("home");
+  };
+
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       const currentUser = data.user ?? null;
       setUser(currentUser);
+
       if (currentUser) {
-        const userCards = await loadCards(currentUser.id);
-        setCards(userCards);
-        setScreen("home");
+        await refreshUserData(currentUser);
       }
     });
 
@@ -879,11 +1092,14 @@ export default function Page() {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
+
       if (currentUser) {
-        const userCards = await loadCards(currentUser.id);
-        setCards(userCards);
+        await refreshUserData(currentUser);
+      } else {
+        setCards([]);
+        setSelectedCategory("");
+        setScreen("cover");
       }
-      setScreen(currentUser ? "home" : "cover");
     });
 
     return () => {
@@ -897,18 +1113,18 @@ export default function Page() {
       alert(validationError);
       return;
     }
-  
+
     setAuthLoading(true);
-  
+
     const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: password.trim(),
     });
-  
+
     if (error) {
       alert(error.message);
     }
-  
+
     setAuthLoading(false);
   };
 
@@ -918,9 +1134,9 @@ export default function Page() {
       alert(validationError);
       return;
     }
-  
+
     setAuthLoading(true);
-  
+
     const { error } = await supabase.auth.signUp({
       email: email.trim(),
       password: password.trim(),
@@ -930,13 +1146,13 @@ export default function Page() {
         },
       },
     });
-  
+
     if (error) {
       alert(error.message);
     } else {
       alert("Compte créé. Tu peux maintenant te connecter.");
     }
-  
+
     setAuthLoading(false);
   };
 
@@ -944,108 +1160,32 @@ export default function Page() {
     await supabase.auth.signOut();
   };
 
-  const loadCards = async (userId: string): Promise<CytodexCard[]> => {
-    let { data: cards, error } = await supabase
-      .from('cards')
-      .select('*')
-      .eq('user_id', userId);
-
-    if (error) {
-      console.error('Error loading cards:', error);
-      alert('Erreur chargement cartes: ' + JSON.stringify(error));
-      return [];
-    }
-
-    if (!cards || cards.length === 0) {
-      // Insert initial cards
-      const initialCards = [
-        { title: 'Schizocyte', category: 'Pathologies du globule rouge' },
-        { title: 'Drépanocyte', category: 'Pathologies du globule rouge' },
-        { title: 'Lymphocyte hyperbasophile', category: 'Pathologies du lymphocyte' },
-        { title: 'Cellule chevelue', category: 'Pathologies du lymphocyte' },
-        { title: 'Blaste myéloïde', category: 'Leucémies' },
-        { title: 'Auer rod', category: 'Leucémies' },
-      ];
-
-      const inserts = initialCards.map((card) => ({
-        user_id: userId,
-        title: card.title,
-        category: card.category,
-        found: false,
-        completed: false,
-        images: [],
-        characteristics: '',
-        pathologies: '',
-      }));
-
-      const { error: insertError } = await supabase
-        .from('cards')
-        .insert(inserts);
-
-      if (insertError) {
-        console.error('Error inserting initial cards:', insertError);
-        alert('Erreur insertion cartes initiales: ' + JSON.stringify(insertError));
-        return [];
-      }
-
-      // Reload
-      const { data: newCards, error: reloadError } = await supabase
-        .from('cards')
-        .select('*')
-        .eq('user_id', userId);
-
-      if (reloadError) {
-        console.error('Error reloading cards:', reloadError);
-        return [];
-      }
-
-      cards = newCards;
-    }
-
-    return (cards || []).map((card: any) => ({
-      id: card.id,
-      title: card.title,
-      category: card.category,
-      found: card.found,
-      completed: card.completed,
-      images: card.images || [],
-      characteristics: card.characteristics || '',
-      pathologies: card.pathologies || '',
-    }));
-  };
-
-  const saveCard = async (card: CytodexCard, userId: string): Promise<void> => {
+  const saveCard = async (card: CytodexCard): Promise<void> => {
     try {
       const { error } = await supabase
-        .from('cards')
-        .upsert({
-          id: card.id,
-          user_id: userId,
-          title: card.title,
-          category: card.category,
+        .from("user_cards")
+        .update({
           found: card.found,
           completed: card.completed,
           images: card.images,
           characteristics: card.characteristics,
           pathologies: card.pathologies,
-        }, { onConflict: 'id' });
+        })
+        .eq("id", card.id);
 
       if (error) {
-        console.error('Error saving card:', error);
-        alert('Erreur sauvegarde carte ' + card.id + ': ' + JSON.stringify(error));
-        return;
+        console.error("Error saving card:", error);
+        alert("Erreur sauvegarde carte " + card.id + ": " + JSON.stringify(error));
       }
-
-      console.log('Card ' + card.id + ' saved for user', userId);
     } catch (err: any) {
-      alert('Erreur exception sauvegarde: ' + err.message);
+      alert("Erreur exception sauvegarde: " + err.message);
       console.error(err);
     }
   };
 
   const addPhotos = async (id: number, files: FileList | null): Promise<void> => {
     if (!user) {
-      alert('Vous devez être connecté pour ajouter des photos.');
+      alert("Vous devez être connecté pour ajouter des photos.");
       return;
     }
 
@@ -1062,10 +1202,12 @@ export default function Page() {
             }
           : card
       );
-      const updatedCard = updatedCards.find(card => card.id === id);
+
+      const updatedCard = updatedCards.find((card) => card.id === id);
       if (updatedCard) {
-        saveCard(updatedCard, user.id);
+        void saveCard(updatedCard);
       }
+
       return updatedCards;
     });
   };
@@ -1076,7 +1218,7 @@ export default function Page() {
     files: FileList | null
   ): Promise<void> => {
     if (!user) {
-      alert('Vous devez être connecté pour remplacer une photo.');
+      alert("Vous devez être connecté pour remplacer une photo.");
       return;
     }
 
@@ -1086,14 +1228,18 @@ export default function Page() {
     setCards((prev) => {
       const updatedCards = prev.map((card) => {
         if (card.id !== id) return card;
+
         const nextImages = [...card.images];
         nextImages[index] = newUrls[0];
+
         return { ...card, images: nextImages };
       });
-      const updatedCard = updatedCards.find(card => card.id === id);
+
+      const updatedCard = updatedCards.find((card) => card.id === id);
       if (updatedCard) {
-        saveCard(updatedCard, user.id);
+        void saveCard(updatedCard);
       }
+
       return updatedCards;
     });
   };
@@ -1102,6 +1248,7 @@ export default function Page() {
     setCards((prev) => {
       const updatedCards = prev.map((card) => {
         if (card.id !== id) return card;
+
         const nextImages = card.images.filter(
           (_, currentIndex) => currentIndex !== index
         );
@@ -1115,21 +1262,27 @@ export default function Page() {
             Boolean(card.characteristics.trim() && card.pathologies.trim()),
         };
       });
-      const updatedCard = updatedCards.find(card => card.id === id);
-      if (updatedCard && user) {
-        saveCard(updatedCard, user.id);
+
+      const updatedCard = updatedCards.find((card) => card.id === id);
+      if (updatedCard) {
+        void saveCard(updatedCard);
       }
+
       return updatedCards;
     });
   };
 
   const updateCard = (id: number, patch: CardUpdate): void => {
     setCards((prev) => {
-      const updatedCards = prev.map((card) => (card.id === id ? { ...card, ...patch } : card));
-      const updatedCard = updatedCards.find(card => card.id === id);
-      if (updatedCard && user) {
-        saveCard(updatedCard, user.id);
+      const updatedCards = prev.map((card) =>
+        card.id === id ? { ...card, ...patch } : card
+      );
+
+      const updatedCard = updatedCards.find((card) => card.id === id);
+      if (updatedCard) {
+        void saveCard(updatedCard);
       }
+
       return updatedCards;
     });
   };
@@ -1152,6 +1305,7 @@ export default function Page() {
     return (
       <HomeScreen
         cards={cards}
+        categories={categories}
         user={user}
         onOpenDex={() => setScreen("categories")}
         onLogout={handleLogout}
@@ -1163,6 +1317,7 @@ export default function Page() {
     return (
       <CategoryScreen
         cards={cards}
+        categories={categories}
         onBack={() => setScreen("home")}
         onOpenCategory={(category) => {
           setSelectedCategory(category);
