@@ -546,7 +546,9 @@ function DexCard({
         canvas.toBlob((blob) => {
           if (blob) {
             const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
-            const fileList = { 0: file, length: 1, item: (index: number) => fileList[index] || null } as FileList;
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            const fileList = dataTransfer.files;
             if (replacingIndex !== null) {
               onReplacePhoto(card.id, replacingIndex, fileList);
             } else {
