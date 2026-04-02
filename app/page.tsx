@@ -960,6 +960,26 @@ export default function Page() {
     await supabase.auth.signOut();
   };
 
+  const ensureAnomalyReference = async (): Promise<void> => {
+    try {
+      const ids = initialCards.map((c) => c.id);
+      const { data: existing } = await supabase
+        .from('anomalies_reference')
+        .select('id')
+        .in('id', ids);
+
+      const existingIds = new Set((existing || []).map((x: any) => x.id));
+      const missing = initialCards.filter((c) => !existingIds.has(c.id));
+      if (missing.length > 0) {
+        await supabase
+          .from('anomalies_reference')
+          .insert(missing.map((c) => ({ id: c.id })));
+      }
+    } catch (err) {
+      console.warn('Could not ensure anomalies_reference table', err);
+    }
+  };
+
   const loadCards = async (userId: string): Promise<CytodexCard[]> => {
     const { data: cardData, error: cardError } = await supabase
       .from('user_cards')
@@ -972,10 +992,11 @@ export default function Page() {
       return initialCards;
     }
 
+    const cardIds = (cardData || []).map((card: any) => card.id);
     const { data: photoData, error: photoError } = await supabase
       .from('user_photos')
       .select('*')
-      .eq('user_id', userId);
+      .in('user_card_id', cardIds.length ? cardIds : [0]);
 
     if (photoError) {
       console.error('Error loading photos:', photoError);
@@ -1006,24 +1027,9 @@ export default function Page() {
       });
     }
 
-    const defaultCards = initialCards.map((card) => ({
-      user_id: userId,
-      anomaly_id: card.id,
-      characteristics: card.characteristics,
-      pathologies: card.pathologies,
-    }));
-
-    const { error: insertError } = await supabase
-      .from('user_cards')
-      .insert(defaultCards);
-
-    if (insertError) {
-      console.error('Error initializing cards:', insertError);
-      alert('Erreur initialisation cartes: ' + JSON.stringify(insertError));
-    } else {
-      alert('Cartes initialisées avec succès');
-    }
-
+    // Do not automatically insert default cards if they do not exist, to avoid
+    // FK constraint violations with anomalies_reference.
+    // We rely on initialCards fallback until the user has existing user_cards entries.
     return initialCards;
   };
 
@@ -1068,7 +1074,7 @@ export default function Page() {
             .from('user_cards')
             .select('id')
             .eq('user_id', userId)
-            .eq('anomaly-id', card.id)
+            .eq('anomaly_id', card.id)
             .single()).data?.id;
 
       if (cardRow) {
