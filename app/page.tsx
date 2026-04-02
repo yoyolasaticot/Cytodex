@@ -493,6 +493,7 @@ function DexCard({
   const [pathologies, setPathologies] = useState(card.pathologies);
   const [isCapturing, setIsCapturing] = useState(false);
   const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -506,6 +507,13 @@ function DexCard({
       videoRef.current.play().catch(err => console.error('Error playing video:', err));
     }
   }, [isCapturing]);
+
+  useEffect(() => {
+    if (videoRef.current && cameraStream) {
+      videoRef.current.srcObject = cameraStream;
+      alert('Stream assigned to video');
+    }
+  }, [cameraStream]);
 
   const saveForm = () => {
     onUpdate(card.id, {
@@ -524,15 +532,10 @@ function DexCard({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
       alert('Camera access granted');
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play().catch(err => alert('Error playing video: ' + err));
-        setIsCapturing(true);
-        if (index !== undefined) setReplacingIndex(index);
-        alert('Camera started, overlay should appear');
-      } else {
-        alert('videoRef.current is null');
-      }
+      setCameraStream(stream);
+      setIsCapturing(true);
+      if (index !== undefined) setReplacingIndex(index);
+      alert('Camera started, overlay should appear');
     } catch (err) {
       alert('Error accessing camera: ' + err);
     }
@@ -573,13 +576,15 @@ function DexCard({
   };
 
   const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
-      videoRef.current.srcObject = null;
-      setIsCapturing(false);
-      setReplacingIndex(null);
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
     }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsCapturing(false);
+    setReplacingIndex(null);
   };
 
   if (!card.found) {
