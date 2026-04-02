@@ -968,6 +968,7 @@ export default function Page() {
 
     if (error) {
       console.error('Error loading cards:', error);
+      alert('Erreur chargement cartes: ' + JSON.stringify(error));
       return initialCards; // Fallback to initial cards
     }
 
@@ -992,28 +993,38 @@ export default function Page() {
 
     if (insertError) {
       console.error('Error initializing cards:', insertError);
+      alert('Erreur initialisation cartes: ' + JSON.stringify(insertError));
+    } else {
+      alert('Cartes initialisées avec succès');
     }
 
     return initialCards;
   };
 
   const saveCard = async (card: CytodexCard, userId: string): Promise<void> => {
-    const { error } = await supabase
-      .from('cards')
-      .upsert({
-        id: card.id,
-        user_id: userId,
-        title: card.title,
-        category: card.category,
-        found: card.found,
-        completed: card.completed,
-        images: card.images,
-        characteristics: card.characteristics,
-        pathologies: card.pathologies,
-      });
+    try {
+      const { error } = await supabase
+        .from('cards')
+        .upsert({
+          id: card.id,
+          user_id: userId,
+          title: card.title,
+          category: card.category,
+          found: card.found,
+          completed: card.completed,
+          images: card.images,
+          characteristics: card.characteristics,
+          pathologies: card.pathologies,
+        });
 
-    if (error) {
-      console.error('Error saving card:', error);
+      if (error) {
+        console.error('Error saving card:', error);
+        alert('Erreur sauvegarde fiche ' + card.id + ': ' + JSON.stringify(error));
+      } else {
+        console.log('Card ' + card.id + ' saved successfully');
+      }
+    } catch (err: any) {
+      alert('Erreur exception sauvegarde: ' + err.message);
     }
   };
 
