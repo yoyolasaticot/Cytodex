@@ -34,27 +34,21 @@ CREATE POLICY "Users can delete their own cards" ON cards
 
 -- Create storage bucket for card images (if not exists)
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('card-images', 'card-images', true)
+VALUES ('card-images', 'card-images', false)
 ON CONFLICT (id) DO NOTHING;
 
--- Allow public access to card images (remove RLS for viewing images)
-ALTER TABLE storage.objects DISABLE ROW LEVEL SECURITY;
-
--- Re-enable RLS but with proper policies
+-- Enable RLS for storage objects
 ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 
--- Create policy for storage bucket - allow anyone to view images
-CREATE POLICY "Anyone can view card images" ON storage.objects
-  FOR SELECT USING (bucket_id = 'card-images');
+-- Create policy for storage bucket - allow users to only access their own paths
+CREATE POLICY "Users can view their own card images" ON storage.objects
+  FOR SELECT USING (bucket_id = 'card-images' AND split_part(name, '/', 1) = auth.uid());
 
--- Create policy for users to upload their own card images
-CREATE POLICY "Users can upload card images" ON storage.objects
-  FOR INSERT WITH CHECK (bucket_id = 'card-images');
+CREATE POLICY "Users can upload their own card images" ON storage.objects
+  FOR INSERT WITH CHECK (bucket_id = 'card-images' AND split_part(name, '/', 1) = auth.uid());
 
--- Create policy for users to update their own card images
-CREATE POLICY "Users can update card images" ON storage.objects
-  FOR UPDATE USING (bucket_id = 'card-images');
+CREATE POLICY "Users can update their own card images" ON storage.objects
+  FOR UPDATE USING (bucket_id = 'card-images' AND split_part(name, '/', 1) = auth.uid());
 
--- Create policy for users to delete their own card images
-CREATE POLICY "Users can delete card images" ON storage.objects
-  FOR DELETE USING (bucket_id = 'card-images');
+CREATE POLICY "Users can delete their own card images" ON storage.objects
+  FOR DELETE USING (bucket_id = 'card-images' AND split_part(name, '/', 1) = auth.uid());

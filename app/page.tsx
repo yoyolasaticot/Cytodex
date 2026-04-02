@@ -126,23 +126,38 @@ function badgeStyle(level: BadgeLevel): string {
   return "bg-muted text-muted-foreground border-dashed";
 }
 
-function fileListToUrls(files: FileList | null): Promise<string[]> {
+function fileListToUrls(files: FileList | null, userId: string): Promise<string[]> {
   if (!files || files.length === 0) return Promise.resolve([]);
   const uploadPromises = Array.from(files).map(async (file) => {
     const fileName = `card-${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
-    const { data, error } = await supabase.storage
+    const path = `${userId}/${fileName}`;
+    const { error } = await supabase.storage
       .from('card-images')
-      .upload(fileName, file);
+      .upload(path, file);
     if (error) {
       console.error('Error uploading file:', error);
       return null;
     }
-    const { data: publicUrl } = supabase.storage
-      .from('card-images')
-      .getPublicUrl(fileName);
-    return publicUrl.publicUrl;
+    return path;
   });
-  return Promise.all(uploadPromises).then(urls => urls.filter(url => url !== null) as string[]);
+
+  return Promise.all(uploadPromises).then(urls => urls.filter((url): url is string => url !== null));
+}
+
+async function getSignedUrl(path: string): Promise<string> {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+
+  const { data, error } = await supabase.storage
+    .from('card-images')
+    .createSignedUrl(path, 60 * 60);
+
+  if (error || !data?.signedUrl) {
+    console.error('Error creating signed URL for', path, error);
+    return '';
+  }
+
+  return data.signedUrl;
 }
 
 function CoverScreen({
@@ -442,6 +457,7 @@ function DexCard({
 }: DexCardProps) {
   const [characteristics, setCharacteristics] = useState(card.characteristics);
   const [pathologies, setPathologies] = useState(card.pathologies);
+  const [signedImageUrls, setSignedImageUrls] = useState<string[]>([]);
   const [isCapturing, setIsCapturing] = useState(false);
   const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
@@ -452,6 +468,23 @@ function DexCard({
     setCharacteristics(card.characteristics);
     setPathologies(card.pathologies);
   }, [card]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadUrls = async () => {
+      const urls = await Promise.all(card.images.map((img) => getSignedUrl(img)));
+      if (!isCancelled) {
+        setSignedImageUrls(urls.filter((url) => url));
+      }
+    };
+
+    loadUrls();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [card.images]);
 
   useEffect(() => {
     if (videoRef.current && isCapturing) {
@@ -591,8 +624,8 @@ function DexCard({
     <>
       <Card className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
         <div className="aspect-[4/3] bg-slate-100 overflow-hidden">
-        {card.images[0] ? (
-          <img src={card.images[0]} alt={card.title} className="h-full w-full object-cover" />
+        {signedImageUrls[0] ? (
+          <img src={signedImageUrls[0]} alt={card.title} className="h-full w-full object-cover" />
         ) : (
           <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
             Aucune image
@@ -645,14 +678,14 @@ function DexCard({
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {card.images.map((image, index) => (
+            {signedImageUrls.map((imageUrl, index) => (
               <div
                 key={`${card.id}-${index}`}
                 className="rounded-2xl overflow-hidden border bg-slate-50"
               >
                 <div className="aspect-square overflow-hidden">
                   <img
-                    src={image}
+                    src={imageUrl}
                     alt={`${card.title} ${index + 1}`}
                     className="h-full w-full object-cover"
                   />
@@ -1011,7 +1044,12 @@ export default function Page() {
   };
 
   const addPhotos = async (id: number, files: FileList | null): Promise<void> => {
-    const newUrls = await fileListToUrls(files);
+    if (!user) {
+      alert('Vous devez être connecté pour ajouter des photos.');
+      return;
+    }
+
+    const newUrls = await fileListToUrls(files, user.id);
     if (newUrls.length === 0) return;
 
     setCards((prev) => {
@@ -1025,7 +1063,7 @@ export default function Page() {
           : card
       );
       const updatedCard = updatedCards.find(card => card.id === id);
-      if (updatedCard && user) {
+      if (updatedCard) {
         saveCard(updatedCard, user.id);
       }
       return updatedCards;
@@ -1037,7 +1075,12 @@ export default function Page() {
     index: number,
     files: FileList | null
   ): Promise<void> => {
-    const newUrls = await fileListToUrls(files);
+    if (!user) {
+      alert('Vous devez être connecté pour remplacer une photo.');
+      return;
+    }
+
+    const newUrls = await fileListToUrls(files, user.id);
     if (newUrls.length === 0) return;
 
     setCards((prev) => {
@@ -1048,7 +1091,7 @@ export default function Page() {
         return { ...card, images: nextImages };
       });
       const updatedCard = updatedCards.find(card => card.id === id);
-      if (updatedCard && user) {
+      if (updatedCard) {
         saveCard(updatedCard, user.id);
       }
       return updatedCards;
