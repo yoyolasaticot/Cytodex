@@ -962,7 +962,7 @@ export default function Page() {
 
   const loadCards = async (userId: string): Promise<CytodexCard[]> => {
     const { data, error } = await supabase
-      .from('cards')
+      .from('user_cards')
       .select('*')
       .eq('user_id', userId);
 
@@ -988,7 +988,7 @@ export default function Page() {
     // If no cards in DB, initialize with default cards
     const defaultCards = initialCards.map(card => ({ ...card, user_id: userId }));
     const { error: insertError } = await supabase
-      .from('cards')
+      .from('user_cards')
       .insert(defaultCards);
 
     if (insertError) {
@@ -1004,7 +1004,7 @@ export default function Page() {
   const saveCard = async (card: CytodexCard, userId: string): Promise<void> => {
     try {
       const { error } = await supabase
-        .from('cards')
+        .from('user_cards')
         .upsert({
           id: card.id,
           user_id: userId,
@@ -1044,7 +1044,10 @@ export default function Page() {
       );
       const updatedCard = updatedCards.find(card => card.id === id);
       if (updatedCard && user) {
+        alert('Saving card ' + updatedCard.id + ' for user ' + user.id);
         saveCard(updatedCard, user.id);
+      } else {
+        alert('updatedCard or user is missing. updatedCard: ' + !!updatedCard + ', user: ' + !!user);
       }
       return updatedCards;
     });
@@ -1067,7 +1070,10 @@ export default function Page() {
       });
       const updatedCard = updatedCards.find(card => card.id === id);
       if (updatedCard && user) {
+        alert('Replacing photo for card ' + updatedCard.id);
         saveCard(updatedCard, user.id);
+      } else {
+        alert('updatedCard or user is missing in replacePhoto');
       }
       return updatedCards;
     });
@@ -1092,7 +1098,10 @@ export default function Page() {
       });
       const updatedCard = updatedCards.find(card => card.id === id);
       if (updatedCard && user) {
+        alert('Removing photo from card ' + updatedCard.id);
         saveCard(updatedCard, user.id);
+      } else {
+        alert('updatedCard or user is missing in removePhoto');
       }
       return updatedCards;
     });
@@ -1103,7 +1112,10 @@ export default function Page() {
       const updatedCards = prev.map((card) => (card.id === id ? { ...card, ...patch } : card));
       const updatedCard = updatedCards.find(card => card.id === id);
       if (updatedCard && user) {
+        alert('Updating card ' + updatedCard.id);
         saveCard(updatedCard, user.id);
+      } else {
+        alert('updatedCard or user is missing in updateCard. updatedCard: ' + !!updatedCard + ', user: ' + !!user);
       }
       return updatedCards;
     });
