@@ -514,12 +514,17 @@ function DexCard({
   };
 
   const startCamera = async (index?: number) => {
+    console.log('Starting camera...');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      console.log('Camera access granted, stream:', stream);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         setIsCapturing(true);
         if (index !== undefined) setReplacingIndex(index);
+        console.log('Camera started, isCapturing set to true');
+      } else {
+        console.error('videoRef.current is null');
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
@@ -527,6 +532,7 @@ function DexCard({
   };
 
   const capturePhoto = () => {
+    console.log('Capturing photo...');
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -548,9 +554,14 @@ function DexCard({
             }
             stopCamera();
             setReplacingIndex(null);
+            console.log('Photo captured and saved');
           }
         }, 'image/jpeg');
+      } else {
+        console.error('Could not get canvas context');
       }
+    } else {
+      console.error('videoRef or canvasRef is null');
     }
   };
 
@@ -599,8 +610,8 @@ function DexCard({
         </Card>
 
         {isCapturing && (
-          <div className="fixed inset-0 bg-black z-50 flex flex-col">
-            <video ref={videoRef} autoPlay playsInline className="flex-1 object-cover"></video>
+          <div className="fixed inset-0 bg-black z-[9999] flex flex-col">
+            <video ref={videoRef} autoPlay playsInline className="flex-1 object-cover w-full h-full"></video>
             <div className="p-4 flex justify-between">
               <Button onClick={stopCamera} variant="outline">Annuler</Button>
               <Button onClick={capturePhoto}>Capturer</Button>
@@ -739,8 +750,7 @@ function DexCard({
     </Card>
 
     {isCapturing && (
-      <div className="fixed inset-0 bg-black z-50 flex flex-col">
-        <video ref={videoRef} autoPlay playsInline className="flex-1 object-cover"></video>
+        <div className="fixed inset-0 bg-black z-[9999] flex flex-col">
         <div className="p-4 flex justify-between">
           <Button onClick={stopCamera} variant="outline">Annuler</Button>
           <Button onClick={capturePhoto}>Capturer</Button>
