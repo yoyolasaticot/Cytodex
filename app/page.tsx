@@ -102,24 +102,19 @@ const initialCards: CytodexCard[] = [
     id: 1,
     title: "Schizocyte",
     category: "Pathologies du globule rouge",
-    found: true,
-    completed: true,
-    images: [
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop",
-    ],
-    characteristics:
-      "Fragments érythrocytaires irréguliers, anguleux, de petite taille.",
-    pathologies: "Microangiopathie thrombotique, CIVD, hémolyse mécanique.",
+    found: false,
+    completed: false,
+    images: [],
+    characteristics: "",
+    pathologies: "",
   },
   {
     id: 2,
     title: "Drépanocyte",
     category: "Pathologies du globule rouge",
-    found: true,
+    found: false,
     completed: false,
-    images: [
-      "https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=1200&auto=format&fit=crop",
-    ],
+    images: [],
     characteristics: "",
     pathologies: "",
   },
@@ -147,15 +142,12 @@ const initialCards: CytodexCard[] = [
     id: 5,
     title: "Blaste myéloïde",
     category: "Leucémies",
-    found: true,
-    completed: true,
-    images: [
-      "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=1200&auto=format&fit=crop",
-    ],
-    characteristics:
-      "Grande cellule, chromatine fine, nucléoles visibles, rapport N/C élevé.",
-    pathologies: "Leucémie aiguë myéloïde.",
-  },
+    found: false,
+    completed: false,
+    images: [],
+    characteristics: "",
+    pathologies: "",
+  }
   {
     id: 6,
     title: "Auer rod",
