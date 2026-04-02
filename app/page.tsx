@@ -499,8 +499,10 @@ function DexCard({
 }: DexCardProps) {
   const [characteristics, setCharacteristics] = useState(card.characteristics);
   const [pathologies, setPathologies] = useState(card.pathologies);
-  const addPhotoInputRef = useRef<HTMLInputElement | null>(null);
-  const replacePhotoRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     setCharacteristics(card.characteristics);
@@ -519,21 +521,54 @@ function DexCard({
     });
   };
 
-  const hiddenCaptureInput = (
-    refCallback: (node: HTMLInputElement | null) => void,
-    onChange: (e: ChangeEvent<HTMLInputElement>) => void,
-    multiple = false
-  ) => (
-    <input
-      ref={refCallback}
-      type="file"
-      accept="image/*"
-      capture="environment"
-      multiple={multiple}
-      className="hidden"
-      onChange={onChange}
-    />
-  );
+  const startCamera = async (index?: number) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        setIsCapturing(true);
+        if (index !== undefined) setReplacingIndex(index);
+      }
+    } catch (err) {
+      console.error('Error accessing camera:', err);
+    }
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      if (context) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
+            const fileList = { 0: file, length: 1, item: (index: number) => fileList[index] || null } as FileList;
+            if (replacingIndex !== null) {
+              onReplacePhoto(card.id, replacingIndex, fileList);
+            } else {
+              onAddPhotos(card.id, fileList);
+            }
+            stopCamera();
+            setReplacingIndex(null);
+          }
+        }, 'image/jpeg');
+      }
+    }
+  };
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+      setIsCapturing(false);
+      setReplacingIndex(null);
+    }
+  };
 
   if (!card.found) {
     return (
@@ -546,18 +581,10 @@ function DexCard({
               La fiche se débloque uniquement après une photo prise en direct.
             </p>
 
-            {hiddenCaptureInput(
-              (node) => {
-                addPhotoInputRef.current = node;
-              },
-              (e) => onAddPhotos(card.id, e.target.files),
-              true
-            )}
-
             <Button
               className="mt-4 rounded-2xl min-h-11 w-full sm:w-auto"
               variant="secondary"
-              onClick={() => addPhotoInputRef.current?.click()}
+              onClick={() => startCamera()}
             >
               <Camera className="mr-2 h-4 w-4" />
               Prendre une photo
@@ -575,6 +602,18 @@ function DexCard({
           </div>
         </CardContent>
       </Card>
+
+      {isCapturing && (
+        <div className="fixed inset-0 bg-black z-50 flex flex-col">
+          <video ref={videoRef} autoPlay playsInline className="flex-1 object-cover"></video>
+          <div className="p-4 flex justify-between">
+            <Button onClick={stopCamera} variant="outline">Annuler</Button>
+            <Button onClick={capturePhoto}>Capturer</Button>
+          </div>
+        </div>
+      )}
+
+      <canvas ref={canvasRef} className="hidden"></canvas>
     );
   }
 
@@ -623,19 +662,11 @@ function DexCard({
               Photographies prises en direct
             </label>
 
-            {hiddenCaptureInput(
-              (node) => {
-                addPhotoInputRef.current = node;
-              },
-              (e) => onAddPhotos(card.id, e.target.files),
-              true
-            )}
-
             <Button
               type="button"
               variant="outline"
               className="rounded-2xl min-h-11"
-              onClick={() => addPhotoInputRef.current?.click()}
+              onClick={() => startCamera()}
             >
               <Camera className="mr-2 h-4 w-4" />
               Ajouter des photos
@@ -657,19 +688,11 @@ function DexCard({
                 </div>
 
                 <div className="p-2 space-y-2">
-                  {hiddenCaptureInput(
-                    (node) => {
-                      replacePhotoRefs.current[index] = node;
-                    },
-                    (e) => onReplacePhoto(card.id, index, e.target.files),
-                    false
-                  )}
-
                   <Button
                     type="button"
                     variant="outline"
                     className="w-full rounded-xl min-h-10 text-xs"
-                    onClick={() => replacePhotoRefs.current[index]?.click()}
+                    onClick={() => startCamera(index)}
                   >
                     <RefreshCw className="mr-2 h-3.5 w-3.5" />
                     Remplacer
@@ -716,6 +739,18 @@ function DexCard({
           Enregistrer la fiche
         </Button>
       </CardContent>
+
+      {isCapturing && (
+        <div className="fixed inset-0 bg-black z-50 flex flex-col">
+          <video ref={videoRef} autoPlay playsInline className="flex-1 object-cover"></video>
+          <div className="p-4 flex justify-between">
+            <Button onClick={stopCamera} variant="outline">Annuler</Button>
+            <Button onClick={capturePhoto}>Capturer</Button>
+          </div>
+        </div>
+      )}
+
+      <canvas ref={canvasRef} className="hidden"></canvas>
     </Card>
   );
 }
