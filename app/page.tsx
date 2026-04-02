@@ -1055,7 +1055,7 @@ export default function Page() {
 
       const { error } = await supabase
         .from('user_cards')
-        .upsert(upsertObj, { onConflict: ['user_id', 'anomaly-id'] });
+        .upsert(upsertObj, { onConflict: 'user_id, anomaly-id' });
 
       if (error) {
         console.error('Error saving card:', error);
