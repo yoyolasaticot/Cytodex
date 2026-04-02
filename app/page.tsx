@@ -501,6 +501,12 @@ function DexCard({
     setPathologies(card.pathologies);
   }, [card]);
 
+  useEffect(() => {
+    if (videoRef.current && isCapturing) {
+      videoRef.current.play().catch(err => console.error('Error playing video:', err));
+    }
+  }, [isCapturing]);
+
   const saveForm = () => {
     onUpdate(card.id, {
       characteristics,
@@ -520,6 +526,7 @@ function DexCard({
       console.log('Camera access granted, stream:', stream);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.play().catch(err => console.error('Error playing video:', err));
         setIsCapturing(true);
         if (index !== undefined) setReplacingIndex(index);
         console.log('Camera started, isCapturing set to true');
@@ -610,8 +617,8 @@ function DexCard({
         </Card>
 
         {isCapturing && (
-          <div className="fixed inset-0 bg-black z-[9999] flex flex-col">
-            <video ref={videoRef} autoPlay playsInline className="flex-1 object-cover w-full h-full"></video>
+          <div className="fixed inset-0 bg-black z-[9999] flex flex-col h-screen">
+            <video ref={videoRef} autoPlay playsInline muted className="flex-1 object-cover w-full h-full"></video>
             <div className="p-4 flex justify-between">
               <Button onClick={stopCamera} variant="outline">Annuler</Button>
               <Button onClick={capturePhoto}>Capturer</Button>
