@@ -572,54 +572,57 @@ function DexCard({
 
   if (!card.found) {
     return (
-      <Card className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border-slate-300 bg-slate-200 text-slate-600">
-        <div className="aspect-[4/3] flex items-center justify-center border-b border-dashed border-slate-400 bg-slate-300">
-          <div className="text-center p-6">
-            <Lock className="mx-auto h-10 w-10 mb-3" />
-            <p className="font-semibold">Fiche non trouvée</p>
-            <p className="text-sm mt-1">
-              La fiche se débloque uniquement après une photo prise en direct.
-            </p>
+      <>
+        <Card className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border-slate-300 bg-slate-200 text-slate-600">
+          <div className="aspect-[4/3] flex items-center justify-center border-b border-dashed border-slate-400 bg-slate-300">
+            <div className="text-center p-6">
+              <Lock className="mx-auto h-10 w-10 mb-3" />
+              <p className="font-semibold">Fiche non trouvée</p>
+              <p className="text-sm mt-1">
+                La fiche se débloque uniquement après une photo prise en direct.
+              </p>
 
-            <Button
-              className="mt-4 rounded-2xl min-h-11 w-full sm:w-auto"
-              variant="secondary"
-              onClick={() => startCamera()}
-            >
-              <Camera className="mr-2 h-4 w-4" />
-              Prendre une photo
-            </Button>
+              <Button
+                className="mt-4 rounded-2xl min-h-11 w-full sm:w-auto"
+                variant="secondary"
+                onClick={() => startCamera()}
+              >
+                <Camera className="mr-2 h-4 w-4" />
+                Prendre une photo
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <CardContent className="p-5 space-y-3">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em]">Anomalie</p>
-            <h3 className="text-2xl font-bold mt-1">{card.title}</h3>
-          </div>
-          <div className="rounded-xl border border-dashed border-slate-400 p-4 text-sm">
-            Champs verrouillés jusqu’à validation d’une image prise en direct.
-          </div>
-        </CardContent>
-      </Card>
+          <CardContent className="p-5 space-y-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em]">Anomalie</p>
+              <h3 className="text-2xl font-bold mt-1">{card.title}</h3>
+            </div>
+            <div className="rounded-xl border border-dashed border-slate-400 p-4 text-sm">
+              Champs verrouillés jusqu’à validation d’une image prise en direct.
+            </div>
+          </CardContent>
+        </Card>
 
-      {isCapturing && (
-        <div className="fixed inset-0 bg-black z-50 flex flex-col">
-          <video ref={videoRef} autoPlay playsInline className="flex-1 object-cover"></video>
-          <div className="p-4 flex justify-between">
-            <Button onClick={stopCamera} variant="outline">Annuler</Button>
-            <Button onClick={capturePhoto}>Capturer</Button>
+        {isCapturing && (
+          <div className="fixed inset-0 bg-black z-50 flex flex-col">
+            <video ref={videoRef} autoPlay playsInline className="flex-1 object-cover"></video>
+            <div className="p-4 flex justify-between">
+              <Button onClick={stopCamera} variant="outline">Annuler</Button>
+              <Button onClick={capturePhoto}>Capturer</Button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <canvas ref={canvasRef} className="hidden"></canvas>
+        <canvas ref={canvasRef} className="hidden"></canvas>
+      </>
     );
   }
 
   return (
-    <Card className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
-      <div className="aspect-[4/3] bg-slate-100 overflow-hidden">
+    <>
+      <Card className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
+        <div className="aspect-[4/3] bg-slate-100 overflow-hidden">
         {card.images[0] ? (
           <img src={card.images[0]} alt={card.title} className="h-full w-full object-cover" />
         ) : (
@@ -739,19 +742,20 @@ function DexCard({
           Enregistrer la fiche
         </Button>
       </CardContent>
-
-      {isCapturing && (
-        <div className="fixed inset-0 bg-black z-50 flex flex-col">
-          <video ref={videoRef} autoPlay playsInline className="flex-1 object-cover"></video>
-          <div className="p-4 flex justify-between">
-            <Button onClick={stopCamera} variant="outline">Annuler</Button>
-            <Button onClick={capturePhoto}>Capturer</Button>
-          </div>
-        </div>
-      )}
-
-      <canvas ref={canvasRef} className="hidden"></canvas>
     </Card>
+
+    {isCapturing && (
+      <div className="fixed inset-0 bg-black z-50 flex flex-col">
+        <video ref={videoRef} autoPlay playsInline className="flex-1 object-cover"></video>
+        <div className="p-4 flex justify-between">
+          <Button onClick={stopCamera} variant="outline">Annuler</Button>
+          <Button onClick={capturePhoto}>Capturer</Button>
+        </div>
+      </div>
+    )}
+
+    <canvas ref={canvasRef} className="hidden"></canvas>
+    </>
   );
 }
 
