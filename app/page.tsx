@@ -624,9 +624,9 @@ function DexCard({
         {isCapturing && (
           <div className="fixed inset-0 bg-black z-[9999] flex flex-col h-screen">
             <video ref={videoRef} autoPlay playsInline muted className="flex-1 object-cover w-full h-full"></video>
-            <div className="p-4 flex justify-between">
-              <Button onClick={stopCamera} variant="outline">Annuler</Button>
-              <Button onClick={capturePhoto}>Capturer</Button>
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-70 flex justify-between gap-2 z-[10000]">
+              <Button onClick={stopCamera} variant="outline" className="bg-white text-black hover:bg-gray-200">Annuler</Button>
+              <Button onClick={capturePhoto} className="bg-blue-600 text-white hover:bg-blue-700">Capturer</Button>
             </div>
           </div>
         )}
@@ -762,10 +762,11 @@ function DexCard({
     </Card>
 
     {isCapturing && (
-        <div className="fixed inset-0 bg-black z-[9999] flex flex-col">
-        <div className="p-4 flex justify-between">
-          <Button onClick={stopCamera} variant="outline">Annuler</Button>
-          <Button onClick={capturePhoto}>Capturer</Button>
+      <div className="fixed inset-0 bg-black z-[9999] flex flex-col h-screen">
+        <video ref={videoRef} autoPlay playsInline muted className="flex-1 object-cover w-full h-full"></video>
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-70 flex justify-between gap-2 z-[10000]">
+          <Button onClick={stopCamera} variant="outline" className="bg-white text-black hover:bg-gray-200">Annuler</Button>
+          <Button onClick={capturePhoto} className="bg-blue-600 text-white hover:bg-blue-700">Capturer</Button>
         </div>
       </div>
     )}
