@@ -520,21 +520,21 @@ function DexCard({
   };
 
   const startCamera = async (index?: number) => {
-    console.log('Starting camera...');
+    alert('Starting camera...');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-      console.log('Camera access granted, stream:', stream);
+      alert('Camera access granted');
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play().catch(err => console.error('Error playing video:', err));
+        videoRef.current.play().catch(err => alert('Error playing video: ' + err));
         setIsCapturing(true);
         if (index !== undefined) setReplacingIndex(index);
-        console.log('Camera started, isCapturing set to true');
+        alert('Camera started, overlay should appear');
       } else {
-        console.error('videoRef.current is null');
+        alert('videoRef.current is null');
       }
     } catch (err) {
-      console.error('Error accessing camera:', err);
+      alert('Error accessing camera: ' + err);
     }
   };
 
@@ -597,7 +597,7 @@ function DexCard({
               <Button
                 className="mt-4 rounded-2xl min-h-11 w-full sm:w-auto"
                 variant="secondary"
-                onClick={() => startCamera()}
+                onClick={() => { alert('Button clicked'); startCamera(); }}
               >
                 <Camera className="mr-2 h-4 w-4" />
                 Prendre une photo
@@ -681,7 +681,7 @@ function DexCard({
               type="button"
               variant="outline"
               className="rounded-2xl min-h-11"
-              onClick={() => startCamera()}
+              onClick={() => { alert('Button clicked'); startCamera(); }}
             >
               <Camera className="mr-2 h-4 w-4" />
               Ajouter des photos
