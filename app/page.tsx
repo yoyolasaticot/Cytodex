@@ -147,7 +147,7 @@ const initialCards: CytodexCard[] = [
     images: [],
     characteristics: "",
     pathologies: "",
-  }
+  },
   {
     id: 6,
     title: "Auer rod",
