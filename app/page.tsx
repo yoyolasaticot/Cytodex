@@ -991,7 +991,7 @@ export default function Page() {
       });
 
       return cardData.map((dbCard: any) => {
-        const anomalyId = dbCard['anomaly-id'];
+        const anomalyId = dbCard.anomaly_id || dbCard['anomaly-id'];
         const template = initialCards.find((c) => c.id === anomalyId);
         return {
           id: anomalyId,
@@ -1008,9 +1008,7 @@ export default function Page() {
 
     const defaultCards = initialCards.map((card) => ({
       user_id: userId,
-      'anomaly-id': card.id,
-      found: card.found,
-      completed: card.completed,
+      anomaly_id: card.id,
       characteristics: card.characteristics,
       pathologies: card.pathologies,
     }));
@@ -1031,12 +1029,12 @@ export default function Page() {
 
   const saveCard = async (card: CytodexCard, userId: string): Promise<void> => {
     try {
-      // Upsert user_cards row by anomaly-id and user_id.
+      // Upsert user_cards row by anomaly_id and user_id.
       const { data: existing, error: existingError } = await supabase
         .from('user_cards')
         .select('id')
         .eq('user_id', userId)
-        .eq('anomaly-id', card.id)
+        .eq('anomaly_id', card.id)
         .single();
 
       if (existingError && existingError.code !== 'PGRST116') {
@@ -1045,7 +1043,7 @@ export default function Page() {
       }
 
       const upsertObj: any = {
-        'anomaly-id': card.id,
+        anomaly_id: card.id,
         user_id: userId,
         found: card.found,
         completed: card.completed,
@@ -1055,7 +1053,7 @@ export default function Page() {
 
       const { error } = await supabase
         .from('user_cards')
-        .upsert(upsertObj, { onConflict: 'user_id, anomaly-id' });
+        .upsert(upsertObj, { onConflict: 'user_id, anomaly_id' });
 
       if (error) {
         console.error('Error saving card:', error);
@@ -1078,7 +1076,6 @@ export default function Page() {
         if (card.images.length > 0) {
           const photoInserts = card.images.map((url) => ({
             user_card_id: cardRow,
-            user_id: userId,
             image_url: url,
           }));
           const { error: photoError } = await supabase.from('user_photos').insert(photoInserts);
