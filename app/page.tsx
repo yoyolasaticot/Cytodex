@@ -72,8 +72,8 @@ type CategoryScreenProps = {
 
 type DexCardProps = {
   card: CytodexCard;
-  onAddPhotos: (id: number, files: FileList | null) => void;
-  onReplacePhoto: (id: number, index: number, files: FileList | null) => void;
+  onAddPhotos: (id: number, files: FileList | null) => Promise<void>;
+  onReplacePhoto: (id: number, index: number, files: FileList | null) => Promise<void>;
   onRemovePhoto: (id: number, index: number) => void;
   onUpdate: (id: number, patch: CardUpdate) => void;
 };
@@ -82,8 +82,8 @@ type DexScreenProps = {
   cards: CytodexCard[];
   category: string;
   onBack: () => void;
-  onAddPhotos: (id: number, files: FileList | null) => void;
-  onReplacePhoto: (id: number, index: number, files: FileList | null) => void;
+  onAddPhotos: (id: number, files: FileList | null) => Promise<void>;
+  onReplacePhoto: (id: number, index: number, files: FileList | null) => Promise<void>;
   onRemovePhoto: (id: number, index: number) => void;
   onUpdate: (id: number, patch: CardUpdate) => void;
 };
@@ -126,9 +126,23 @@ function badgeStyle(level: BadgeLevel): string {
   return "bg-muted text-muted-foreground border-dashed";
 }
 
-function fileListToUrls(files: FileList | null): string[] {
-  if (!files || files.length === 0) return [];
-  return Array.from(files).map((file) => URL.createObjectURL(file));
+function fileListToUrls(files: FileList | null): Promise<string[]> {
+  if (!files || files.length === 0) return Promise.resolve([]);
+  const uploadPromises = Array.from(files).map(async (file) => {
+    const fileName = `card-${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
+    const { data, error } = await supabase.storage
+      .from('card-images')
+      .upload(fileName, file);
+    if (error) {
+      console.error('Error uploading file:', error);
+      return null;
+    }
+    const { data: publicUrl } = supabase.storage
+      .from('card-images')
+      .getPublicUrl(fileName);
+    return publicUrl.publicUrl;
+  });
+  return Promise.all(uploadPromises).then(urls => urls.filter(url => url !== null) as string[]);
 }
 
 function CoverScreen({
@@ -898,97 +912,90 @@ export default function Page() {
   };
 
   const loadCards = async (userId: string): Promise<CytodexCard[]> => {
-    // Fetch all anomalies_reference
-    const { data: anomalies, error: anomaliesError } = await supabase
-      .from('anomalies_reference')
-      .select('*');
-
-    if (anomaliesError) {
-      console.error('Error loading anomalies:', anomaliesError);
-      alert('Erreur chargement anomalies: ' + JSON.stringify(anomaliesError));
-      return [];
-    }
-
-    // Fetch user_cards for this user
-    const { data: userCards, error: userCardsError } = await supabase
-      .from('user_cards')
+    let { data: cards, error } = await supabase
+      .from('cards')
       .select('*')
       .eq('user_id', userId);
 
-    if (userCardsError) {
-      console.error('Error loading user cards:', userCardsError);
-      alert('Erreur chargement user cards: ' + JSON.stringify(userCardsError));
+    if (error) {
+      console.error('Error loading cards:', error);
+      alert('Erreur chargement cartes: ' + JSON.stringify(error));
       return [];
     }
 
-    // Fetch photos for user_cards
-    const userCardIds = (userCards || []).map((uc: any) => uc.id);
-    const { data: photos, error: photosError } = await supabase
-      .from('user_photos')
-      .select('*')
-      .in('user_card_id', userCardIds.length ? userCardIds : [0]);
+    if (!cards || cards.length === 0) {
+      // Insert initial cards
+      const initialCards = [
+        { title: 'Schizocyte', category: 'Pathologies du globule rouge' },
+        { title: 'Drépanocyte', category: 'Pathologies du globule rouge' },
+        { title: 'Lymphocyte hyperbasophile', category: 'Pathologies du lymphocyte' },
+        { title: 'Cellule chevelue', category: 'Pathologies du lymphocyte' },
+        { title: 'Blaste myéloïde', category: 'Leucémies' },
+        { title: 'Auer rod', category: 'Leucémies' },
+      ];
 
-    if (photosError) {
-      console.error('Error loading photos:', photosError);
-      alert('Erreur chargement photos: ' + JSON.stringify(photosError));
+      const inserts = initialCards.map((card) => ({
+        user_id: userId,
+        title: card.title,
+        category: card.category,
+        found: false,
+        completed: false,
+        images: [],
+        characteristics: '',
+        pathologies: '',
+      }));
+
+      const { error: insertError } = await supabase
+        .from('cards')
+        .insert(inserts);
+
+      if (insertError) {
+        console.error('Error inserting initial cards:', insertError);
+        alert('Erreur insertion cartes initiales: ' + JSON.stringify(insertError));
+        return [];
+      }
+
+      // Reload
+      const { data: newCards, error: reloadError } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (reloadError) {
+        console.error('Error reloading cards:', reloadError);
+        return [];
+      }
+
+      cards = newCards;
     }
 
-    // Group photos by user_card_id
-    const photosByCardId = new Map<number, string[]>();
-    (photos || []).forEach((photo: any) => {
-      const cId = photo.user_card_id;
-      if (!photosByCardId.has(cId)) photosByCardId.set(cId, []);
-      photosByCardId.get(cId)?.push(photo.image_url);
-    });
-
-    // Map anomalies to CytodexCard, merging with user_cards if exist
-    const userCardsMap = new Map<number, any>();
-    (userCards || []).forEach((uc: any) => {
-      userCardsMap.set(uc.anomaly_id, uc);
-    });
-
-    return (anomalies || []).map((anomaly: any) => {
-      const userCard = userCardsMap.get(anomaly.id);
-      return {
-        id: anomaly.id,
-        title: anomaly.title,
-        category: anomaly.category,
-        found: userCard?.found ?? false,
-        completed: userCard?.completed ?? false,
-        images: userCard ? (photosByCardId.get(userCard.id) ?? []) : [],
-        characteristics: userCard?.characteristics ?? '',
-        pathologies: userCard?.pathologies ?? '',
-      };
-    });
+    return (cards || []).map((card: any) => ({
+      id: card.id,
+      title: card.title,
+      category: card.category,
+      found: card.found,
+      completed: card.completed,
+      images: card.images || [],
+      characteristics: card.characteristics || '',
+      pathologies: card.pathologies || '',
+    }));
   };
 
   const saveCard = async (card: CytodexCard, userId: string): Promise<void> => {
     try {
-      // Upsert user_cards row by anomaly_id and user_id.
-      const { data: existing, error: existingError } = await supabase
-        .from('user_cards')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('anomaly_id', card.id)
-        .single();
-
-      if (existingError && existingError.code !== 'PGRST116') {
-        console.error('Error finding user_card:', existingError);
-        alert('Erreur find user_card: ' + JSON.stringify(existingError));
-      }
-
-      const upsertObj: any = {
-        anomaly_id: card.id,
-        user_id: userId,
-        found: card.found,
-        completed: card.completed,
-        characteristics: card.characteristics,
-        pathologies: card.pathologies,
-      };
-
       const { error } = await supabase
-        .from('user_cards')
-        .upsert(upsertObj, { onConflict: 'user_id, anomaly_id' });
+        .from('cards')
+        .upsert({
+          id: card.id,
+          user_id: userId,
+          title: card.title,
+          category: card.category,
+          found: card.found,
+          completed: card.completed,
+          images: card.images,
+          characteristics: card.characteristics,
+          pathologies: card.pathologies,
+        }, { onConflict: 'id' });
 
       if (error) {
         console.error('Error saving card:', error);
@@ -996,40 +1003,15 @@ export default function Page() {
         return;
       }
 
-      // Insert photos in user_photos for this user_card.
-      const cardRow = existing?.id
-        ? existing.id
-        : (await supabase
-            .from('user_cards')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('anomaly_id', card.id)
-            .single()).data?.id;
-
-      if (cardRow) {
-        await supabase.from('user_photos').delete().eq('user_card_id', cardRow);
-        if (card.images.length > 0) {
-          const photoInserts = card.images.map((url) => ({
-            user_card_id: cardRow,
-            image_url: url,
-          }));
-          const { error: photoError } = await supabase.from('user_photos').insert(photoInserts);
-          if (photoError) {
-            console.error('Error saving photos:', photoError);
-            alert('Erreur sauvegarde photos: ' + JSON.stringify(photoError));
-          }
-        }
-      }
-
-      console.log('Card ' + card.id + ' sync saved for user', userId);
+      console.log('Card ' + card.id + ' saved for user', userId);
     } catch (err: any) {
       alert('Erreur exception sauvegarde: ' + err.message);
       console.error(err);
     }
   };
 
-  const addPhotos = (id: number, files: FileList | null): void => {
-    const newUrls = fileListToUrls(files);
+  const addPhotos = async (id: number, files: FileList | null): Promise<void> => {
+    const newUrls = await fileListToUrls(files);
     if (newUrls.length === 0) return;
 
     setCards((prev) => {
@@ -1044,21 +1026,18 @@ export default function Page() {
       );
       const updatedCard = updatedCards.find(card => card.id === id);
       if (updatedCard && user) {
-        alert('Saving card ' + updatedCard.id + ' for user ' + user.id);
         saveCard(updatedCard, user.id);
-      } else {
-        alert('updatedCard or user is missing. updatedCard: ' + !!updatedCard + ', user: ' + !!user);
       }
       return updatedCards;
     });
   };
 
-  const replacePhoto = (
+  const replacePhoto = async (
     id: number,
     index: number,
     files: FileList | null
-  ): void => {
-    const newUrls = fileListToUrls(files);
+  ): Promise<void> => {
+    const newUrls = await fileListToUrls(files);
     if (newUrls.length === 0) return;
 
     setCards((prev) => {
@@ -1070,10 +1049,7 @@ export default function Page() {
       });
       const updatedCard = updatedCards.find(card => card.id === id);
       if (updatedCard && user) {
-        alert('Replacing photo for card ' + updatedCard.id);
         saveCard(updatedCard, user.id);
-      } else {
-        alert('updatedCard or user is missing in replacePhoto');
       }
       return updatedCards;
     });
@@ -1098,10 +1074,7 @@ export default function Page() {
       });
       const updatedCard = updatedCards.find(card => card.id === id);
       if (updatedCard && user) {
-        alert('Removing photo from card ' + updatedCard.id);
         saveCard(updatedCard, user.id);
-      } else {
-        alert('updatedCard or user is missing in removePhoto');
       }
       return updatedCards;
     });
@@ -1112,10 +1085,7 @@ export default function Page() {
       const updatedCards = prev.map((card) => (card.id === id ? { ...card, ...patch } : card));
       const updatedCard = updatedCards.find(card => card.id === id);
       if (updatedCard && user) {
-        alert('Updating card ' + updatedCard.id);
         saveCard(updatedCard, user.id);
-      } else {
-        alert('updatedCard or user is missing in updateCard. updatedCard: ' + !!updatedCard + ', user: ' + !!user);
       }
       return updatedCards;
     });
