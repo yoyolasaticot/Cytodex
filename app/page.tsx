@@ -1,5 +1,5 @@
 "use client";
-
+import CoverScreen from "@/components/cytodex/CoverScreen";
 import React, {
   useEffect,
   useMemo,
@@ -1002,6 +1002,7 @@ export default function Page() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
+  const [coverMode, setCoverMode] = useState<"menu" | "login" | "signup">("menu");
 
   const categories = useMemo(() => {
     return Array.from(new Set(cards.map((c) => c.category)));
@@ -1157,8 +1158,9 @@ export default function Page() {
   };
 
   const handleLogout = async (): Promise<void> => {
-    await supabase.auth.signOut();
-  };
+  setCoverMode("menu");
+  await supabase.auth.signOut();
+};
 
   const saveCard = async (card: CytodexCard): Promise<void> => {
     try {
@@ -1288,18 +1290,20 @@ export default function Page() {
   };
 
   if (!user || screen === "cover") {
-    return (
-      <CoverScreen
-        email={email}
-        password={password}
-        loading={authLoading}
-        onEmailChange={setEmail}
-        onPasswordChange={setPassword}
-        onLogin={handleLogin}
-        onSignup={handleSignup}
-      />
-    );
-  }
+  return (
+    <CoverScreen
+      email={email}
+      password={password}
+      loading={authLoading}
+      mode={coverMode}
+      onEmailChange={setEmail}
+      onPasswordChange={setPassword}
+      onLogin={handleLogin}
+      onSignup={handleSignup}
+      onSetMode={setCoverMode}
+    />
+  );
+}
 
   if (screen === "home") {
     return (
