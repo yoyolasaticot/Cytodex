@@ -241,20 +241,24 @@ export default function CoverScreen({
               </div>
 
               <div className="mb-1 flex items-center gap-4">
-                <div className="h-14 w-14 rounded-full border border-black/10 bg-[#8f2632] shadow-[inset_-4px_-4px_10px_rgba(0,0,0,0.2),inset_4px_4px_10px_rgba(255,255,255,0.15)]" />
-                <div className="h-14 w-14 rounded-full border border-black/10 bg-[#6a257a] shadow-[inset_-4px_-4px_10px_rgba(0,0,0,0.2),inset_4px_4px_10px_rgba(255,255,255,0.15)]" />
+                <div className="relative h-14 w-14 rounded-full bg-gradient-to-br from-[#b43746] via-[#8f2632] to-[#5e1620] border border-black/20 shadow-[0_8px_14px_rgba(0,0,0,0.35),inset_2px_2px_5px_rgba(255,255,255,0.2),inset_-6px_-8px_10px_rgba(0,0,0,0.28)]">
+                  <div className="absolute left-[18%] top-[16%] h-3.5 w-3.5 rounded-full bg-white/20 blur-[1px]" />
+                </div>
+                <div className="relative h-14 w-14 rounded-full bg-gradient-to-br from-[#8a42a0] via-[#6a257a] to-[#43164f] border border-black/20 shadow-[0_8px_14px_rgba(0,0,0,0.35),inset_2px_2px_5px_rgba(255,255,255,0.2),inset_-6px_-8px_10px_rgba(0,0,0,0.28)]">
+                  <div className="absolute left-[18%] top-[16%] h-3.5 w-3.5 rounded-full bg-white/20 blur-[1px]" />
+                </div>
               </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-between">
-              <div className="relative h-20 w-20">
-                <div className="absolute left-1/2 top-0 h-full w-5 -translate-x-1/2 rounded-md bg-[#59544d]" />
-                <div className="absolute left-0 top-1/2 h-5 w-full -translate-y-1/2 rounded-md bg-[#59544d]" />
-              </div>
+            <div className="relative h-20 w-20">
+               <div className="absolute left-1/2 top-0 h-full w-5 -translate-x-1/2 rounded-md bg-gradient-to-b from-[#7a746d] via-[#59544d] to-[#3d3934] border border-black/25 shadow-[0_8px_10px_rgba(0,0,0,0.28),inset_1px_1px_2px_rgba(255,255,255,0.18),inset_-2px_-3px_4px_rgba(0,0,0,0.25)]" />
+                <div className="absolute left-0 top-1/2 h-5 w-full -translate-y-1/2 rounded-md bg-gradient-to-r from-[#7a746d] via-[#59544d] to-[#3d3934] border border-black/25 shadow-[0_8px_10px_rgba(0,0,0,0.28),inset_1px_1px_2px_rgba(255,255,255,0.18),inset_-2px_-3px_4px_rgba(0,0,0,0.25)]" />
+                <div className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-sm bg-[#47433d] shadow-[inset_1px_1px_2px_rgba(255,255,255,0.12),inset_-2px_-2px_3px_rgba(0,0,0,0.25)]" />
+            </div>
 
               <div className="flex gap-5 pr-2">
-                <div className="h-3 w-16 rounded-full bg-[#7b7570] -rotate-12" />
-                <div className="h-3 w-16 rounded-full bg-[#7b7570] -rotate-12" />
+                <div className="h-3.5 w-16 rounded-full -rotate-12 bg-gradient-to-b from-[#9b948d] via-[#7b7570] to-[#57524d] border border-black/20 shadow-[0_5px_8px_rgba(0,0,0,0.25),inset_1px_1px_2px_rgba(255,255,255,0.18),inset_-2px_-2px_3px_rgba(0,0,0,0.2)]" />
+               <div className="h-3.5 w-16 rounded-full -rotate-12 bg-gradient-to-b from-[#9b948d] via-[#7b7570] to-[#57524d] border border-black/20 shadow-[0_5px_8px_rgba(0,0,0,0.25),inset_1px_1px_2px_rgba(255,255,255,0.18),inset_-2px_-2px_3px_rgba(0,0,0,0.2)]" />
               </div>
             </div>
           </div>
