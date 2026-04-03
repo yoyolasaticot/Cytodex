@@ -67,8 +67,8 @@ export default function CoverScreen({
           }
         `}</style>
 
-        <div className="w-full h-full max-w-none">
-          <div className="relative h-full rounded-[1.6rem] border-[8px] border-[#f1e6c8] bg-[radial-gradient(circle_at_top,_#faf5e7,_#d5e3c2_80%)] px-4 pt-4 pb-6 shadow-[0_28px_76px_rgba(0,0,0,0.55)] sm:px-6 sm:pt-6 sm:pb-10">
+        <div className="w-screen h-screen">
+          <div className="relative w-full h-full bg-[radial-gradient(circle_at_top,_#faf5e7,_#d5e3c2_80%)] px-6 pt-6 pb-10">
             <div className="absolute right-6 top-4 text-[9px] uppercase tracking-[0.28em] text-[#6e665e] sm:right-8 sm:top-5 sm:text-[10px]">
               Portable Morphology System
             </div>
