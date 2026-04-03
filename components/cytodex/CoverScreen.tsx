@@ -77,7 +77,7 @@ export default function CoverScreen({
     const music = musicRef.current;
     if (!music) return;
 
-    music.volume = 0.12;
+    music.volume = 0.5;
     music.loop = true;
     music.play().catch(() => {});
     hasStartedRef.current = true;
@@ -93,24 +93,7 @@ export default function CoverScreen({
     <audio ref={musicRef} src="/sounds/menu-loop.wav" preload="auto" loop />
     <audio ref={clickRef} src="/sounds/menu-bouton.wav" preload="auto" />
     <div className="fixed inset-0 w-screen h-screen bg-[radial-gradient(circle_at_top,_#c42828,_#101925_55%)] flex items-center justify-center p-0 overflow-hidden">
-      <div className="relative w-full flex items-center justify-center">
-       <Button
-  type="button"
-  onClick={() => {
-    const music = musicRef.current;
-    if (!music) return;
-    music.volume = 0.5;
-    music.loop = true;
-    music.currentTime = 0;
-    music.play().then(() => {
-      console.log("music started");
-    }).catch((err) => {
-      console.error("music failed", err);
-    });
-  }}
->
-  TEST MUSIC
-</Button> 
+      <div className="relative w-full flex items-center justify-center"> 
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15),transparent_50%)] pointer-events-none" />
         <style jsx global>{`
           @keyframes pulseRed {
