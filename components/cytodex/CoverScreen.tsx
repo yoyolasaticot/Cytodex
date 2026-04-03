@@ -330,6 +330,7 @@ export default function CoverScreen({
           </div>
         </div>
       </div>
-    </div>
+        </div>
+  </>
   );
 }
