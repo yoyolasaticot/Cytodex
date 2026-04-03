@@ -35,9 +35,12 @@ function PixelButton({
     <button
       type="button"
       onClick={onClick}
-      className="w-full border-2 border-[#44503b] bg-[#dce6c4] px-3 py-3 text-left text-[10px] leading-relaxed text-[#263021] shadow-[2px_2px_0_#55614b] transition hover:translate-y-[1px] hover:shadow-[1px_1px_0_#55614b] active:translate-y-[2px] active:shadow-none sm:text-xs"
+      className="w-full border-2 border-[#44503b] bg-[#dce6c4] px-3 py-3 text-left text-[10px] leading-relaxed text-[#263021] shadow-[0_6px_0_#2a3325,0_10px_15px_rgba(0,0,0,0.35)] transform transition-all duration-150 hover:-translate-y-1 hover:shadow-[0_8px_0_#2a3325,0_12px_18px_rgba(0,0,0,0.45)] active:translate-y-[2px] active:shadow-[0_2px_0_#2a3325,0_4px_6px_rgba(0,0,0,0.35)] sm:text-xs"
+      style={{ perspective: "600px" }}
     >
-      {children}
+      <span className="block transform-gpu transition-transform duration-150 hover:rotate-x-1 hover:rotate-y-1 active:translate-y-0.5">
+        {children}
+      </span>
     </button>
   );
 }
@@ -54,18 +57,27 @@ export default function CoverScreen({
   onSetMode,
 }: CoverScreenProps) {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#5a1318,_#151722_68%)] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-      <div className="relative w-full max-w-6xl flex items-center justify-center">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_55%)] pointer-events-none" />
+    <div className="fixed inset-0 w-screen h-screen bg-[radial-gradient(circle_at_top,_#c42828,_#101925_55%)] flex items-center justify-center p-0 overflow-hidden">
+      <div className="relative w-full flex items-center justify-center">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15),transparent_50%)] pointer-events-none" />
+        <style jsx global>{`
+          @keyframes pulseRed {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
+          }
+        `}</style>
 
-        <div className="w-full max-w-[560px]">
-          <div className="relative rounded-[2.8rem] border-[8px] border-[#c9c2b6] bg-[#ddd5c8] px-5 pt-5 pb-10 shadow-[0_32px_80px_rgba(0,0,0,0.45)] sm:px-8 sm:pt-7 sm:pb-12">
+        <div className="w-full h-full max-w-none">
+          <div className="relative h-full rounded-[1.6rem] border-[8px] border-[#f1e6c8] bg-[radial-gradient(circle_at_top,_#faf5e7,_#d5e3c2_80%)] px-4 pt-4 pb-6 shadow-[0_28px_76px_rgba(0,0,0,0.55)] sm:px-6 sm:pt-6 sm:pb-10">
             <div className="absolute right-6 top-4 text-[9px] uppercase tracking-[0.28em] text-[#6e665e] sm:right-8 sm:top-5 sm:text-[10px]">
               Portable Morphology System
             </div>
 
-            <div className="mb-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-[#5a524b] sm:mb-5 sm:text-[11px]">
-              <Power className="h-3.5 w-3.5 text-red-700" />
+            <div
+              className="mb-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-[#ff8f8f] sm:mb-5 sm:text-[11px]"
+              style={{ animation: "pulseRed 2.5s ease-in-out infinite" }}
+            >
+              <Power className="h-3.5 w-3.5 text-red-500 drop-shadow-[0_0_10px_rgba(255,0,0,0.8)]" />
               On
             </div>
 
@@ -97,7 +109,7 @@ export default function CoverScreen({
                   {mode === "menu" && (
                     <div className="space-y-3">
                       <div className="text-[8px] leading-[1.9] sm:text-[9px]">
-                        <div className="mb-3 animate-pulse">PRESS START</div>
+                        <div className="mb-3 animate-pulse">PRESS TO START</div>
                       </div>
 
                       <PixelButton onClick={() => onSetMode("login")}>
