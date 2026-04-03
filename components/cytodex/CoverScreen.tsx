@@ -16,53 +16,6 @@ const pixelFont = Press_Start_2P({
 type CoverMode = "menu" | "login" | "signup";
 
 type CoverScreenProps = {
-  
-const musicRef = useRef<HTMLAudioElement | null>(null);
-
-const clickRef = useRef<HTMLAudioElement | null>(null);
-
-const playClick = () => {
-  const audio = clickRef.current;
-  if (!audio) return;
-
-  audio.currentTime = 0;
-  audio.volume = 0.25;
-  audio.play().catch(() => {});
-};
-
-const hasStartedRef = useRef(false);
-
-const startMusic = () => {
-  if (hasStartedRef.current) return;
-
-  const music = musicRef.current;
-  if (!music) return;
-
-  music.volume = 0.12;
-  music.loop = true;
-  music.play().catch(() => {});
-  hasStartedRef.current = true;
-};
-
-useEffect(() => {
-  const music = musicRef.current;
-  if (!music) return;
-
-  music.volume = 0.12;
-  music.loop = true;
-
-  const start = () => {
-    music.play().catch(() => {});
-    window.removeEventListener("pointerdown", start);
-  };
-
-  window.addEventListener("pointerdown", start);
-
-  return () => {
-    music.pause();
-    window.removeEventListener("pointerdown", start);
-  };
-}, []);
   email: string;
   password: string;
   loading: boolean;
@@ -105,7 +58,36 @@ export default function CoverScreen({
   onLogin,
   onSignup,
   onSetMode,
-}: CoverScreenProps) {
+}: CoverScreenProps) {const musicRef = useRef<HTMLAudioElement | null>(null);
+  const clickRef = useRef<HTMLAudioElement | null>(null);
+  const hasStartedRef = useRef(false);
+
+  const playClick = () => {
+    const audio = clickRef.current;
+    if (!audio) return;
+
+    audio.currentTime = 0;
+    audio.volume = 0.25;
+    audio.play().catch(() => {});
+  };
+
+  const startMusic = () => {
+    if (hasStartedRef.current) return;
+
+    const music = musicRef.current;
+    if (!music) return;
+
+    music.volume = 0.12;
+    music.loop = true;
+    music.play().catch(() => {});
+    hasStartedRef.current = true;
+  };
+
+  useEffect(() => {
+    return () => {
+      musicRef.current?.pause();
+    };
+  }, []);
   return (  
   <>
     <audio ref={musicRef} src="/sounds/menu-loop.wav" preload="auto" loop />
@@ -178,13 +160,6 @@ export default function CoverScreen({
                         <div className="mb-3 animate-pulse">PRESS TO START</div>
                       </div>
 
-                      <PixelButton onClick={() => {
-  playClick();
-  onSetMode("login");
-}}>
-                        {">"} M&apos;IDENTIFIER
-                      </PixelButton>
-
                       <PixelButton
   onClick={() => {
     startMusic();
@@ -192,6 +167,13 @@ export default function CoverScreen({
     onSetMode("signup");
   }}
 >
+                        {">"} M&apos;IDENTIFIER
+                      </PixelButton>
+
+                      <PixelButton onClick={() => {
+  playClick();
+  onSetMode("signup");
+}}>
                         {">"} INITIALISER
                         <br />
                         MON CYTODEX
