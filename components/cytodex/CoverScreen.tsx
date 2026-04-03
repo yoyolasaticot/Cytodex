@@ -62,8 +62,14 @@ export default function CoverScreen({
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15),transparent_50%)] pointer-events-none" />
         <style jsx global>{`
           @keyframes pulseRed {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.35; }
+            0%,100% {
+              opacity: 1;
+              filter: brightness(1.2);
+            }
+            50% {
+              opacity: 0.35;
+              filter: brightness(0.6);
+            }
           }
         `}</style>
 
@@ -77,12 +83,19 @@ export default function CoverScreen({
               className="mb-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-[#ff8f8f] sm:mb-5 sm:text-[11px]"
               style={{ animation: "pulseRed 2.5s ease-in-out infinite" }}
             >
-              <Power className="h-3.5 w-3.5 text-red-500 drop-shadow-[0_0_10px_rgba(255,0,0,0.8)]" />
-              On
-            </div>
+              <div className="relative flex items-center justify-center">
+                {/* HALO */}
+                <span className="absolute w-4 h-4 rounded-full bg-red-500 blur-md opacity-70" />
 
+                {/* LED */}
+                <Power className="h-3.5 w-3.5 text-red-500 drop-shadow-[0_0_12px_rgba(255,0,0,0.9)]" />
+             </div>
+
+            On
+          </div>
             <div className="rounded-[1.9rem] border-[6px] border-[#979087] bg-[#8f9785] p-4 shadow-inner sm:p-5">
-              <div className="rounded-[1.1rem] border border-[#5c6654] bg-[#b7c39d] px-4 py-5 min-h-[330px] shadow-[inset_0_0_0_2px_rgba(74,84,66,0.15)] sm:min-h-[380px] sm:px-5 sm:py-6">
+              <div className="relative rounded-[1.1rem] border border-[#5c6654] bg-[#b7c39d] px-4 py-5 min-h-[330px] shadow-[inset_0_0_0_2px_rgba(74,84,66,0.15)] sm:min-h-[380px] sm:px-5 sm:py-6">
+                <div className="absolute inset-0 pointer-events-none rounded-[1.1rem] bg-[radial-gradient(circle_at_center,transparent_60%,rgba(0,0,0,0.22))]" />
                 <div
                   className={`${pixelFont.className} h-full flex flex-col justify-between text-[#263021]`}
                 >
