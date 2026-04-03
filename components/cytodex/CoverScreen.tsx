@@ -70,24 +70,14 @@ const playClick = () => {
   audio.play().catch(() => {});
 };
 
-useEffect(() => {
+const startMusic = () => {
   const music = musicRef.current;
   if (!music) return;
 
   music.volume = 0.12;
   music.loop = true;
-
-  const start = () => {
-    music.play().catch(() => {});
-    window.removeEventListener("pointerdown", start);
-  };
-
-  window.addEventListener("pointerdown", start);
-
-  return () => {
-    music.pause();
-    window.removeEventListener("pointerdown", start);
-  };
+  music.play().catch(() => {});
+};
 }, []);
   return (  
   <>
@@ -168,10 +158,13 @@ useEffect(() => {
                         {">"} M&apos;IDENTIFIER
                       </PixelButton>
 
-                      <PixelButton onClick={() => {
-  playClick();
-  onSetMode("signup");
-}}>
+                      <PixelButton
+  onClick={() => {
+    startMusic();
+    playClick();
+    onSetMode("signup");
+  }}
+>
                         {">"} INITIALISER
                         <br />
                         MON CYTODEX
