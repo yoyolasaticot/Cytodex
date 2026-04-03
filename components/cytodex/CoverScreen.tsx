@@ -4,11 +4,45 @@ import { Power } from "lucide-react";
 import { Press_Start_2P } from "next/font/google";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useEffect, useRef } from "react";
 
 const pixelFont = Press_Start_2P({
   subsets: ["latin"],
   weight: "400",
 });
+
+const musicRef = useRef<HTMLAudioElement | null>(null);
+
+const clickRef = useRef<HTMLAudioElement | null>(null);
+
+const playClick = () => {
+  const audio = clickRef.current;
+  if (!audio) return;
+
+  audio.currentTime = 0;
+  audio.volume = 0.25;
+  audio.play().catch(() => {});
+};
+
+useEffect(() => {
+  const music = musicRef.current;
+  if (!music) return;
+
+  music.volume = 0.12;
+  music.loop = true;
+
+  const start = () => {
+    music.play().catch(() => {});
+    window.removeEventListener("pointerdown", start);
+  };
+
+  window.addEventListener("pointerdown", start);
+
+  return () => {
+    music.pause();
+    window.removeEventListener("pointerdown", start);
+  };
+}, []);
 
 type CoverMode = "menu" | "login" | "signup";
 
@@ -56,7 +90,10 @@ export default function CoverScreen({
   onSignup,
   onSetMode,
 }: CoverScreenProps) {
-  return (
+  return (  
+  <>
+    <audio ref={musicRef} src="/sounds/menu-loop.wav" preload="auto" loop />
+    <audio ref={clickRef} src="/sounds/menu-bouton.wav" preload="auto" />
     <div className="fixed inset-0 w-screen h-screen bg-[radial-gradient(circle_at_top,_#c42828,_#101925_55%)] flex items-center justify-center p-0 overflow-hidden">
       <div className="relative w-full flex items-center justify-center">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15),transparent_50%)] pointer-events-none" />
@@ -125,11 +162,17 @@ export default function CoverScreen({
                         <div className="mb-3 animate-pulse">PRESS TO START</div>
                       </div>
 
-                      <PixelButton onClick={() => onSetMode("login")}>
+                      <PixelButton onClick={() => {
+  playClick();
+  onSetMode("login");
+}}>
                         {">"} M&apos;IDENTIFIER
                       </PixelButton>
 
-                      <PixelButton onClick={() => onSetMode("signup")}>
+                      <PixelButton onClick={() => {
+  playClick();
+  onSetMode("signup");
+}}>
                         {">"} INITIALISER
                         <br />
                         MON CYTODEX
@@ -172,7 +215,10 @@ export default function CoverScreen({
 
                       <div className="grid grid-cols-2 gap-3">
                         <Button
-                          onClick={onLogin}
+                          onClick={() => {
+  playClick();
+  onLogin();
+}}
                           disabled={loading}
                           className="rounded-none border-2 border-[#2b3526] bg-[#384331] text-[10px] uppercase text-[#edf5df] shadow-[2px_2px_0_#20281c] hover:bg-[#303a2a] sm:text-xs"
                         >
@@ -182,7 +228,10 @@ export default function CoverScreen({
                         <Button
                           type="button"
                           variant="outline"
-                          onClick={() => onSetMode("menu")}
+                          onClick={() => {
+  playClick();
+  onSetMode("menu");
+}}
                           className="rounded-none border-2 border-[#44503b] bg-[#dce6c4] text-[10px] uppercase text-[#263021] shadow-[2px_2px_0_#55614b] hover:bg-[#e3ebd1] sm:text-xs"
                         >
                           RETOUR
@@ -221,7 +270,10 @@ export default function CoverScreen({
 
                       <div className="grid grid-cols-2 gap-3">
                         <Button
-                          onClick={onSignup}
+                          onClick={() => {
+  playClick();
+  onSignup();
+}}
                           disabled={loading}
                           className="rounded-none border-2 border-[#2b3526] bg-[#384331] text-[10px] uppercase text-[#edf5df] shadow-[2px_2px_0_#20281c] hover:bg-[#303a2a] sm:text-xs"
                         >
