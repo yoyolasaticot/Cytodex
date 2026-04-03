@@ -11,9 +11,58 @@ const pixelFont = Press_Start_2P({
   weight: "400",
 });
 
+
+
 type CoverMode = "menu" | "login" | "signup";
 
 type CoverScreenProps = {
+  
+const musicRef = useRef<HTMLAudioElement | null>(null);
+
+const clickRef = useRef<HTMLAudioElement | null>(null);
+
+const playClick = () => {
+  const audio = clickRef.current;
+  if (!audio) return;
+
+  audio.currentTime = 0;
+  audio.volume = 0.25;
+  audio.play().catch(() => {});
+};
+
+const hasStartedRef = useRef(false);
+
+const startMusic = () => {
+  if (hasStartedRef.current) return;
+
+  const music = musicRef.current;
+  if (!music) return;
+
+  music.volume = 0.12;
+  music.loop = true;
+  music.play().catch(() => {});
+  hasStartedRef.current = true;
+};
+
+useEffect(() => {
+  const music = musicRef.current;
+  if (!music) return;
+
+  music.volume = 0.12;
+  music.loop = true;
+
+  const start = () => {
+    music.play().catch(() => {});
+    window.removeEventListener("pointerdown", start);
+  };
+
+  window.addEventListener("pointerdown", start);
+
+  return () => {
+    music.pause();
+    window.removeEventListener("pointerdown", start);
+  };
+}, []);
   email: string;
   password: string;
   loading: boolean;
@@ -57,28 +106,6 @@ export default function CoverScreen({
   onSignup,
   onSetMode,
 }: CoverScreenProps) {
-  const musicRef = useRef<HTMLAudioElement | null>(null);
-
-const clickRef = useRef<HTMLAudioElement | null>(null);
-
-const playClick = () => {
-  const audio = clickRef.current;
-  if (!audio) return;
-
-  audio.currentTime = 0;
-  audio.volume = 0.25;
-  audio.play().catch(() => {});
-};
-
-const startMusic = () => {
-  const music = musicRef.current;
-  if (!music) return;
-
-  music.volume = 0.12;
-  music.loop = true;
-  music.play().catch(() => {});
-};
-}, []);
   return (  
   <>
     <audio ref={musicRef} src="/sounds/menu-loop.wav" preload="auto" loop />
