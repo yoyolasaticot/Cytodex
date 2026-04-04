@@ -1,10 +1,11 @@
 "use client";
 
-import { Power } from "lucide-react";
+import { Eye, EyeOff, Power } from "lucide-react";
 import { Press_Start_2P } from "next/font/google";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
 
 const pixelFont = Press_Start_2P({
   subsets: ["latin"],
@@ -61,6 +62,10 @@ export default function CoverScreen({
 }: CoverScreenProps) {const musicRef = useRef<HTMLAudioElement | null>(null);
   const clickRef = useRef<HTMLAudioElement | null>(null);
   const hasStartedRef = useRef(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [signupError, setSignupError] = useState("");
 
   const playClick = () => {
     const audio = clickRef.current;
@@ -82,6 +87,30 @@ export default function CoverScreen({
     music.play().catch(() => {});
     hasStartedRef.current = true;
   };
+
+  const handleSignupClick = async () => {
+  playClick();
+
+  if (!password.trim() || !confirmPassword.trim()) {
+    setSignupError("Les deux champs mot de passe sont requis.");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    setSignupError("Les mots de passe ne correspondent pas.");
+    return;
+  }
+
+  setSignupError("");
+  await onSignup();
+};
+
+const goToMenu = () => {
+  playClick();
+  setSignupError("");
+  setConfirmPassword("");
+  onSetMode("menu");
+};
 
   useEffect(() => {
     return () => {
@@ -205,13 +234,23 @@ export default function CoverScreen({
                           onChange={(e) => onEmailChange(e.target.value)}
                           className="h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
                         />
-                        <Input
-                          type="password"
-                          placeholder="MOT DE PASSE"
-                          value={password}
-                          onChange={(e) => onPasswordChange(e.target.value)}
-                          className="h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
-                        />
+                        <div className="relative">
+                          <Input
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => onPasswordChange(e.target.value)}
+                            placeholder="PASSWORD"
+                            className="pr-12 h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
+                          />
+                        <button
+                          type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#44503b]"
+                            aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                            >
+                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
@@ -253,21 +292,64 @@ export default function CoverScreen({
                       </div>
 
                       <div className="space-y-3">
-                        <Input
-                          type="email"
-                          placeholder="EMAIL"
-                          value={email}
-                          onChange={(e) => onEmailChange(e.target.value)}
-                          className="h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
-                        />
-                        <Input
-                          type="password"
-                          placeholder="MOT DE PASSE"
-                          value={password}
-                          onChange={(e) => onPasswordChange(e.target.value)}
-                          className="h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
-                        />
-                      </div>
+  <Input
+    type="email"
+    value={email}
+    onChange={(e) => onEmailChange(e.target.value)}
+    placeholder="EMAIL"
+    className="h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
+  />
+
+  <div className="relative">
+    <Input
+      type={showPassword ? "text" : "password"}
+      value={password}
+      onChange={(e) => onPasswordChange(e.target.value)}
+      placeholder="PASSWORD"
+      className="pr-12 h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
+    />
+    <button
+      type="button"
+      onClick={() => setShowPassword((prev) => !prev)}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#44503b]"
+      aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+    >
+      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+    </button>
+  </div>
+
+  <div className="relative">
+    <Input
+      type={showConfirmPassword ? "text" : "password"}
+      value={confirmPassword}
+      onChange={(e) => setConfirmPassword(e.target.value)}
+      placeholder="CONFIRM PASSWORD"
+      className="pr-12 h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
+    />
+    <button
+      type="button"
+      onClick={() => setShowConfirmPassword((prev) => !prev)}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#44503b]"
+      aria-label={
+        showConfirmPassword
+          ? "Masquer la confirmation du mot de passe"
+          : "Afficher la confirmation du mot de passe"
+      }
+    >
+      {showConfirmPassword ? (
+        <EyeOff className="h-4 w-4" />
+      ) : (
+        <Eye className="h-4 w-4" />
+      )}
+    </button>
+  </div>
+
+  {signupError && (
+    <p className="text-[9px] leading-relaxed text-red-700 sm:text-[10px]">
+      {signupError}
+    </p>
+  )}
+</div>
 
                       <div className="grid grid-cols-2 gap-3">
                         <Button
