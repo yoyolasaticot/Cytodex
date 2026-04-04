@@ -153,49 +153,6 @@ async function getSignedUrl(path: string): Promise<string> {
   return data.signedUrl;
 }
 
-  const activeTemplates = (templates || []) as Pick<TemplateRow, "id" | "is_active">[];
-
-  if (activeTemplates.length === 0) return;
-
-  const { data: existingRows, error: existingError } = await supabase
-    .from("user_cards")
-    .select("card_template_id")
-    .eq("user_id", userId);
-
-  if (existingError) {
-    console.error("Error loading user_cards:", existingError);
-    throw existingError;
-  }
-
-  const existingTemplateIds = new Set(
-    (existingRows || []).map((row: { card_template_id: number }) => row.card_template_id)
-  );
-
-  const missingRows = activeTemplates
-    .filter((template) => !existingTemplateIds.has(template.id))
-    .map((template) => ({
-      user_id: userId,
-      card_template_id: template.id,
-      found: false,
-      completed: false,
-      images: [],
-      characteristics: "",
-      pathologies: "",
-    }));
-
-  if (missingRows.length === 0) return;
-
-  const { error: insertError } = await supabase
-    .from("user_cards")
-    .insert(missingRows);
-
-  if (insertError) {
-    console.error("Error inserting missing user_cards:", insertError);
-    throw insertError;
-  }
-}
-
-
 function HomeScreen({
   cards,
   categories,
