@@ -352,11 +352,16 @@ const goToMenu = () => {
 </div>
 
                       <div className="grid grid-cols-2 gap-3">
-                        <Button onClick={handleSignupClick}>
-                          VALIDER
+                        <Button onClick={handleSignupClick}
+                           disabled={loading}
+                          className="rounded-none border-2 border-[#2b3526] bg-[#384331] text-[10px] uppercase text-[#edf5df] shadow-[2px_2px_0_#20281c] hover:bg-[#303a2a] sm:text-xs"
+                        >
+                          {loading ? "..." : "VALIDER"}
                         </Button>
                         <Button variant="outline"
-                          onClick={goToMenu}>
+                          onClick={goToMenu}
+                          className="rounded-none border-2 border-[#44503b] bg-[#dce6c4] text-[10px] uppercase text-[#263021] shadow-[2px_2px_0_#55614b] hover:bg-[#e3ebd1] sm:text-xs"
+                        >>
                           RETOUR
                         </Button>
                       </div>
