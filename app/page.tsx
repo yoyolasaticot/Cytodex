@@ -1023,7 +1023,7 @@ export default function Page() {
     });
   };
 
-  if (!user || screen === "cover") {
+  if (!user) {
     return (
       <CoverScreen
         email={email}
