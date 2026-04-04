@@ -167,16 +167,20 @@ export default function CoverScreen({
     onSetMode("login");
   }}
 >
+<<<<<<< HEAD
                         {">"} IDENTIFICATION
+=======
+                        {">"} IDENTIFiCATION
+>>>>>>> 8ef0230c367a448f9e515a2b144f23f6eb528d70
                       </PixelButton>
 
                       <PixelButton onClick={() => {
   playClick();
   onSetMode("signup");
 }}>
-                        {">"} INITIALISER
+                        {">"} INITIALISATION
                         <br />
-                        MON CYTODEX
+                        DU CYTODEX
                       </PixelButton>
 
                       <div className="pt-2 text-[8px] leading-[1.8] text-[#33402c]/90 sm:text-[9px]">
