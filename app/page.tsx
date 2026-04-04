@@ -889,22 +889,7 @@ export default function Page() {
   setAuthLoading(false);
 };
 
-
-    setAuthLoading(true);
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: password.trim(),
-    });
-
-    if (error) {
-      alert(error.message);
-    }
-
-    setAuthLoading(false);
-  };
-
- const handleSignup = async (): Promise<void> => {
+  const handleSignup = async (): Promise<void> => {
   const validationError = validateCredentials(email, password);
   if (validationError) {
     alert(validationError);
@@ -923,26 +908,6 @@ export default function Page() {
 
   setAuthLoading(false);
 };
-
-    const { error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password: password.trim(),
-      options: {
-        data: {
-          display_name: email.trim().split("@")[0] ?? "",
-        },
-      },
-    });
-
-    if (error) {
-      alert(error.message);
-    } else {
-      alert("Compte créé. Tu peux maintenant te connecter.");
-    }
-
-    setAuthLoading(false);
-  };
-
   
 const handleLogout = async (): Promise<void> => {
   setCoverMode("menu");
