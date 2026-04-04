@@ -691,25 +691,24 @@ function DexScreen({
   onRemovePhoto,
   onUpdate,
 }: DexScreenProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
   const filteredCards = cards.filter((c) => c.category === category);
-  const activeCard = filteredCards[activeIndex] ?? null;
+
+  const [selectedCardId, setSelectedCardId] = useState<number | null>(
+    filteredCards[0]?.id ?? null
+  );
 
   useEffect(() => {
-    setActiveIndex(0);
-  }, [category]);
+    setSelectedCardId(filteredCards[0]?.id ?? null);
+  }, [category, cards]);
 
-  const goPrev = () =>
-    setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev));
-
-  const goNext = () =>
-    setActiveIndex((prev) =>
-      prev < filteredCards.length - 1 ? prev + 1 : prev
-    );
+  const activeCard =
+    filteredCards.find((card) => card.id === selectedCardId) ??
+    filteredCards[0] ??
+    null;
 
   return (
     <div className="min-h-screen bg-slate-100 p-3 sm:p-6 md:p-8 pb-24">
-      <div className="mx-auto max-w-4xl space-y-6">
+      <div className="mx-auto max-w-6xl space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">
@@ -717,7 +716,7 @@ function DexScreen({
             </p>
             <h2 className="text-3xl font-bold mt-2">{category}</h2>
             <p className="text-muted-foreground mt-2">
-              Défilement fiche par fiche à l’intérieur de la catégorie.
+              Sélectionner directement une fiche dans la catégorie.
             </p>
           </div>
 
@@ -726,55 +725,86 @@ function DexScreen({
           </Button>
         </div>
 
-        <div className="rounded-[1.5rem] sm:rounded-[2rem] bg-white border p-4 flex items-center justify-between gap-3">
-          <Button
-            variant="outline"
-            className="rounded-2xl min-h-11"
-            onClick={goPrev}
-            disabled={activeIndex === 0}
-          >
-            Précédente
-          </Button>
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+          <Card className="rounded-[1.5rem] sm:rounded-[2rem] h-fit">
+            <CardHeader>
+              <CardTitle>Fiches de la catégorie</CardTitle>
+            </CardHeader>
 
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">Fiche</p>
-            <p className="font-semibold">
-              {filteredCards.length === 0 ? 0 : activeIndex + 1} /{" "}
-              {filteredCards.length}
-            </p>
-          </div>
+            <CardContent className="space-y-3">
+              {filteredCards.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Aucune fiche dans cette catégorie.
+                </p>
+              ) : (
+                filteredCards.map((card) => {
+                  const isActive = card.id === activeCard?.id;
 
-          <Button
-            variant="outline"
-            className="rounded-2xl min-h-11"
-            onClick={goNext}
-            disabled={activeIndex >= filteredCards.length - 1}
-          >
-            Suivante
-          </Button>
-        </div>
-
-        {activeCard ? (
-          <DexCard
-            key={activeCard.id}
-            card={activeCard}
-            onAddPhotos={onAddPhotos}
-            onReplacePhoto={onReplacePhoto}
-            onRemovePhoto={onRemovePhoto}
-            onUpdate={onUpdate}
-          />
-        ) : (
-          <Card className="rounded-[1.5rem] sm:rounded-[2rem]">
-            <CardContent className="p-8 text-center text-muted-foreground">
-              Aucune fiche dans cette catégorie.
+                  return (
+                    <button
+                      key={card.id}
+                      type="button"
+                      onClick={() => setSelectedCardId(card.id)}
+                      className={`w-full text-left rounded-2xl border p-4 transition ${
+                        isActive
+                          ? "border-slate-900 bg-slate-900 text-white shadow-sm"
+                          : "border-slate-200 bg-white hover:bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p
+                            className={`font-semibold leading-tight ${
+                              isActive ? "text-white" : "text-slate-900"
+                            }`}
+                          >
+                            {card.title}
+                          </p>
+                          <p
+                            className={`mt-2 text-xs ${
+                              isActive
+                                ? "text-slate-200"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {card.completed
+                              ? "✅ Complétée"
+                              : card.found
+                              ? "📷 Trouvée"
+                              : "🔒 Non trouvée"}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
             </CardContent>
           </Card>
-        )}
+
+          <div>
+            {activeCard ? (
+              <DexCard
+                key={activeCard.id}
+                card={activeCard}
+                onAddPhotos={onAddPhotos}
+                onReplacePhoto={onReplacePhoto}
+                onRemovePhoto={onRemovePhoto}
+                onUpdate={onUpdate}
+              />
+            ) : (
+              <Card className="rounded-[1.5rem] sm:rounded-[2rem]">
+                <CardContent className="p-8 text-center text-muted-foreground">
+                  Aucune fiche sélectionnée.
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-
 export default function Page() {
   const [screen, setScreen] = useState<Screen>("cover");
   const [cards, setCards] = useState<CytodexCard[]>([]);
