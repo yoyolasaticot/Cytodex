@@ -167,7 +167,7 @@ export default function CoverScreen({
     onSetMode("login");
   }}
 >
-                        {">"} M&apos;IDENTIFIER
+                        {">"} IDENTIFICATION
                       </PixelButton>
 
                       <PixelButton onClick={() => {
@@ -207,7 +207,7 @@ export default function CoverScreen({
                         />
                         <Input
                           type="password"
-                          placeholder="PASSWORD"
+                          placeholder="MOT DE PASSE"
                           value={password}
                           onChange={(e) => onPasswordChange(e.target.value)}
                           className="h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
@@ -262,7 +262,7 @@ export default function CoverScreen({
                         />
                         <Input
                           type="password"
-                          placeholder="PASSWORD"
+                          placeholder="MOT DE PASSE"
                           value={password}
                           onChange={(e) => onPasswordChange(e.target.value)}
                           className="h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
@@ -282,9 +282,12 @@ export default function CoverScreen({
                         </Button>
 
                         <Button
-                          type="button"
+                        type="button"
                           variant="outline"
-                          onClick={() => onSetMode("menu")}
+                          onClick={() => {
+  playClick();
+  onSetMode("menu");
+}}
                           className="rounded-none border-2 border-[#44503b] bg-[#dce6c4] text-[10px] uppercase text-[#263021] shadow-[2px_2px_0_#55614b] hover:bg-[#e3ebd1] sm:text-xs"
                         >
                           RETOUR
