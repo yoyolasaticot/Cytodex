@@ -323,7 +323,7 @@ const goToMenu = () => {
       type={showConfirmPassword ? "text" : "password"}
       value={confirmPassword}
       onChange={(e) => setConfirmPassword(e.target.value)}
-      placeholder="CONFIRMER LE MOT DE PASSE"
+      placeholder="CONFIRMER LE MDP"
       className="pr-12 h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
     />
     <button
