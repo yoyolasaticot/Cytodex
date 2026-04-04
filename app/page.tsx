@@ -827,10 +827,7 @@ export default function Page() {
           images: row.images || [],
           characteristics: row.characteristics || "",
           pathologies: row.pathologies || "",
-        } satisfies CytodexCard;
-      })
-      .filter((row): row is CytodexCard => row !== null);
-  };
+        }
 
   const refreshUserData = async (currentUser: SupabaseUser) => {
   try {
