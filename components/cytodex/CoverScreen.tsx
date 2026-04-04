@@ -167,11 +167,7 @@ export default function CoverScreen({
     onSetMode("login");
   }}
 >
-<<<<<<< HEAD
                         {">"} IDENTIFICATION
-=======
-                        {">"} IDENTIFiCATION
->>>>>>> 8ef0230c367a448f9e515a2b144f23f6eb528d70
                       </PixelButton>
 
                       <PixelButton onClick={() => {
