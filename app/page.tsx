@@ -627,7 +627,7 @@ function DexCard({
 
 
 
-                             variant="secondary"
+              </Button>
                 onClick={() => startCamera()}
               >
                 <Camera className="mr-2 h-4 w-4" />
