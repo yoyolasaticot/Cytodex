@@ -27,7 +27,8 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
 type BadgeLevel = "Bronze" | "Argent" | "Or" | null;
-type Screen = "cover" | "home" | "categories" | "dex";
+
+type Screen = "cover" | "home" | "categories" | "card_list" | "card_detail";
 
 type CardUpdate = Partial<
   Pick<
@@ -66,6 +67,26 @@ type DexCardProps = {
 type DexScreenProps = {
   cards: CytodexCard[];
   category: string;
+  onBack: () => void;
+  onAddPhotos: (id: number, files: FileList | null) => Promise<void>;
+  onReplacePhoto: (
+    id: number,
+    index: number,
+    files: FileList | null
+  ) => Promise<void>;
+  onRemovePhoto: (id: number, index: number) => void;
+  onUpdate: (id: number, patch: CardUpdate) => void;
+};
+
+type CardListScreenProps = {
+  cards: CytodexCard[];
+  category: string;
+  onBack: () => void;
+  onOpenCard: (cardId: number) => void;
+};
+
+type CardDetailScreenProps = {
+  card: CytodexCard | null;
   onBack: () => void;
   onAddPhotos: (id: number, files: FileList | null) => Promise<void>;
   onReplacePhoto: (
@@ -682,33 +703,17 @@ function DexCard({
   );
 }
 
-function DexScreen({
+function CardListScreen({
   cards,
   category,
   onBack,
-  onAddPhotos,
-  onReplacePhoto,
-  onRemovePhoto,
-  onUpdate,
-}: DexScreenProps) {
+  onOpenCard,
+}: CardListScreenProps) {
   const filteredCards = cards.filter((c) => c.category === category);
-
-  const [selectedCardId, setSelectedCardId] = useState<number | null>(
-    filteredCards[0]?.id ?? null
-  );
-
-  useEffect(() => {
-    setSelectedCardId(filteredCards[0]?.id ?? null);
-  }, [category, cards]);
-
-  const activeCard =
-    filteredCards.find((card) => card.id === selectedCardId) ??
-    filteredCards[0] ??
-    null;
 
   return (
     <div className="min-h-screen bg-slate-100 p-3 sm:p-6 md:p-8 pb-24">
-      <div className="mx-auto max-w-6xl space-y-6">
+      <div className="mx-auto max-w-5xl space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">
@@ -716,7 +721,7 @@ function DexScreen({
             </p>
             <h2 className="text-3xl font-bold mt-2">{category}</h2>
             <p className="text-muted-foreground mt-2">
-              Sélectionner directement une fiche dans la catégorie.
+              Sélectionner une fiche pour l’ouvrir.
             </p>
           </div>
 
@@ -725,86 +730,77 @@ function DexScreen({
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
-          <Card className="rounded-[1.5rem] sm:rounded-[2rem] h-fit">
-            <CardHeader>
-              <CardTitle>Fiches de la catégorie</CardTitle>
-            </CardHeader>
-
-            <CardContent className="space-y-3">
-              {filteredCards.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  Aucune fiche dans cette catégorie.
-                </p>
-              ) : (
-                filteredCards.map((card) => {
-                  const isActive = card.id === activeCard?.id;
-
-                  return (
-                    <button
-                      key={card.id}
-                      type="button"
-                      onClick={() => setSelectedCardId(card.id)}
-                      className={`w-full text-left rounded-2xl border p-4 transition ${
-                        isActive
-                          ? "border-slate-900 bg-slate-900 text-white shadow-sm"
-                          : "border-slate-200 bg-white hover:bg-slate-50"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p
-                            className={`font-semibold leading-tight ${
-                              isActive ? "text-white" : "text-slate-900"
-                            }`}
-                          >
-                            {card.title}
-                          </p>
-                          <p
-                            className={`mt-2 text-xs ${
-                              isActive
-                                ? "text-slate-200"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {card.completed
-                              ? "✅ Complétée"
-                              : card.found
-                              ? "📷 Trouvée"
-                              : "🔒 Non trouvée"}
-                          </p>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })
-              )}
-            </CardContent>
-          </Card>
-
-          <div>
-            {activeCard ? (
-              <DexCard
-                key={activeCard.id}
-                card={activeCard}
-                onAddPhotos={onAddPhotos}
-                onReplacePhoto={onReplacePhoto}
-                onRemovePhoto={onRemovePhoto}
-                onUpdate={onUpdate}
-              />
+        <Card className="rounded-[1.5rem] sm:rounded-[2rem]">
+          <CardContent className="p-6 space-y-3">
+            {filteredCards.length === 0 ? (
+              <p className="text-muted-foreground">Aucune fiche dans cette catégorie.</p>
             ) : (
-              <Card className="rounded-[1.5rem] sm:rounded-[2rem]">
-                <CardContent className="p-8 text-center text-muted-foreground">
-                  Aucune fiche sélectionnée.
-                </CardContent>
-              </Card>
+              filteredCards.map((card) => (
+                <button
+                  key={card.id}
+                  type="button"
+                  onClick={() => onOpenCard(card.id)}
+                  className="w-full text-left rounded-2xl border bg-white p-4 hover:bg-slate-50 transition"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-semibold">{card.title}</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {card.completed
+                          ? "✅ Complétée"
+                          : card.found
+                          ? "📷 Trouvée"
+                          : "🔒 Non trouvée"}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </button>
+              ))
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
+
+function CardDetailScreen({
+  card,
+  onBack,
+  onAddPhotos,
+  onReplacePhoto,
+  onRemovePhoto,
+  onUpdate,
+}: CardDetailScreenProps) {
+  return (
+    <div className="min-h-screen bg-slate-100 p-3 sm:p-6 md:p-8 pb-24">
+      <div className="mx-auto max-w-4xl space-y-6">
+        <Button variant="outline" className="rounded-2xl" onClick={onBack}>
+          Retour à la liste des fiches
+        </Button>
+
+        {card ? (
+          <DexCard
+            key={card.id}
+            card={card}
+            onAddPhotos={onAddPhotos}
+            onReplacePhoto={onReplacePhoto}
+            onRemovePhoto={onRemovePhoto}
+            onUpdate={onUpdate}
+          />
+        ) : (
+          <Card className="rounded-[1.5rem] sm:rounded-[2rem]">
+            <CardContent className="p-8 text-center text-muted-foreground">
+              Fiche introuvable.
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Page() {
   const [screen, setScreen] = useState<Screen>("cover");
   const [cards, setCards] = useState<CytodexCard[]>([]);
@@ -814,6 +810,7 @@ export default function Page() {
   const [password, setPassword] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [coverMode, setCoverMode] = useState<"menu" | "login" | "signup">("menu");
+  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
 
   const categories = useMemo(() => {
     return Array.from(new Set(cards.map((c) => c.category)));
@@ -843,6 +840,9 @@ export default function Page() {
       alert("Erreur chargement cartes: " + JSON.stringify(error));
     }
   };
+
+  const selectedCard =
+  cards.find((card) => card.id === selectedCardId) ?? null;
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -1088,22 +1088,35 @@ export default function Page() {
         categories={categories}
         onBack={() => setScreen("home")}
         onOpenCategory={(category) => {
-          setSelectedCategory(category);
-          setScreen("dex");
-        }}
+  setSelectedCategory(category);
+  setSelectedCardId(null);
+  setScreen("card_list");
+}}
       />
     );
   }
 
+if (screen === "card_list") {
   return (
-    <DexScreen
+    <CardListScreen
       cards={cards}
       category={selectedCategory}
       onBack={() => setScreen("categories")}
-      onAddPhotos={addPhotos}
-      onReplacePhoto={replacePhoto}
-      onRemovePhoto={removePhoto}
-      onUpdate={updateCard}
+      onOpenCard={(cardId) => {
+        setSelectedCardId(cardId);
+        setScreen("card_detail");
+      }}
     />
   );
 }
+
+return (
+  <CardDetailScreen
+    card={selectedCard}
+    onBack={() => setScreen("card_list")}
+    onAddPhotos={addPhotos}
+    onReplacePhoto={replacePhoto}
+    onRemovePhoto={removePhoto}
+    onUpdate={updateCard}
+  />
+);
