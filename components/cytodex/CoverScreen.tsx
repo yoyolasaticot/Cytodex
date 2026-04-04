@@ -361,7 +361,7 @@ const goToMenu = () => {
                         <Button variant="outline"
                           onClick={goToMenu}
                           className="rounded-none border-2 border-[#44503b] bg-[#dce6c4] text-[10px] uppercase text-[#263021] shadow-[2px_2px_0_#55614b] hover:bg-[#e3ebd1] sm:text-xs"
-                        >>
+                        >
                           RETOUR
                         </Button>
                       </div>
