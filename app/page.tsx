@@ -624,59 +624,6 @@ function DexCard({
 
           <div className="space-y-2">
             <label className="text-sm font-medium">
-
-
-
-              </Button>
-                onClick={() => startCamera()}
-              >
-                <Camera className="mr-2 h-4 w-4" />
-                Ajouter des photos
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {signedImageUrls.map((imageUrl, index) => (
-                <div
-                  key={`${card.id}-${index}`}
-                  className="rounded-2xl overflow-hidden border bg-slate-50"
-                >
-                  <div className="aspect-square overflow-hidden">
-                    <img
-                      src={imageUrl}
-                      alt={`${card.title} ${index + 1}`}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-
-                  <div className="p-2 space-y-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full rounded-xl min-h-10 text-xs"
-                      onClick={() => startCamera(index)}
-                    >
-                      <RefreshCw className="mr-2 h-3.5 w-3.5" />
-                      Remplacer
-                    </Button>
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full rounded-xl min-h-10 text-xs"
-                      onClick={() => onRemovePhoto(card.id, index)}
-                    >
-                      <Trash2 className="mr-2 h-3.5 w-3.5" />
-                      Supprimer
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">
               Caractéristiques de l’anomalie
             </label>
             <textarea
@@ -1129,5 +1076,4 @@ export default function Page() {
       onUpdate={updateCard}
     />
   );
-                }
-             
+}
