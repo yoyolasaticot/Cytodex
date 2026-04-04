@@ -1,5 +1,12 @@
 "use client";
 import CoverScreen from "@/components/cytodex/CoverScreen";
+import {
+  loginWithEmail,
+  logoutUser,
+  signupWithEmail,
+  validateCredentials,
+} from "@/lib/auth";
+import { CytodexCard, loadCards, saveCard } from "@/lib/cards";
 import React, {
   useEffect,
   useMemo,
@@ -27,18 +34,6 @@ import { Badge } from "@/components/ui/badge";
 
 type BadgeLevel = "Bronze" | "Argent" | "Or" | null;
 type Screen = "cover" | "home" | "categories" | "dex";
-
-type CytodexCard = {
-  id: number; // user_cards.id
-  cardTemplateId: number;
-  title: string;
-  category: string;
-  found: boolean;
-  completed: boolean;
-  images: string[];
-  characteristics: string;
-  pathologies: string;
-};
 
 type CardUpdate = Partial<
   Pick<
@@ -97,52 +92,6 @@ type DexScreenProps = {
   onRemovePhoto: (id: number, index: number) => void;
   onUpdate: (id: number, patch: CardUpdate) => void;
 };
-
-type TemplateRow = {
-  id: number;
-  title: string;
-  category: string;
-  is_active: boolean;
-};
-
-type UserCardRow = {
-  id: number;
-  user_id: string;
-  card_template_id: number;
-  found: boolean;
-  completed: boolean;
-  images: string[] | null;
-  characteristics: string | null;
-  pathologies: string | null;
-  card_templates:
-    | {
-        id: number;
-        title: string;
-        category: string;
-        is_active: boolean;
-      }
-    | {
-        id: number;
-        title: string;
-        category: string;
-        is_active: boolean;
-      }[]
-    | null;
-};
-
-function isValidEmail(value: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-}
-
-function validateCredentials(email: string, password: string): string | null {
-  if (!email.trim()) return "L'adresse email est obligatoire.";
-  if (!isValidEmail(email.trim())) return "L'adresse email n'est pas valide.";
-  if (!password.trim()) return "Le mot de passe est obligatoire.";
-  if (password.trim().length < 8) {
-    return "Le mot de passe doit contenir au moins 8 caractères.";
-  }
-  return null;
-}
 
 function computeBadge(completed: number, total: number): BadgeLevel {
   const ratio = total === 0 ? 0 : (completed / total) * 100;
@@ -203,25 +152,6 @@ async function getSignedUrl(path: string): Promise<string> {
 
   return data.signedUrl;
 }
-
-function normalizeTemplate(
-  value: UserCardRow["card_templates"]
-): TemplateRow | null {
-  if (!value) return null;
-  if (Array.isArray(value)) return value[0] ?? null;
-  return value;
-}
-
-async function syncUserCards(userId: string): Promise<void> {
-  const { data: templates, error: templatesError } = await supabase
-    .from("card_templates")
-    .select("id, is_active")
-    .eq("is_active", true);
-
-  if (templatesError) {
-    console.error("Error loading card templates:", templatesError);
-    throw templatesError;
-  }
 
   const activeTemplates = (templates || []) as Pick<TemplateRow, "id" | "is_active">[];
 
@@ -931,9 +861,6 @@ export default function Page() {
     }
   }, [categories, selectedCategory]);
 
-  const loadCards = async (userId: string): Promise<CytodexCard[]> => {
-    await syncUserCards(userId);
-
     const { data, error } = await supabase
       .from("user_cards")
       .select(`
@@ -982,10 +909,16 @@ export default function Page() {
   };
 
   const refreshUserData = async (currentUser: SupabaseUser) => {
+  try {
     const userCards = await loadCards(currentUser.id);
     setCards(userCards);
     setScreen("home");
-  };
+  } catch (error: any) {
+    console.error("Error refreshing user data:", error);
+    alert("Erreur chargement cartes: " + JSON.stringify(error));
+  }
+};
+
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -1018,11 +951,23 @@ export default function Page() {
   }, []);
 
   const handleLogin = async (): Promise<void> => {
-    const validationError = validateCredentials(email, password);
-    if (validationError) {
-      alert(validationError);
-      return;
-    }
+  const validationError = validateCredentials(email, password);
+  if (validationError) {
+    alert(validationError);
+    return;
+  }
+
+  setAuthLoading(true);
+
+  const { error } = await loginWithEmail(email, password);
+
+  if (error) {
+    alert(error.message);
+  }
+
+  setAuthLoading(false);
+};
+
 
     setAuthLoading(true);
 
@@ -1038,14 +983,25 @@ export default function Page() {
     setAuthLoading(false);
   };
 
-  const handleSignup = async (): Promise<void> => {
-    const validationError = validateCredentials(email, password);
-    if (validationError) {
-      alert(validationError);
-      return;
-    }
+ const handleSignup = async (): Promise<void> => {
+  const validationError = validateCredentials(email, password);
+  if (validationError) {
+    alert(validationError);
+    return;
+  }
 
-    setAuthLoading(true);
+  setAuthLoading(true);
+
+  const { error } = await signupWithEmail(email, password);
+
+  if (error) {
+    alert(error.message);
+  } else {
+    alert("Compte créé. Tu peux maintenant te connecter.");
+  }
+
+  setAuthLoading(false);
+};
 
     const { error } = await supabase.auth.signUp({
       email: email.trim(),
@@ -1066,33 +1022,11 @@ export default function Page() {
     setAuthLoading(false);
   };
 
-  const handleLogout = async (): Promise<void> => {
+  
+const handleLogout = async (): Promise<void> => {
   setCoverMode("menu");
-  await supabase.auth.signOut();
+  await logoutUser();
 };
-
-  const saveCard = async (card: CytodexCard): Promise<void> => {
-    try {
-      const { error } = await supabase
-        .from("user_cards")
-        .update({
-          found: card.found,
-          completed: card.completed,
-          images: card.images,
-          characteristics: card.characteristics,
-          pathologies: card.pathologies,
-        })
-        .eq("id", card.id);
-
-      if (error) {
-        console.error("Error saving card:", error);
-        alert("Erreur sauvegarde carte " + card.id + ": " + JSON.stringify(error));
-      }
-    } catch (err: any) {
-      alert("Erreur exception sauvegarde: " + err.message);
-      console.error(err);
-    }
-  };
 
   const addPhotos = async (id: number, files: FileList | null): Promise<void> => {
     if (!user) {
@@ -1116,8 +1050,11 @@ export default function Page() {
 
       const updatedCard = updatedCards.find((card) => card.id === id);
       if (updatedCard) {
-        void saveCard(updatedCard);
-      }
+  void saveCard(updatedCard).catch((error) => {
+    console.error("Error saving card:", error);
+    alert("Erreur sauvegarde carte " + updatedCard.id + ": " + JSON.stringify(error));
+  });
+}
 
       return updatedCards;
     });
@@ -1147,9 +1084,12 @@ export default function Page() {
       });
 
       const updatedCard = updatedCards.find((card) => card.id === id);
-      if (updatedCard) {
-        void saveCard(updatedCard);
-      }
+     if (updatedCard) {
+  void saveCard(updatedCard).catch((error) => {
+    console.error("Error saving card:", error);
+    alert("Erreur sauvegarde carte " + updatedCard.id + ": " + JSON.stringify(error));
+  });
+}
 
       return updatedCards;
     });
@@ -1176,8 +1116,11 @@ export default function Page() {
 
       const updatedCard = updatedCards.find((card) => card.id === id);
       if (updatedCard) {
-        void saveCard(updatedCard);
-      }
+  void saveCard(updatedCard).catch((error) => {
+    console.error("Error saving card:", error);
+    alert("Erreur sauvegarde carte " + updatedCard.id + ": " + JSON.stringify(error));
+  });
+}
 
       return updatedCards;
     });
@@ -1191,8 +1134,11 @@ export default function Page() {
 
       const updatedCard = updatedCards.find((card) => card.id === id);
       if (updatedCard) {
-        void saveCard(updatedCard);
-      }
+  void saveCard(updatedCard).catch((error) => {
+    console.error("Error saving card:", error);
+    alert("Erreur sauvegarde carte " + updatedCard.id + ": " + JSON.stringify(error));
+  });
+}
 
       return updatedCards;
     });
