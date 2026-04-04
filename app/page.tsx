@@ -817,39 +817,6 @@ export default function Page() {
       setSelectedCategory(categories[0]);
     }
   }, [categories, selectedCategory]);
-
-    const { data, error } = await supabase
-      .from("user_cards")
-      .select(`
-        id,
-        user_id,
-        card_template_id,
-        found,
-        completed,
-        images,
-        characteristics,
-        pathologies,
-        card_templates (
-          id,
-          title,
-          category,
-          is_active
-        )
-      `)
-      .eq("user_id", userId)
-      .order("id", { ascending: true });
-
-    if (error) {
-      console.error("Error loading cards:", error);
-      alert("Erreur chargement cartes: " + JSON.stringify(error));
-      return [];
-    }
-
-    return ((data || []) as UserCardRow[])
-      .map((row) => {
-        const template = normalizeTemplate(row.card_templates);
-        if (!template || !template.is_active) return null;
-
         return {
           id: row.id,
           cardTemplateId: row.card_template_id,
