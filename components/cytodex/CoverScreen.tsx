@@ -164,7 +164,7 @@ export default function CoverScreen({
   onClick={() => {
     startMusic();
     playClick();
-    onSetMode("signup");
+    onSetMode("login");
   }}
 >
                         {">"} M&apos;IDENTIFIER
