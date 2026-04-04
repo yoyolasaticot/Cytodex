@@ -239,8 +239,8 @@ const goToMenu = () => {
                             type={showPassword ? "text" : "password"}
                             value={password}
                             onChange={(e) => onPasswordChange(e.target.value)}
-                            placeholder="PASSWORD"
-                            className="pr-12 h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
+                            placeholder="MOT DE PASSE"
+                            className="pr-12 h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
                           />
                         <button
                           type="button"
@@ -305,8 +305,8 @@ const goToMenu = () => {
       type={showPassword ? "text" : "password"}
       value={password}
       onChange={(e) => onPasswordChange(e.target.value)}
-      placeholder="PASSWORD"
-      className="pr-12 h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
+      placeholder="MOT DE PASSE"
+      className="pr-12 h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
     />
     <button
       type="button"
@@ -323,8 +323,8 @@ const goToMenu = () => {
       type={showConfirmPassword ? "text" : "password"}
       value={confirmPassword}
       onChange={(e) => setConfirmPassword(e.target.value)}
-      placeholder="CONFIRM PASSWORD"
-      className="pr-12 h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
+      placeholder="CONFIRMER LE MOT DE PASSE"
+      className="pr-12 h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
     />
     <button
       type="button"
