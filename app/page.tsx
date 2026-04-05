@@ -1120,3 +1120,4 @@ return (
     onUpdate={updateCard}
   />
 );
+}
