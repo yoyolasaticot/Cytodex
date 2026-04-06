@@ -629,14 +629,22 @@ function DexCard({
                     </Button>
 
                     <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full rounded-xl min-h-10 text-xs"
-                      onClick={() => onRemovePhoto(card.id, index)}
-                    >
-                      <Trash2 className="mr-2 h-3.5 w-3.5" />
-                      Supprimer
-                    </Button>
+  type="button"
+  variant="outline"
+  className="w-full rounded-xl min-h-10 text-xs"
+  onClick={() => {
+    const confirmed = window.confirm(
+      "Voulez-vous vraiment supprimer cette photo ?"
+    );
+
+    if (confirmed) {
+      onRemovePhoto(card.id, index);
+    }
+  }}
+>
+  <Trash2 className="mr-2 h-3.5 w-3.5" />
+  Supprimer
+</Button>
                   </div>
                 </div>
               ))}
