@@ -112,7 +112,7 @@ function badgeStyle(level: BadgeLevel): string {
     return "bg-slate-100 text-slate-800 border-slate-300";
   }
   if (level === "Bronze") return "bg-amber-100 text-amber-900 border-amber-300";
-  return "bg-muted text-muted-foreground border-dashed";
+  return "bg-muted text-[#6f6758] border-dashed";
 }
 
 async function fileListToUrls(
@@ -181,16 +181,16 @@ function HomeScreen({
     cards.length === 0 ? 0 : Math.round((completedCount / cards.length) * 100);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-3 sm:p-6 md:p-8 pb-24">
-      <div className="mx-auto max-w-6xl space-y-6">
+<div className="min-h-screen bg-[#8f9785] p-3 sm:p-6 md:p-8 pb-24">
+  <div className="mx-auto max-w-6xl rounded-[2rem] border border-[#c9bfa8] bg-[#f4ecd8] p-4 sm:p-6 md:p-8 space-y-6 shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
         <div className="rounded-[2rem] bg-white p-6 shadow-sm border">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">
+              <p className="text-sm uppercase tracking-[0.25em] text-[#6f6758]">
                 CytoDex
               </p>
               <h2 className="text-3xl font-bold mt-2">Accueil utilisateur</h2>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-[#6f6758] mt-2">
                 Connecté en tant que {user.email}
               </p>
             </div>
@@ -211,7 +211,7 @@ function HomeScreen({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-4 sm:gap-6">
-          <Card className="rounded-[2rem]">
+          <Card className="rounded-[2rem] bg-[#fbf6ea] border-[#d8ccb3]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
@@ -220,14 +220,14 @@ function HomeScreen({
             </CardHeader>
             <CardContent>
               <div className="text-5xl font-bold">{globalProgress}%</div>
-              <p className="mt-2 text-muted-foreground">
+              <p className="mt-2 text-[#6f6758]">
                 {completedCount} fiches complétées sur {cards.length}
               </p>
               <Progress value={globalProgress} className="mt-5 h-3" />
             </CardContent>
           </Card>
 
-          <Card className="rounded-[2rem]">
+          <Card className="rounded-[2rem] bg-[#fbf6ea] border-[#d8ccb3]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Medal className="h-5 w-5" />
@@ -278,15 +278,15 @@ function CategoryScreen({
   });
 
   return (
-    <div className="min-h-screen bg-slate-100 p-3 sm:p-6 md:p-8 pb-24">
-      <div className="mx-auto max-w-5xl space-y-6">
+<div className="min-h-screen bg-[#8f9785] p-3 sm:p-6 md:p-8 pb-24">
+  <div className="mx-auto max-w-5xl rounded-[2rem] border border-[#c9bfa8] bg-[#f4ecd8] p-4 sm:p-6 md:p-8 space-y-6 shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">
+            <p className="text-sm uppercase tracking-[0.25em] text-[#6f6758]">
               CytoDex
             </p>
             <h2 className="text-3xl font-bold mt-2">Thèmes des fiches</h2>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-[#6f6758] mt-2">
               Choisir un grand cadre nosologique avant de feuilleter les fiches.
             </p>
           </div>
@@ -306,7 +306,7 @@ function CategoryScreen({
               <CardContent className="p-6 space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    <p className="text-xs uppercase tracking-[0.2em] text-[#6f6758]">
                       Catégorie
                     </p>
                     <h3 className="text-2xl font-bold mt-1">{category}</h3>
@@ -324,13 +324,13 @@ function CategoryScreen({
 
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="rounded-2xl bg-slate-50 p-4 border">
-                    <p className="text-muted-foreground">Fiches trouvées</p>
+                    <p className="text-[#6f6758]">Fiches trouvées</p>
                     <p className="text-xl font-semibold mt-1">
                       {found} / {total}
                     </p>
                   </div>
                   <div className="rounded-2xl bg-slate-50 p-4 border">
-                    <p className="text-muted-foreground">Fiches complétées</p>
+                    <p className="text-[#6f6758]">Fiches complétées</p>
                     <p className="text-xl font-semibold mt-1">
                       {completed} / {total}
                     </p>
@@ -553,7 +553,7 @@ function DexCard({
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
+            <div className="h-full w-full flex items-center justify-center text-sm text-[#6f6758]">
               Aucune image
             </div>
           )}
@@ -562,11 +562,11 @@ function DexCard({
         <CardContent className="p-5 space-y-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              <p className="text-xs uppercase tracking-[0.2em] text-[#6f6758]">
                 Anomalie
               </p>
               <h3 className="text-2xl font-bold mt-1">{card.title}</h3>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-[#6f6758] mt-1">
                 {card.category}
               </p>
             </div>
@@ -712,15 +712,15 @@ function CardListScreen({
   const filteredCards = cards.filter((c) => c.category === category);
 
   return (
-    <div className="min-h-screen bg-slate-100 p-3 sm:p-6 md:p-8 pb-24">
-      <div className="mx-auto max-w-5xl space-y-6">
+<div className="min-h-screen bg-[#8f9785] p-3 sm:p-6 md:p-8 pb-24">
+  <div className="mx-auto max-w-5xl rounded-[2rem] border border-[#c9bfa8] bg-[#f4ecd8] p-4 sm:p-6 md:p-8 space-y-6 shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">
+            <p className="text-sm uppercase tracking-[0.25em] text-[#6f6758]">
               CytoDex
             </p>
             <h2 className="text-3xl font-bold mt-2">{category}</h2>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-[#6f6758] mt-2">
               Sélectionner une fiche pour l’ouvrir.
             </p>
           </div>
@@ -733,7 +733,7 @@ function CardListScreen({
         <Card className="rounded-[1.5rem] sm:rounded-[2rem]">
           <CardContent className="p-6 space-y-3">
             {filteredCards.length === 0 ? (
-              <p className="text-muted-foreground">Aucune fiche dans cette catégorie.</p>
+              <p className="text-[#6f6758]">Aucune fiche dans cette catégorie.</p>
             ) : (
               filteredCards.map((card) => (
                 <button
@@ -745,7 +745,7 @@ function CardListScreen({
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="font-semibold">{card.title}</p>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-sm text-[#6f6758] mt-1">
                         {card.completed
                           ? "✅ Complétée"
                           : card.found
@@ -753,7 +753,7 @@ function CardListScreen({
                           : "🔒 Non trouvée"}
                       </p>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    <ChevronRight className="h-5 w-5 text-[#6f6758]" />
                   </div>
                 </button>
               ))
@@ -774,8 +774,8 @@ function CardDetailScreen({
   onUpdate,
 }: CardDetailScreenProps) {
   return (
-    <div className="min-h-screen bg-slate-100 p-3 sm:p-6 md:p-8 pb-24">
-      <div className="mx-auto max-w-4xl space-y-6">
+<div className="min-h-screen bg-[#8f9785] p-3 sm:p-6 md:p-8 pb-24">
+  <div className="mx-auto max-w-4xl rounded-[2rem] border border-[#c9bfa8] bg-[#f4ecd8] p-4 sm:p-6 md:p-8 space-y-6 shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
         <Button variant="outline" className="rounded-2xl" onClick={onBack}>
           Retour à la liste des fiches
         </Button>
@@ -791,7 +791,7 @@ function CardDetailScreen({
           />
         ) : (
           <Card className="rounded-[1.5rem] sm:rounded-[2rem]">
-            <CardContent className="p-8 text-center text-muted-foreground">
+            <CardContent className="p-8 text-center text-[#6f6758]">
               Fiche introuvable.
             </CardContent>
           </Card>
