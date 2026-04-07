@@ -22,6 +22,24 @@ export function validateCredentials(
   return null;
 }
 
+export function validateProfile(
+  username: string,
+  avatarKey: string
+): string | null {
+  const trimmedUsername = username.trim();
+
+  if (!trimmedUsername) return "Le nom de microscopeur est obligatoire.";
+  if (trimmedUsername.length < 2) {
+    return "Le nom de microscopeur doit contenir au moins 2 caractères.";
+  }
+  if (trimmedUsername.length > 24) {
+    return "Le nom de microscopeur ne doit pas dépasser 24 caractères.";
+  }
+  if (!avatarKey) return "Veuillez choisir un avatar.";
+
+  return null;
+}
+
 export async function loginWithEmail(email: string, password: string) {
   return supabase.auth.signInWithPassword({
     email: email.trim(),
@@ -29,16 +47,42 @@ export async function loginWithEmail(email: string, password: string) {
   });
 }
 
-export async function signupWithEmail(email: string, password: string) {
-  return supabase.auth.signUp({
+export async function signupWithEmail(
+  email: string,
+  password: string,
+  username: string,
+  avatarKey: string
+) {
+  const signUpResult = await supabase.auth.signUp({
     email: email.trim(),
     password: password.trim(),
     options: {
       data: {
-        display_name: email.trim().split("@")[0] ?? "",
+        display_name: username.trim(),
       },
     },
   });
+
+  if (signUpResult.error || !signUpResult.data.user) {
+    return signUpResult;
+  }
+
+  const userId = signUpResult.data.user.id;
+
+  const { error: profileError } = await supabase.from("profiles").insert({
+    id: userId,
+    username: username.trim(),
+    avatar_key: avatarKey,
+  });
+
+  if (profileError) {
+    return {
+      data: signUpResult.data,
+      error: profileError,
+    };
+  }
+
+  return signUpResult;
 }
 
 export async function logoutUser() {

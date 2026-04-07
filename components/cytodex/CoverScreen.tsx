@@ -19,10 +19,14 @@ type CoverMode = "menu" | "login" | "signup";
 type CoverScreenProps = {
   email: string;
   password: string;
+  username: string;
+  avatarKey: string;
   loading: boolean;
   mode: CoverMode;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
+  onUsernameChange: (value: string) => void;
+  onAvatarChange: (value: string) => void;
   onLogin: () => Promise<void>;
   onSignup: () => Promise<void>;
   onSetMode: (mode: CoverMode) => void;
@@ -52,10 +56,14 @@ function PixelButton({
 export default function CoverScreen({
   email,
   password,
+  username,
+  avatarKey,
   loading,
   mode,
   onEmailChange,
   onPasswordChange,
+  onUsernameChange,
+  onAvatarChange,
   onLogin,
   onSignup,
   onSetMode,
@@ -103,6 +111,31 @@ export default function CoverScreen({
 
   setSignupError("");
   await onSignup();
+};
+
+const avatars = [
+  "avatar-1",
+  "avatar-2",
+  "avatar-3",
+  "avatar-4",
+  "avatar-5",
+];
+
+const currentIndex = Math.max(
+  0,
+  avatars.findIndex((a) => a === avatarKey)
+);
+
+const goPrevAvatar = () => {
+  const prev =
+    currentIndex === 0 ? avatars.length - 1 : currentIndex - 1;
+  onAvatarChange(avatars[prev]);
+};
+
+const goNextAvatar = () => {
+  const next =
+    currentIndex === avatars.length - 1 ? 0 : currentIndex + 1;
+  onAvatarChange(avatars[next]);
 };
 
 const goToMenu = () => {
@@ -281,24 +314,32 @@ const goToMenu = () => {
                   )}
 
                   {mode === "signup" && (
-                    <div className="space-y-4">
-                      <div className="text-[8px] leading-[1.9] sm:text-[9px]">
-                        <div>{">"} INITIALISATION</div>
-                        <div className="mt-2 text-[#33402c]/85">
-                          CREER
-                          <br />
-                          UN CYTODEX
-                        </div>
-                      </div>
+  <div className="space-y-4">
+    <div className="text-[8px] leading-[1.9] sm:text-[9px]">
+      <div>{">"} INITIALISATION</div>
+      <div className="mt-2 text-[#33402c]/85">
+        CREER
+        <br />
+        UN CYTODEX
+      </div>
+    </div>
 
-                      <div className="space-y-3">
-  <Input
-    type="email"
-    value={email}
-    onChange={(e) => onEmailChange(e.target.value)}
-    placeholder="EMAIL"
-    className="h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] uppercase text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
-  />
+    <div className="space-y-3">
+      <Input
+        type="email"
+        placeholder="EMAIL"
+        value={email}
+        onChange={(e) => onEmailChange(e.target.value)}
+        className="h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
+      />
+
+      <Input
+        type="text"
+        placeholder="NOM DE MICROSCOPEUR"
+        value={username}
+        onChange={(e) => onUsernameChange(e.target.value)}
+        className="h-11 rounded-none border-2 border-[#44503b] bg-[#dde6c8] px-3 text-[10px] text-[#263021] placeholder:text-[#5f6c57] shadow-[2px_2px_0_#55614b] sm:text-xs"
+      />
 
   <div className="relative">
     <Input
@@ -351,22 +392,60 @@ const goToMenu = () => {
   )}
 </div>
 
-                      <div className="grid grid-cols-2 gap-3">
-                        <Button onClick={handleSignupClick}
-                           disabled={loading}
-                          className="rounded-none border-2 border-[#2b3526] bg-[#384331] text-[10px] uppercase text-[#edf5df] shadow-[2px_2px_0_#20281c] hover:bg-[#303a2a] sm:text-xs"
-                        >
-                          {loading ? "..." : "VALIDER"}
-                        </Button>
-                        <Button variant="outline"
-                          onClick={goToMenu}
-                          className="rounded-none border-2 border-[#44503b] bg-[#dce6c4] text-[10px] uppercase text-[#263021] shadow-[2px_2px_0_#55614b] hover:bg-[#e3ebd1] sm:text-xs"
-                        >
-                          RETOUR
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+<div className="space-y-2">
+  <p className="text-[8px] sm:text-[9px] text-[#263021]">
+    CHOISIR UN AVATAR
+  </p>
+
+  <div className="flex items-center justify-center gap-3">
+    <Button
+      type="button"
+      variant="outline"
+      onClick={goPrevAvatar}
+      className="h-12 w-12 rounded-xl"
+    >
+      ◀
+    </Button>
+
+    <div className="rounded-2xl border-2 border-[#44503b] bg-[#dce6c4] p-3">
+      <img
+        src={`/avatars/${avatarKey}.png`}
+        alt="avatar"
+        className="h-28 w-28 object-contain"
+      />
+    </div>
+
+    <Button
+      type="button"
+      variant="outline"
+      onClick={goNextAvatar}
+      className="h-12 w-12 rounded-xl"
+    >
+      ▶
+    </Button>
+  </div>
+</div>
+
+    <div className="grid grid-cols-2 gap-3">
+      <Button
+        onClick={onSignup}
+        disabled={loading}
+        className="rounded-none border-2 border-[#2b3526] bg-[#384331] text-[10px] uppercase text-[#edf5df] shadow-[2px_2px_0_#20281c] hover:bg-[#303a2a] sm:text-xs"
+      >
+        {loading ? "..." : "VALIDER"}
+      </Button>
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => onSetMode("menu")}
+        className="rounded-none border-2 border-[#44503b] bg-[#dce6c4] text-[10px] uppercase text-[#263021] shadow-[2px_2px_0_#55614b] hover:bg-[#e3ebd1] sm:text-xs"
+      >
+        RETOUR
+      </Button>
+    </div>
+  </div>
+)}
                 </div>
               </div>
             </div>

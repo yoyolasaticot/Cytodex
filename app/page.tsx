@@ -9,6 +9,7 @@ import {
   logoutUser,
   signupWithEmail,
   validateCredentials,
+  validateProfile,
 } from "@/lib/auth";
 import { CytodexCard, loadCards, saveCard } from "@/lib/cards";
 import {
@@ -901,24 +902,37 @@ export default function Page() {
   };
 
   const handleSignup = async (): Promise<void> => {
-    const validationError = validateCredentials(email, password);
-    if (validationError) {
-      alert(validationError);
-      return;
-    }
+  const credentialsError = validateCredentials(email, password);
+  if (credentialsError) {
+    alert(credentialsError);
+    return;
+  }
 
-    setAuthLoading(true);
+  const profileError = validateProfile(username, avatarKey);
+  if (profileError) {
+    alert(profileError);
+    return;
+  }
 
-    const { error } = await signupWithEmail(email, password);
+  setAuthLoading(true);
 
-    if (error) {
-      alert(error.message);
-    } else {
-      alert("Compte créé. Tu peux maintenant te connecter.");
-    }
+  const { error } = await signupWithEmail(
+    email,
+    password,
+    username,
+    avatarKey
+  );
 
-    setAuthLoading(false);
-  };
+  if (error) {
+    alert(error.message);
+  } else {
+    alert("Compte créé. Tu peux maintenant te connecter.");
+    setUsername("");
+    setAvatarKey("");
+  }
+
+  setAuthLoading(false);
+};
 
   const handleLogout = async (): Promise<void> => {
     setCoverMode("menu");
@@ -1064,16 +1078,20 @@ export default function Page() {
   if (!user) {
     return (
       <CoverScreen
-        email={email}
-        password={password}
-        loading={authLoading}
-        mode={coverMode}
-        onEmailChange={setEmail}
-        onPasswordChange={setPassword}
-        onLogin={handleLogin}
-        onSignup={handleSignup}
-        onSetMode={setCoverMode}
-      />
+  email={email}
+  password={password}
+  username={username}
+  avatarKey={avatarKey}
+  loading={authLoading}
+  mode={coverMode}
+  onEmailChange={setEmail}
+  onPasswordChange={setPassword}
+  onUsernameChange={setUsername}
+  onAvatarChange={setAvatarKey}
+  onLogin={handleLogin}
+  onSignup={handleSignup}
+  onSetMode={setCoverMode}
+/>
     );
   }
 
