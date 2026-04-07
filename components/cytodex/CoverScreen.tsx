@@ -409,7 +409,7 @@ const goToMenu = () => {
 
     <div className="rounded-2xl border-2 border-[#44503b] bg-[#dce6c4] p-3">
       <img
-        src={`/avatars/${avatarKey}.png`}
+        src={`/Avatars/${avatarKey}.png`}
         alt="avatar"
         className="h-28 w-28 object-contain"
       />
