@@ -191,7 +191,7 @@ const goToMenu = () => {
             On
           </div>
             <div className="rounded-[1.9rem] border-[6px] border-[#979087] bg-[#8f9785] p-4 shadow-inner sm:p-5">
-              <div className="relative rounded-[1.1rem] border border-[#5c6654] bg-[linear-gradient(180deg,#d6ef85,#8fb319)] px-4 py-5 h-[450px] shadow-[inset_0_0_0_2px_rgba(74,84,66,0.15)] sm:min-h-[380px] sm:px-5 sm:py-6">
+              <div className="relative rounded-[1.1rem] border border-[#5c6654] bg-[linear-gradient(180deg,#d6ef85,#8fb319)] px-4 py-5 min-h-[450px] shadow-[inset_0_0_0_2px_rgba(74,84,66,0.15)] sm:min-h-[380px] sm:px-5 sm:py-6">
                 <div className="absolute inset-0 pointer-events-none rounded-[1.1rem] bg-[radial-gradient(circle_at_center,transparent_60%,rgba(0,0,0,0.22))]" />
                 <div
                   className={`${pixelFont.className} h-full flex flex-col justify-center text-[#263021]`}
