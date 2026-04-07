@@ -818,8 +818,11 @@ export default function Page() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [avatarKey, setAvatarKey] = useState("avatar-1");
   const [coverMode, setCoverMode] = useState<"menu" | "login" | "signup">("menu");
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
+  
 
   const categories = useMemo(() => {
     return Array.from(new Set(cards.map((c) => c.category)));
