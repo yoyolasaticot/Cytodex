@@ -489,7 +489,8 @@ function DexCard({
     setReplacingIndex(null);
   };
 
-  const openFullscreenImage = (imageUrl: string) => {
+const openFullscreenImage = (imageUrl: string) => {
+  console.log("open image", imageUrl);
   setFullscreenImage(imageUrl);
   setZoomLevel(1);
   setTranslateX(0);
@@ -501,8 +502,6 @@ const closeFullscreenImage = () => {
   setZoomLevel(1);
   setTranslateX(0);
   setTranslateY(0);
-  setIsDraggingImage(false);
-  pinchDistanceRef.current = null;
 };
 
 const clamp = (value: number, min: number, max: number) => {
