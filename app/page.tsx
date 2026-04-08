@@ -21,6 +21,7 @@ import {
   Trash2,
   RefreshCw,
   Camera,
+  X,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -363,8 +364,19 @@ function DexCard({
   const [isCapturing, setIsCapturing] = useState(false);
   const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [translateX, setTranslateX] = useState(0);
+  const [translateY, setTranslateY] = useState(0);
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageViewerRef = useRef<HTMLDivElement>(null);
+  const lastTapRef = useRef(0);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const panStartRef = useRef({ x: 0, y: 0 });
+  const pinchDistanceRef = useRef<number | null>(null);
+  const pinchStartZoomRef = useRef(1);
 
   useEffect(() => {
     setCharacteristics(card.characteristics);
@@ -477,6 +489,111 @@ function DexCard({
     setReplacingIndex(null);
   };
 
+  const openFullscreenImage = (imageUrl: string) => {
+  setFullscreenImage(imageUrl);
+  setZoomLevel(1);
+  setTranslateX(0);
+  setTranslateY(0);
+};
+
+const closeFullscreenImage = () => {
+  setFullscreenImage(null);
+  setZoomLevel(1);
+  setTranslateX(0);
+  setTranslateY(0);
+  setIsDraggingImage(false);
+  pinchDistanceRef.current = null;
+};
+
+const clamp = (value: number, min: number, max: number) => {
+  return Math.min(Math.max(value, min), max);
+};
+
+const getTouchDistance = (touches: TouchList) => {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
+const handleViewerTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+  if (e.touches.length === 1) {
+    const now = Date.now();
+    const timeSinceLastTap = now - lastTapRef.current;
+
+    if (timeSinceLastTap < 300) {
+      if (zoomLevel > 1) {
+        setZoomLevel(1);
+        setTranslateX(0);
+        setTranslateY(0);
+      } else {
+        setZoomLevel(2);
+      }
+    }
+
+    lastTapRef.current = now;
+
+    dragStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
+
+    panStartRef.current = {
+      x: translateX,
+      y: translateY,
+    };
+
+    setIsDraggingImage(true);
+  }
+
+  if (e.touches.length === 2) {
+    pinchDistanceRef.current = getTouchDistance(e.touches);
+    pinchStartZoomRef.current = zoomLevel;
+    setIsDraggingImage(false);
+  }
+};
+
+const handleViewerTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+  if (e.touches.length === 2) {
+    const currentDistance = getTouchDistance(e.touches);
+    const startDistance = pinchDistanceRef.current;
+
+    if (!startDistance) return;
+
+    const scaleFactor = currentDistance / startDistance;
+    const nextZoom = clamp(pinchStartZoomRef.current * scaleFactor, 1, 4);
+    setZoomLevel(nextZoom);
+
+    if (nextZoom <= 1) {
+      setTranslateX(0);
+      setTranslateY(0);
+    }
+
+    return;
+  }
+
+  if (e.touches.length === 1 && isDraggingImage && zoomLevel > 1) {
+    e.preventDefault();
+
+    const deltaX = e.touches[0].clientX - dragStartRef.current.x;
+    const deltaY = e.touches[0].clientY - dragStartRef.current.y;
+
+    const maxOffset = 220 * (zoomLevel - 1);
+
+    setTranslateX(clamp(panStartRef.current.x + deltaX, -maxOffset, maxOffset));
+    setTranslateY(clamp(panStartRef.current.y + deltaY, -maxOffset, maxOffset));
+  }
+};
+
+const handleViewerTouchEnd = () => {
+  setIsDraggingImage(false);
+  pinchDistanceRef.current = null;
+
+  if (zoomLevel <= 1) {
+    setTranslateX(0);
+    setTranslateY(0);
+  }
+};
+
   if (!card.found) {
     return (
       <>
@@ -548,12 +665,18 @@ function DexCard({
       <Card className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
         <div className="aspect-[4/3] bg-slate-100 overflow-hidden">
           {signedImageUrls[0] ? (
-            <img
-              src={signedImageUrls[0]}
-              alt={card.title}
-              className="h-full w-full object-cover"
-            />
-          ) : (
+  <button
+    type="button"
+    onClick={() => openFullscreenImage(signedImageUrls[0])}
+    className="h-full w-full"
+  >
+    <img
+      src={signedImageUrls[0]}
+      alt={card.title}
+      className="h-full w-full object-cover"
+    />
+  </button>
+) : (
             <div className="h-full w-full flex items-center justify-center text-sm text-[#6f6758]">
               Aucune image
             </div>
@@ -611,12 +734,18 @@ function DexCard({
                   className="rounded-2xl overflow-hidden border bg-slate-50"
                 >
                   <div className="aspect-square overflow-hidden">
-                    <img
-                      src={imageUrl}
-                      alt={`${card.title} ${index + 1}`}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
+  <button
+    type="button"
+    onClick={() => openFullscreenImage(imageUrl)}
+    className="h-full w-full"
+  >
+    <img
+      src={imageUrl}
+      alt={`${card.title} ${index + 1}`}
+      className="h-full w-full object-cover"
+    />
+  </button>
+</div>
 
                   <div className="p-2 space-y-2">
                     <Button
@@ -707,6 +836,56 @@ function DexCard({
         </div>
       )}
 
+{fullscreenImage && (
+  <div className="fixed inset-0 z-[10000] bg-black flex flex-col">
+    <div className="flex items-center justify-between gap-3 p-4 bg-black/80">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={closeFullscreenImage}
+        className="bg-white text-black hover:bg-gray-200"
+      >
+        Retour
+      </Button>
+
+      <div className="flex items-center gap-2">
+        <span className="text-white text-sm">
+          {Math.round(zoomLevel * 100)}%
+        </span>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={closeFullscreenImage}
+          className="bg-white text-black hover:bg-gray-200"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+
+    <div
+     ref={imageViewerRef}
+      className="flex-1 overflow-hidden flex items-center justify-center bg-black"
+      style={{ touchAction: "none" }}
+      onTouchStart={handleViewerTouchStart}
+      onTouchMove={handleViewerTouchMove}
+      onTouchEnd={handleViewerTouchEnd}
+    >
+      <img
+        src={fullscreenImage}
+        alt="Image en plein écran"
+        draggable={false}
+        className="max-w-full max-h-full select-none transition-transform duration-75"
+        style={{
+          transform: `translate(${translateX}px, ${translateY}px) scale(${zoomLevel})`,
+          transformOrigin: "center center",
+        }}
+      />
+    </div>
+  </div>
+)}
+      
       <canvas ref={canvasRef} className="hidden" />
     </>
   );
