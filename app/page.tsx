@@ -509,7 +509,9 @@ const clamp = (value: number, min: number, max: number) => {
   return Math.min(Math.max(value, min), max);
 };
 
-const getTouchDistance = (touches: TouchList) => {
+const getTouchDistance = (
+  touches: React.TouchEvent<HTMLDivElement>["touches"]
+) => {
   const dx = touches[0].clientX - touches[1].clientX;
   const dy = touches[0].clientY - touches[1].clientY;
   return Math.sqrt(dx * dx + dy * dy);
