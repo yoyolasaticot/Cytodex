@@ -81,7 +81,8 @@ export default function HomeScreen({
     user.email?.split("@")[0] ||
     "Microscopeur";
 
-  const avatarKey = "avatar-1";
+   const avatarKey =
+    (user.user_metadata?.avatar_key as string | undefined) || "avatar-1";
 
   return (
     <div className="min-h-screen bg-[#d9d9d9] p-3 sm:p-5">
@@ -101,10 +102,12 @@ export default function HomeScreen({
           <div className="flex items-center gap-4">
             <div className="flex h-24 w-24 shrink-0 items-center justify-center border-[4px] border-red-500 bg-yellow-200">
   <img
-    src="/avatars/avatar-1.png"
-    alt="Avatar utilisateur"
-    className="h-20 w-20 object-contain"
-  />
+  src={`/Avatars/${avatarKey}.png`}
+  alt="avatar"
+  className="h-20 w-20 object-contain"
+  onLoad={() => console.log("image loaded")}
+  onError={() => console.log("image error")}
+/>
 </div>
 
             <div className="min-w-0 flex-1">
