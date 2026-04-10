@@ -105,11 +105,11 @@ const avatarKey = profile?.avatar_key || "avatar-1";
 
         <div className="border-[5px] border-black bg-[#e9e2cf] p-4 shadow-[inset_0_0_0_3px_rgba(0,0,0,0.18)]">
           <div className="flex items-center gap-4">
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center border-[4px] border-black bg-[#d8d1bc] shadow-[3px_3px_0_#000]">
+            <div className="shrink-0">
   <img
   src={`/Avatars/${avatarKey}.png`}
   alt="avatar"
-  className="h-20 w-20 object-contain"
+  className="h-28 w-28 object-contain drop-shadow-[3px_3px_0_rgba(0,0,0,0.5)]"
 />
 </div>
 
