@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import CoverScreen from "@/components/cytodex/CoverScreen";
+import HomeScreen from "@/components/cytodex/HomeScreen";
 import {
   loginWithEmail,
   logoutUser,
@@ -14,21 +15,15 @@ import {
 import { CytodexCard, loadCards, saveCard } from "@/lib/cards";
 import {
   Lock,
-  Medal,
-  User,
-  ChevronRight,
   CheckCircle2,
   Trash2,
   RefreshCw,
   Camera,
   X,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-
-type BadgeLevel = "Bronze" | "Argent" | "Or" | null;
 
 type Screen = "cover" | "home" | "categories" | "card_list" | "card_detail";
 
@@ -38,14 +33,6 @@ type CardUpdate = Partial<
     "characteristics" | "pathologies" | "completed" | "found" | "images"
   >
 >;
-
-type HomeScreenProps = {
-  cards: CytodexCard[];
-  categories: string[];
-  user: SupabaseUser;
-  onOpenDex: () => void;
-  onLogout: () => Promise<void>;
-};
 
 type CategoryScreenProps = {
   cards: CytodexCard[];
@@ -100,23 +87,6 @@ type CardDetailScreenProps = {
   onUpdate: (id: number, patch: CardUpdate) => void;
 };
 
-function computeBadge(completed: number, total: number): BadgeLevel {
-  const ratio = total === 0 ? 0 : (completed / total) * 100;
-  if (ratio >= 100) return "Or";
-  if (ratio >= 70) return "Argent";
-  if (ratio >= 50) return "Bronze";
-  return null;
-}
-
-function badgeStyle(level: BadgeLevel): string {
-  if (level === "Or") return "bg-yellow-100 text-yellow-900 border-yellow-300";
-  if (level === "Argent") {
-    return "bg-slate-100 text-slate-800 border-slate-300";
-  }
-  if (level === "Bronze") return "bg-amber-100 text-amber-900 border-amber-300";
-  return "bg-muted text-[#6f6758] border-dashed";
-}
-
 async function fileListToUrls(
   files: FileList | null,
   userId: string
@@ -158,105 +128,6 @@ async function getSignedUrl(path: string): Promise<string> {
   }
 
   return data.signedUrl;
-}
-
-function HomeScreen({
-  cards,
-  categories,
-  user,
-  onOpenDex,
-  onLogout,
-}: HomeScreenProps) {
-  const badgeData = useMemo(() => {
-    return categories.map((category) => {
-      const inCategory = cards.filter((c) => c.category === category);
-      const completed = inCategory.filter((c) => c.completed).length;
-      return {
-        category,
-        badge: computeBadge(completed, inCategory.length),
-      };
-    });
-  }, [cards, categories]);
-
-  const completedCount = cards.filter((c) => c.completed).length;
-  const globalProgress =
-    cards.length === 0 ? 0 : Math.round((completedCount / cards.length) * 100);
-
-  return (
-<div className="min-h-screen bg-[#8f9785] p-3 sm:p-6 md:p-8 pb-24">
-  <div className="mx-auto max-w-6xl rounded-[2rem] border border-[#c9bfa8] bg-[#f4ecd8] p-4 sm:p-6 md:p-8 space-y-6 shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm border">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <p className="text-sm uppercase tracking-[0.25em] text-[#6f6758]">
-                CytoDex
-              </p>
-              <h2 className="text-3xl font-bold mt-2">Accueil utilisateur</h2>
-              <p className="text-[#6f6758] mt-2">
-                Connecté en tant que {user.email}
-              </p>
-            </div>
-
-            <div className="flex gap-3 flex-wrap">
-              <Button onClick={onOpenDex} className="rounded-2xl h-11 px-5">
-                Accéder aux thèmes <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                onClick={onLogout}
-                className="rounded-2xl h-11 px-5"
-              >
-                Déconnexion
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-4 sm:gap-6">
-          <Card className="rounded-[2rem] bg-[#fbf6ea] border-[#d8ccb3]">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Progression globale
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-5xl font-bold">{globalProgress}%</div>
-              <p className="mt-2 text-[#6f6758]">
-                {completedCount} fiches complétées sur {cards.length}
-              </p>
-              <Progress value={globalProgress} className="mt-5 h-3" />
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-[2rem] bg-[#fbf6ea] border-[#d8ccb3]">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Medal className="h-5 w-5" />
-                Badges obtenus
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {badgeData.map(({ category, badge }) => (
-                <div
-                  key={category}
-                  className={`rounded-2xl border p-4 ${badgeStyle(badge)}`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-medium leading-tight">
-                      {category}
-                    </p>
-                    <Medal className="h-5 w-5 shrink-0" />
-                  </div>
-                  <p className="mt-3 text-sm">{badge ?? "Emplacement vide"}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function CategoryScreen({
