@@ -87,6 +87,17 @@ type CardDetailScreenProps = {
   onUpdate: (id: number, patch: CardUpdate) => void;
 };
 
+type BadgeLevel = "Bronze" | "Argent" | "Or" | null;
+
+function computeBadge(completed: number, total: number): BadgeLevel {
+  const ratio = total === 0 ? 0 : (completed / total) * 100;
+
+  if (ratio >= 100) return "Or";
+  if (ratio >= 70) return "Argent";
+  if (ratio >= 50) return "Bronze";
+  return null;
+}
+
 async function fileListToUrls(
   files: FileList | null,
   userId: string
