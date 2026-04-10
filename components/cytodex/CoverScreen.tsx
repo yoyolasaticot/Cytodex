@@ -401,7 +401,6 @@ const goToMenu = () => {
       type="button"
       variant="outline"
       onClick={goPrevAvatar}
-      className="h-12 w-12 rounded-xl"
     >
       ◀
     </Button>
@@ -418,7 +417,6 @@ const goToMenu = () => {
       type="button"
       variant="outline"
       onClick={goNextAvatar}
-      className="h-12 w-12 rounded-xl"
     >
       ▶
     </Button>
