@@ -99,16 +99,13 @@ export default function HomeScreen({
 
         <div className="border-[5px] border-black bg-[#e9e2cf] p-4 shadow-[inset_0_0_0_3px_rgba(0,0,0,0.18)]">
           <div className="flex items-center gap-4">
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center border-[4px] border-black bg-[#d8d1bc]">
-              <img
-                src={`/avatars/${avatarKey}.png`}
-                alt="Avatar utilisateur"
-                className="h-20 w-20 object-contain"
-                onError={(e) => {
-                  e.currentTarget.src = "/avatars/avatar-1.png";
-                }}
-              />
-            </div>
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center border-[4px] border-red-500 bg-yellow-200">
+  <img
+    src="/avatars/avatar-1.png"
+    alt="Avatar utilisateur"
+    className="h-20 w-20 object-contain"
+  />
+</div>
 
             <div className="min-w-0 flex-1">
               <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-black/70">
