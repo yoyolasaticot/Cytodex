@@ -90,7 +90,7 @@ const displayName =
 const avatarKey = profile?.avatar_key || "avatar-1";
 
   return (
-    <div className="min-h-screen bg-[#d9d9d9] px-4 py-3 flex flex-col min-h-0">
+    <div className="min-h-screen bg-[#fafafa] px-4 py-3 flex flex-col min-h-0">
         <div className="mb-3 flex justify-end">
           <Button
             type="button"
