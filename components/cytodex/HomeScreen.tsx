@@ -113,11 +113,11 @@ const avatarKey = profile?.avatar_key || "avatar-1";
 />
 </div>
 
-            <div className="min-w-0 flex-1">
+            <div className="flex-1 overflow-hidden">
               <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-black/70">
                 Microscopeur
               </p>
-              <h1 className="break-words text-3xl font-semibold leading-tight text-black">
+              <h1 className="text-2xl font-semibold leading-tight text-black whitespace-nowrap">
                 {displayName}
               </h1>
             </div>
