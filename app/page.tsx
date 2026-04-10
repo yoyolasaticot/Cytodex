@@ -90,6 +90,11 @@ type CardDetailScreenProps = {
 
 type BadgeLevel = "Bronze" | "Argent" | "Or" | null;
 
+type UserProfile = {
+  username: string;
+  avatar_key: string;
+};
+
 function computeBadge(completed: number, total: number): BadgeLevel {
   const ratio = total === 0 ? 0 : (completed / total) * 100;
 
@@ -894,6 +899,7 @@ export default function Page() {
   const [avatarKey, setAvatarKey] = useState("avatar-1");
   const [coverMode, setCoverMode] = useState<"menu" | "login" | "signup">("menu");
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   
 
   const categories = useMemo(() => {
@@ -914,16 +920,28 @@ export default function Page() {
     }
   }, [categories, selectedCategory]);
 
-  const refreshUserData = async (currentUser: SupabaseUser) => {
-    try {
-      const userCards = await loadCards(currentUser.id);
-      setCards(userCards);
-      setScreen("home");
-    } catch (error: any) {
-      console.error("Error refreshing user data:", error);
-      alert("Erreur chargement cartes: " + JSON.stringify(error));
+const refreshUserData = async (currentUser: SupabaseUser) => {
+  try {
+    const userCards = await loadCards(currentUser.id);
+
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("username, avatar_key")
+      .eq("id", currentUser.id)
+      .single();
+
+    if (profileError) {
+      throw profileError;
     }
-  };
+
+    setCards(userCards);
+    setProfile(profileData);
+    setScreen("home");
+  } catch (error: any) {
+    console.error("Error refreshing user data:", error);
+    alert("Erreur chargement cartes: " + JSON.stringify(error));
+  }
+};
 
   const selectedCard =
   cards.find((card) => card.id === selectedCardId) ?? null;
@@ -944,13 +962,14 @@ export default function Page() {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
-      if (currentUser) {
-        await refreshUserData(currentUser);
-      } else {
-        setCards([]);
-        setSelectedCategory("");
-        setScreen("cover");
-      }
+          if (currentUser) {
+      await refreshUserData(currentUser);
+    } else {
+      setCards([]);
+      setProfile(null);
+      setSelectedCategory("");
+      setScreen("cover");
+    }
     });
 
     return () => {
@@ -1010,9 +1029,10 @@ export default function Page() {
 };
 
   const handleLogout = async (): Promise<void> => {
-    setCoverMode("menu");
-    await logoutUser();
-  };
+  setCoverMode("menu");
+  setProfile(null);
+  await logoutUser();
+};
 
   const addPhotos = async (id: number, files: FileList | null): Promise<void> => {
     if (!user) {
@@ -1170,17 +1190,18 @@ export default function Page() {
     );
   }
 
-  if (screen === "home") {
-    return (
-      <HomeScreen
-        cards={cards}
-        categories={categories}
-        user={user}
-        onOpenDex={() => setScreen("categories")}
-        onLogout={handleLogout}
-      />
-    );
-  }
+if (screen === "home") {
+  return (
+    <HomeScreen
+      cards={cards}
+      categories={categories}
+      user={user}
+      profile={profile}
+      onOpenDex={() => setScreen("categories")}
+      onLogout={handleLogout}
+    />
+  );
+}
 
   if (screen === "categories") {
     return (

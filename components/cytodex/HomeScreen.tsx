@@ -12,6 +12,10 @@ type HomeScreenProps = {
   cards: CytodexCard[];
   categories: string[];
   user: SupabaseUser;
+  profile: {
+    username: string;
+    avatar_key: string;
+  } | null;
   onOpenDex: () => void;
   onLogout: () => Promise<void>;
 };
@@ -61,6 +65,7 @@ export default function HomeScreen({
   cards,
   categories,
   user,
+  profile,
   onOpenDex,
   onLogout,
 }: HomeScreenProps) {
@@ -76,13 +81,13 @@ export default function HomeScreen({
     });
   }, [cards, categories]);
 
-  const displayName =
-    (user.user_metadata?.display_name as string | undefined) ||
-    user.email?.split("@")[0] ||
-    "Microscopeur";
+const displayName =
+  profile?.username ||
+  (user.user_metadata?.display_name as string | undefined) ||
+  user.email?.split("@")[0] ||
+  "Microscopeur";
 
-   const avatarKey =
-    (user.user_metadata?.avatar_key as string | undefined) || "avatar-1";
+const avatarKey = profile?.avatar_key || "avatar-1";
 
   return (
     <div className="min-h-screen bg-[#d9d9d9] p-3 sm:p-5">
