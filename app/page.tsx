@@ -1111,7 +1111,7 @@ export default function Page() {
   } else {
     alert("Compte créé. Tu peux maintenant te connecter.");
     setUsername("");
-    setAvatarKey("");
+    setAvatarKey("avatar-1");
   }
 
   setAuthLoading(false);
