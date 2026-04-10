@@ -124,7 +124,7 @@ const avatarKey = profile?.avatar_key || "avatar-1";
         </div>
 
         <div className="relative mt-4 flex-1 rounded-[6px] border-[4px] border-[#3a2414] bg-[linear-gradient(180deg,#8a5a35,#5c3821)] p-3 shadow-[6px_6px_0_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.18),inset_0_-2px_0_rgba(0,0,0,0.22)]">
-          <div className="relative overflow-hidden rounded-[2px] border-[3px] border-[#2f2f2f] bg-[linear-gradient(180deg,#2a2c2f,#191a1d)] px-5 py-6 h-full flex items-center shadow-[inset_0_0_18px_rgba(255,255,255,0.05),inset_0_-10px_20px_rgba(0,0,0,0.22)]">
+         <div className="relative overflow-hidden rounded-[2px] border-[3px] border-[#2f2f2f] bg-[linear-gradient(180deg,#2a2c2f,#191a1d)] px-5 py-6 h-full flex items-center justify-center">
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(125deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.10)_16%,rgba(255,255,255,0.03)_30%,transparent_44%)]" />
 
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.10)_0%,transparent_18%,transparent_72%,rgba(255,255,255,0.05)_100%)]" />
