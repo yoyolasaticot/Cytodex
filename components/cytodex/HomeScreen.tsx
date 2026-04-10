@@ -124,11 +124,18 @@ const avatarKey = profile?.avatar_key || "avatar-1";
           </div>
         </div>
 
-        <div className="mt-4 border-[6px] border-black bg-black p-4">
-          <div className="relative overflow-hidden border-[3px] border-[#4c4c4c] bg-[linear-gradient(180deg,#2f2f31,#1f1f21)] px-5 py-6">
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(125deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.08)_18%,rgba(255,255,255,0.02)_32%,transparent_45%)]" />
-            <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_22px_rgba(255,255,255,0.08)]" />
+        <div className="mt-4 rounded-[6px] border-[4px] border-[#3a2414] bg-[linear-gradient(180deg,#8a5a35,#5c3821)] p-3 shadow-[6px_6px_0_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.18),inset_0_-2px_0_rgba(0,0,0,0.22)]">
+          <div className="relative overflow-hidden rounded-[2px] border-[3px] border-[#2f2f2f] bg-[linear-gradient(180deg,#2a2c2f,#191a1d)] px-5 py-6 shadow-[inset_0_0_18px_rgba(255,255,255,0.05),inset_0_-10px_20px_rgba(0,0,0,0.22)]">
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(125deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.10)_16%,rgba(255,255,255,0.03)_30%,transparent_44%)]" />
 
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.10)_0%,transparent_18%,transparent_72%,rgba(255,255,255,0.05)_100%)]" />
+
+              <div className="pointer-events-none absolute left-[8%] top-[10%] h-[38%] w-[55%] rotate-[-8deg] rounded-full bg-white/10 blur-2xl" />
+
+             <div className="pointer-events-none absolute right-[10%] top-[18%] h-[24%] w-[20%] rounded-full bg-white/6 blur-xl" />
+
+             <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_26px_rgba(255,255,255,0.08)]" />
+             
             <div className="relative">
              
              <div className="grid grid-cols-2 gap-6 justify-items-center">
