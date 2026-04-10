@@ -15,6 +15,7 @@ import {
 import { CytodexCard, loadCards, saveCard } from "@/lib/cards";
 import {
   Lock,
+  ChevronRight,
   CheckCircle2,
   Trash2,
   RefreshCw,
