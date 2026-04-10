@@ -81,8 +81,7 @@ export default function HomeScreen({
     user.email?.split("@")[0] ||
     "Microscopeur";
 
-  const avatarKey =
-    (user.user_metadata?.avatar_key as string | undefined) || "avatar-1";
+  const avatarKey = "avatar-1";
 
   return (
     <div className="min-h-screen bg-[#d9d9d9] p-3 sm:p-5">
