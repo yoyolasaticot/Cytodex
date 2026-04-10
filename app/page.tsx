@@ -98,6 +98,15 @@ function computeBadge(completed: number, total: number): BadgeLevel {
   return null;
 }
 
+function badgeStyle(level: BadgeLevel): string {
+  if (level === "Or") return "bg-yellow-100 text-yellow-900 border-yellow-300";
+  if (level === "Argent") {
+    return "bg-slate-100 text-slate-800 border-slate-300";
+  }
+  if (level === "Bronze") return "bg-amber-100 text-amber-900 border-amber-300";
+  return "bg-muted text-[#6f6758] border-dashed";
+}
+
 async function fileListToUrls(
   files: FileList | null,
   userId: string
