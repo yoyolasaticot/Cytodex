@@ -130,12 +130,8 @@ const avatarKey = profile?.avatar_key || "avatar-1";
             <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_22px_rgba(255,255,255,0.08)]" />
 
             <div className="relative">
-              <div className="mb-6 flex items-center justify-center gap-2 text-white">
-                <Medal className="h-6 w-6" />
-                <h2 className="text-2xl font-medium tracking-wide">BADGES</h2>
-              </div>
-
-              <div className="grid grid-cols-2 gap-y-8">
+             
+             <div className="grid grid-cols-2 gap-6 justify-items-center">
                 {badgeData.map(({ category, badge }) => {
                   const badgeDisplay = getBadgeDisplay(badge);
 
@@ -152,10 +148,6 @@ const avatarKey = profile?.avatar_key || "avatar-1";
                           {badge ? badgeDisplay.label : ""}
                         </span>
                       </div>
-
-                      <p className="mt-3 max-w-[130px] text-center text-xs uppercase tracking-[0.08em] text-white/85">
-                        {category}
-                      </p>
                     </div>
                   );
                 })}
