@@ -90,8 +90,7 @@ const displayName =
 const avatarKey = profile?.avatar_key || "avatar-1";
 
   return (
-    <div className="min-h-screen bg-[#d9d9d9] p-3 sm:p-5">
-      <div className="mx-auto w-full max-w-md border-[5px] border-black bg-[#efefef] p-4 shadow-[6px_6px_0_#000]">
+    <div className="min-h-screen bg-[#d9d9d9] p-4">
         <div className="mb-3 flex justify-end">
           <Button
             type="button"
@@ -135,7 +134,7 @@ const avatarKey = profile?.avatar_key || "avatar-1";
              <div className="pointer-events-none absolute right-[10%] top-[18%] h-[24%] w-[20%] rounded-full bg-white/6 blur-xl" />
 
              <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_26px_rgba(255,255,255,0.08)]" />
-             
+
             <div className="relative">
              
              <div className="grid grid-cols-2 gap-6 justify-items-center">
@@ -172,7 +171,6 @@ const avatarKey = profile?.avatar_key || "avatar-1";
             Accéder aux fiches
           </Button>
         </div>
-      </div>
     </div>
   );
 }
