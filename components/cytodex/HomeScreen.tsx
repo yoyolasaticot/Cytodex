@@ -132,6 +132,9 @@ const avatarKey = profile?.avatar_key || "avatar-1";
               <div className="pointer-events-none absolute left-[8%] top-[10%] h-[38%] w-[55%] rotate-[-8deg] rounded-full bg-white/10 blur-2xl" />
 
              <div className="pointer-events-none absolute right-[10%] top-[18%] h-[24%] w-[20%] rounded-full bg-white/6 blur-xl" />
+             <div className="pointer-events-none absolute left-[-18%] top-[10%] h-[16%] w-[72%] rotate-[-18deg] bg-white/14 blur-sm" />
+
+<div className="pointer-events-none absolute left-[-10%] top-[18%] h-[8%] w-[58%] rotate-[-18deg] bg-white/8 blur-md" />
 
              <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_26px_rgba(255,255,255,0.08)]" />
 
