@@ -12,9 +12,9 @@ export const largePrimaryButtonClassName =
 const appShellClassName =
   "min-h-screen bg-[radial-gradient(circle_at_top,#164468_0%,#08121f_40%,#040912_100%)] px-4 py-4 sm:px-5 sm:py-6";
 const outerPanelClassName =
-  "mx-auto flex max-w-6xl flex-col gap-4 rounded-[32px] border border-[#86e7ff]/18 bg-[linear-gradient(160deg,rgba(8,19,32,0.92),rgba(5,11,19,0.97))] p-3 shadow-[0_0_0_1px_rgba(134,231,255,0.06),0_34px_96px_rgba(1,6,14,0.56)] backdrop-blur";
+  "mx-auto flex max-w-7xl flex-col gap-4";
 const innerPanelClassName =
-  "relative overflow-hidden rounded-[26px] border border-[#86e7ff]/14 bg-[linear-gradient(180deg,#08131f_0%,#0b1726_52%,#0d1e30_100%)] p-4 text-[#eafcff] shadow-[inset_0_1px_0_rgba(134,231,255,0.08),inset_0_0_42px_rgba(22,77,117,0.14)]";
+  "relative overflow-hidden rounded-[24px] border border-[#86e7ff]/12 bg-[linear-gradient(180deg,rgba(8,19,31,0.8),rgba(11,23,38,0.9))] p-4 text-[#eafcff] shadow-[0_18px_48px_rgba(1,6,14,0.34)] sm:p-5";
 
 type ScreenFrameProps = {
   eyebrow: string;
@@ -36,7 +36,7 @@ export default function ScreenFrame({
   return (
     <div className={appShellClassName}>
       <div className={outerPanelClassName}>
-        <div className="relative overflow-hidden rounded-[24px] border border-[#86e7ff]/22 bg-[linear-gradient(135deg,#071523_0%,#14354f_48%,#1a5674_72%,#ff8c43_100%)] p-5 text-white shadow-[0_22px_60px_rgba(1,8,18,0.38)]">
+        <div className="relative overflow-hidden rounded-[22px] border border-[#86e7ff]/18 bg-[linear-gradient(135deg,#071523_0%,#14354f_48%,#1a5674_72%,#ff8c43_100%)] p-5 text-white shadow-[0_18px_44px_rgba(1,8,18,0.32)]">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,231,255,0.3),transparent_32%),radial-gradient(circle_at_78%_24%,rgba(255,209,102,0.24),transparent_24%),linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent)]" />
           <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:32px_32px]" />
 
@@ -65,11 +65,7 @@ export default function ScreenFrame({
 
         <div className={innerPanelClassName}>
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_18%,transparent_82%,rgba(134,231,255,0.04)_100%),radial-gradient(circle_at_top_left,rgba(134,231,255,0.08),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(243,111,69,0.08),transparent_28%)]" />
-          <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:26px_26px]" />
-          <div className="pointer-events-none absolute inset-y-0 left-5 w-px bg-[linear-gradient(180deg,transparent,rgba(134,231,255,0.3),transparent)]" />
-          <div className="pointer-events-none absolute inset-y-0 right-5 w-px bg-[linear-gradient(180deg,transparent,rgba(255,209,102,0.24),transparent)]" />
-          <div className="pointer-events-none absolute left-[3%] top-[4%] h-20 w-20 rounded-full border border-[#86e7ff]/16 bg-[#0f2030]" />
-          <div className="pointer-events-none absolute right-[5%] top-[8%] h-3 w-24 rounded-full bg-[#ffd166]/35" />
+          <div className="pointer-events-none absolute inset-0 opacity-12 [background-image:linear-gradient(rgba(134,231,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.16)_1px,transparent_1px)] [background-size:32px_32px]" />
           <div className="relative">{children}</div>
         </div>
       </div>

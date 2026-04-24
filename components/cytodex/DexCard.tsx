@@ -265,7 +265,7 @@ export default function DexCard({
   if (!card.found) {
     return (
       <>
-        <Card className="overflow-hidden rounded-[30px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(10,24,38,0.94),rgba(8,19,31,0.94))] text-[#eafcff] shadow-[0_22px_54px_rgba(1,7,15,0.34)]">
+        <Card className="overflow-hidden rounded-[24px] border border-[#86e7ff]/12 bg-[linear-gradient(180deg,rgba(10,24,38,0.76),rgba(8,19,31,0.84))] text-[#eafcff] shadow-[0_18px_40px_rgba(1,7,15,0.28)]">
           <div className="relative flex aspect-[4/3] items-center justify-center border-b border-[#86e7ff]/12 bg-[linear-gradient(135deg,#09131f_0%,#143049_58%,#1e4a69_100%)]">
             <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:24px_24px]" />
             <div className="pointer-events-none absolute left-8 top-8 h-16 w-16 rounded-full bg-[#ffd166]/18 blur-xl" />
@@ -290,14 +290,14 @@ export default function DexCard({
             </div>
           </div>
 
-          <CardContent className="space-y-3 p-6">
+          <CardContent className="space-y-3 p-5">
             <div>
               <p className="text-[11px] uppercase tracking-[0.2em] text-[#9fe9ff]">
                 Echantillon
               </p>
               <h3 className="mt-2 text-2xl font-semibold">{card.title}</h3>
             </div>
-            <div className="rounded-[22px] border border-dashed border-[#86e7ff]/22 bg-[linear-gradient(180deg,rgba(11,24,38,0.9),rgba(8,19,31,0.9))] p-4 text-sm text-[#a6c8d5]">
+            <div className="rounded-[16px] border border-dashed border-[#86e7ff]/18 bg-[#0b1827]/70 p-4 text-sm text-[#a6c8d5]">
               Champs verrouilles jusqu&apos;a validation d&apos;une image acquise en direct.
             </div>
           </CardContent>
@@ -337,9 +337,9 @@ export default function DexCard({
 
   return (
     <>
-      <Card className="overflow-hidden rounded-[30px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(10,24,38,0.94),rgba(8,19,31,0.94))] shadow-[0_22px_54px_rgba(1,7,15,0.34)]">
+      <Card className="overflow-hidden rounded-[24px] border border-[#86e7ff]/12 bg-[linear-gradient(180deg,rgba(10,24,38,0.76),rgba(8,19,31,0.84))] shadow-[0_18px_40px_rgba(1,7,15,0.28)]">
         <div className="relative aspect-[4/3] overflow-hidden border-b border-[#86e7ff]/12 bg-[linear-gradient(135deg,#09131f_0%,#143049_58%,#1e4a69_100%)]">
-          <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:24px_24px]" />
+          <div className="pointer-events-none absolute inset-0 opacity-12 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:32px_32px]" />
           {signedImageUrls[0] ? (
             <button
               type="button"
@@ -360,7 +360,7 @@ export default function DexCard({
           )}
         </div>
 
-        <CardContent className="space-y-5 p-6">
+        <CardContent className="space-y-5 p-5 sm:p-6">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[11px] uppercase tracking-[0.2em] text-[#9fe9ff]">
@@ -406,7 +406,7 @@ export default function DexCard({
               {signedImageUrls.map((imageUrl, index) => (
                 <div
                   key={`${card.id}-${index}`}
-                  className="overflow-hidden rounded-[24px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(11,24,38,0.94),rgba(8,19,31,0.94))] shadow-[0_14px_30px_rgba(1,8,18,0.22)]"
+                  className="overflow-hidden rounded-[16px] bg-[linear-gradient(180deg,rgba(11,24,38,0.72),rgba(8,19,31,0.8))] shadow-[0_10px_24px_rgba(1,8,18,0.18)]"
                 >
                   <div className="aspect-square overflow-hidden">
                     <button
@@ -422,7 +422,7 @@ export default function DexCard({
                     </button>
                   </div>
 
-                  <div className="space-y-2 p-2">
+                  <div className="space-y-2 p-2.5">
                     <Button
                       type="button"
                       variant="outline"
@@ -461,7 +461,7 @@ export default function DexCard({
               Caracteristiques de l&apos;anomalie
             </label>
             <textarea
-              className="min-h-[120px] w-full rounded-[22px] border border-[#86e7ff]/18 bg-[linear-gradient(180deg,rgba(10,24,38,0.96),rgba(8,19,31,0.96))] p-4 text-base text-[#eafcff] outline-none ring-0 transition placeholder:text-[#7594a1] focus:border-[#ffd166]/40 focus:shadow-[0_0_0_4px_rgba(255,209,102,0.12)]"
+              className="min-h-[120px] w-full rounded-[16px] border border-[#86e7ff]/14 bg-[linear-gradient(180deg,rgba(10,24,38,0.82),rgba(8,19,31,0.88))] p-4 text-base text-[#eafcff] outline-none ring-0 transition placeholder:text-[#7594a1] focus:border-[#ffd166]/40 focus:shadow-[0_0_0_4px_rgba(255,209,102,0.12)]"
               value={characteristics}
               onChange={(e) => setCharacteristics(e.target.value)}
               placeholder="Decrire les caracteristiques morphologiques..."
@@ -473,7 +473,7 @@ export default function DexCard({
               Pathologies associees
             </label>
             <textarea
-              className="min-h-[110px] w-full rounded-[22px] border border-[#86e7ff]/18 bg-[linear-gradient(180deg,rgba(10,24,38,0.96),rgba(8,19,31,0.96))] p-4 text-base text-[#eafcff] outline-none ring-0 transition placeholder:text-[#7594a1] focus:border-[#86e7ff]/42 focus:shadow-[0_0_0_4px_rgba(134,231,255,0.12)]"
+              className="min-h-[110px] w-full rounded-[16px] border border-[#86e7ff]/14 bg-[linear-gradient(180deg,rgba(10,24,38,0.82),rgba(8,19,31,0.88))] p-4 text-base text-[#eafcff] outline-none ring-0 transition placeholder:text-[#7594a1] focus:border-[#86e7ff]/42 focus:shadow-[0_0_0_4px_rgba(134,231,255,0.12)]"
               value={pathologies}
               onChange={(e) => setPathologies(e.target.value)}
               placeholder="Renseigner les pathologies dans lesquelles cette anomalie est rencontree..."

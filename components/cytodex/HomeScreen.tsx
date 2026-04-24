@@ -91,7 +91,7 @@ export default function HomeScreen({
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,#15314c_0%,#09131f_44%,#050b14_100%)] px-4 py-4 sm:px-5 sm:py-6">
-      <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl flex-col gap-4">
+      <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-7xl flex-col gap-4">
         <div className="flex justify-end">
           <Button
             type="button"
@@ -131,32 +131,29 @@ export default function HomeScreen({
           </div>
         </div>
 
-        <div className="relative flex-1 overflow-hidden rounded-[32px] border border-[#86e7ff]/14 bg-[linear-gradient(180deg,#08131f_0%,#0b1726_52%,#0d1e30_100%)] px-6 py-8 shadow-[0_24px_54px_rgba(1,7,15,0.38)]">
+        <div className="relative flex-1 overflow-hidden rounded-[24px] border border-[#86e7ff]/12 bg-[linear-gradient(180deg,rgba(8,19,31,0.82),rgba(11,23,38,0.92))] px-5 py-6 shadow-[0_20px_48px_rgba(1,7,15,0.3)] sm:px-6">
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(transparent_0%,rgba(134,231,255,0.02)_48%,transparent_100%),radial-gradient(circle_at_top_left,rgba(134,231,255,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(243,111,69,0.08),transparent_26%)]" />
-          <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:24px_24px]" />
-          <div className="pointer-events-none absolute inset-x-10 top-8 h-px bg-[linear-gradient(90deg,transparent,rgba(134,231,255,0.34),transparent)]" />
-          <div className="pointer-events-none absolute left-[4%] top-[8%] h-20 w-20 rounded-full border border-[#86e7ff]/14 bg-[#0e2031]" />
-          <div className="pointer-events-none absolute right-[8%] top-[12%] h-3 w-24 rounded-full bg-[#ffd166]/40" />
+          <div className="pointer-events-none absolute inset-0 opacity-12 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:28px_28px]" />
 
-          <div className="relative flex h-full min-h-[320px] items-center justify-center">
-            <div className="grid w-full grid-cols-2 gap-6 sm:gap-8">
+          <div className="relative flex h-full min-h-[280px] items-center justify-center">
+            <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-5">
               {badgeData.map(({ category, badge }) => {
                 const badgeDisplay = getBadgeDisplay(badge);
 
                 return (
                   <div
                     key={category}
-                    className="flex flex-col items-center justify-center rounded-[26px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(10,24,38,0.94),rgba(8,19,31,0.92))] p-5 text-center shadow-[0_0_0_1px_rgba(134,231,255,0.05),0_16px_30px_rgba(1,6,14,0.28)] backdrop-blur"
+                    className="flex flex-col items-center justify-center rounded-[18px] border border-[#86e7ff]/14 bg-[linear-gradient(180deg,rgba(10,24,38,0.72),rgba(8,19,31,0.78))] p-4 text-center shadow-[0_12px_24px_rgba(1,6,14,0.2)]"
                   >
                     <div
-                      className={`flex h-24 w-24 items-center justify-center rounded-full border-[3px] text-center text-sm font-semibold ${badgeDisplay.className}`}
+                      className={`flex h-20 w-20 items-center justify-center rounded-full border-[3px] text-center text-sm font-semibold ${badgeDisplay.className}`}
                       title={`${category} - ${badgeDisplay.label}`}
                     >
                       <span className="px-2 leading-tight">
                         {badge ? badgeDisplay.label : ""}
                       </span>
                     </div>
-                    <p className="mt-4 text-sm font-medium text-[#eafcff]">
+                    <p className="mt-3 text-sm font-medium text-[#eafcff]">
                       {category}
                     </p>
                   </div>

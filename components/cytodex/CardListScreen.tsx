@@ -29,7 +29,7 @@ export default function CardListScreen({
     >
       <div className="space-y-3">
         {filteredCards.length === 0 ? (
-          <div className="rounded-[28px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(10,24,38,0.94),rgba(8,19,31,0.94))] p-8 text-center text-[#eafcff] shadow-[0_18px_44px_rgba(1,8,18,0.28)]">
+          <div className="rounded-[22px] bg-[linear-gradient(180deg,rgba(10,24,38,0.8),rgba(8,19,31,0.86))] p-8 text-center text-[#eafcff] shadow-[0_14px_34px_rgba(1,8,18,0.24)]">
             Aucune fiche dans cette categorie.
           </div>
         ) : (
@@ -50,7 +50,7 @@ export default function CardListScreen({
                 key={card.id}
                 type="button"
                 onClick={() => onOpenCard(card.id)}
-                className="group relative flex w-full items-center justify-between gap-4 overflow-hidden rounded-[28px] border border-[#86e7ff]/18 bg-[linear-gradient(180deg,rgba(10,24,38,0.94),rgba(8,19,31,0.94))] p-5 text-left text-[#eafcff] shadow-[0_18px_44px_rgba(1,8,18,0.3)] transition hover:-translate-y-1 hover:border-[#86e7ff]/30 hover:shadow-[0_24px_54px_rgba(1,10,20,0.4)]"
+                className="group relative flex w-full items-center justify-between gap-4 overflow-hidden rounded-[22px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(10,24,38,0.8),rgba(8,19,31,0.86))] p-4 text-left text-[#eafcff] shadow-[0_14px_32px_rgba(1,8,18,0.24)] transition hover:-translate-y-1 hover:border-[#86e7ff]/26 hover:shadow-[0_20px_42px_rgba(1,10,20,0.3)]"
               >
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,231,255,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(243,111,69,0.08),transparent_24%)]" />
                 <div className="relative">
