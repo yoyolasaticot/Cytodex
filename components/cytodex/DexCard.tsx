@@ -38,6 +38,7 @@ export default function DexCard({
   const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [showCompletionReward, setShowCompletionReward] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [translateX, setTranslateX] = useState(0);
   const [translateY, setTranslateY] = useState(0);
@@ -50,6 +51,7 @@ export default function DexCard({
   const panStartRef = useRef({ x: 0, y: 0 });
   const pinchDistanceRef = useRef<number | null>(null);
   const pinchStartZoomRef = useRef(1);
+  const previousCompletedRef = useRef(card.completed);
 
   useEffect(() => {
     setCharacteristics(card.characteristics);
@@ -84,6 +86,21 @@ export default function DexCard({
       videoRef.current.srcObject = cameraStream;
     }
   }, [cameraStream]);
+
+  useEffect(() => {
+    if (card.completed && !previousCompletedRef.current) {
+      setShowCompletionReward(true);
+
+      const timeout = window.setTimeout(() => {
+        setShowCompletionReward(false);
+      }, 2200);
+
+      previousCompletedRef.current = card.completed;
+      return () => window.clearTimeout(timeout);
+    }
+
+    previousCompletedRef.current = card.completed;
+  }, [card.completed]);
 
   const saveForm = () => {
     onUpdate(card.id, {
@@ -336,6 +353,59 @@ export default function DexCard({
 
   return (
     <>
+      {showCompletionReward && (
+        <div className="pointer-events-none fixed inset-0 z-[9998] flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(134,231,255,0.12),transparent_52%)]" />
+          {Array.from({ length: 12 }).map((_, index) => (
+            <span
+              key={index}
+              className="absolute h-2.5 w-14 rounded-full bg-[linear-gradient(90deg,rgba(255,209,102,0),rgba(255,209,102,0.95),rgba(134,231,255,0))] opacity-90"
+              style={
+                {
+                  "--ray-rotate": `${index * 30}deg`,
+                  animation: "cytodex-reward-ray 1.2s ease-out forwards",
+                  animationDelay: `${index * 40}ms`,
+                } as React.CSSProperties & Record<"--ray-rotate", string>
+              }
+            />
+          ))}
+          <div className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-[#86e7ff]/34 bg-[linear-gradient(180deg,rgba(8,24,38,0.96),rgba(11,31,48,0.98))] px-6 py-5 text-center shadow-[0_0_0_1px_rgba(134,231,255,0.16),0_0_42px_rgba(67,190,255,0.18),0_24px_60px_rgba(1,7,15,0.46)]">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(134,231,255,0.22),transparent_42%),linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)]" />
+            <div className="relative flex items-center justify-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#86e7ff]/28 bg-[#0d2132] shadow-[0_0_24px_rgba(67,190,255,0.24)]">
+                <CheckCircle2 className="h-7 w-7 text-[#9fe9ff]" />
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-[#9fe9ff]">
+                  Validation
+                </p>
+                <p className="font-heading text-xl leading-snug text-white">
+                  Fiche completee
+                </p>
+              </div>
+            </div>
+            <p className="relative mt-3 text-sm text-[#b7d7e4]">
+              Observation enregistree. Le CytoDex valide cette entree.
+            </p>
+          </div>
+          <style jsx>{`
+            @keyframes cytodex-reward-ray {
+              0% {
+                opacity: 0;
+                transform: rotate(var(--ray-rotate, 0deg)) translateY(-24px) scaleX(0.35);
+              }
+              25% {
+                opacity: 1;
+              }
+              100% {
+                opacity: 0;
+                transform: rotate(var(--ray-rotate, 0deg)) translateY(-118px) scaleX(1);
+              }
+            }
+          `}</style>
+        </div>
+      )}
+
       <div className="overflow-hidden rounded-[24px]">
         <div className="relative aspect-[4/3] overflow-hidden border-b border-[#86e7ff]/12 bg-[linear-gradient(135deg,#09131f_0%,#143049_58%,#1e4a69_100%)]">
           <div className="pointer-events-none absolute inset-0 opacity-12 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:32px_32px]" />
