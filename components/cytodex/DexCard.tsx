@@ -6,7 +6,6 @@ import { CytodexCard } from "@/lib/cards";
 import { getCardImageUrl } from "@/lib/card-images";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   largePrimaryButtonClassName,
   primaryButtonClassName,
@@ -265,7 +264,7 @@ export default function DexCard({
   if (!card.found) {
     return (
       <>
-        <Card className="overflow-hidden rounded-[24px] border border-[#86e7ff]/12 bg-[linear-gradient(180deg,rgba(10,24,38,0.76),rgba(8,19,31,0.84))] text-[#eafcff] shadow-[0_18px_40px_rgba(1,7,15,0.28)]">
+        <div className="overflow-hidden rounded-[24px] text-[#eafcff]">
           <div className="relative flex aspect-[4/3] items-center justify-center border-b border-[#86e7ff]/12 bg-[linear-gradient(135deg,#09131f_0%,#143049_58%,#1e4a69_100%)]">
             <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:24px_24px]" />
             <div className="pointer-events-none absolute left-8 top-8 h-16 w-16 rounded-full bg-[#ffd166]/18 blur-xl" />
@@ -290,7 +289,7 @@ export default function DexCard({
             </div>
           </div>
 
-          <CardContent className="space-y-3 p-5">
+          <div className="space-y-3 px-1 pt-5">
             <div>
               <p className="text-[11px] uppercase tracking-[0.2em] text-[#9fe9ff]">
                 Echantillon
@@ -300,8 +299,8 @@ export default function DexCard({
             <div className="rounded-[16px] border border-dashed border-[#86e7ff]/18 bg-[#0b1827]/70 p-4 text-sm text-[#a6c8d5]">
               Champs verrouilles jusqu&apos;a validation d&apos;une image acquise en direct.
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {isCapturing && (
           <div className="fixed inset-0 z-[9999] flex h-screen flex-col bg-black">
@@ -337,7 +336,7 @@ export default function DexCard({
 
   return (
     <>
-      <Card className="overflow-hidden rounded-[24px] border border-[#86e7ff]/12 bg-[linear-gradient(180deg,rgba(10,24,38,0.76),rgba(8,19,31,0.84))] shadow-[0_18px_40px_rgba(1,7,15,0.28)]">
+      <div className="overflow-hidden rounded-[24px]">
         <div className="relative aspect-[4/3] overflow-hidden border-b border-[#86e7ff]/12 bg-[linear-gradient(135deg,#09131f_0%,#143049_58%,#1e4a69_100%)]">
           <div className="pointer-events-none absolute inset-0 opacity-12 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:32px_32px]" />
           {signedImageUrls[0] ? (
@@ -360,7 +359,7 @@ export default function DexCard({
           )}
         </div>
 
-        <CardContent className="space-y-5 p-5 sm:p-6">
+        <div className="space-y-5 px-1 pt-5 sm:px-0 sm:pt-6">
           <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
             <div className="min-w-0 flex-1">
               <p className="text-[11px] uppercase tracking-[0.2em] text-[#9fe9ff]">
@@ -483,8 +482,8 @@ export default function DexCard({
           <Button className={`w-full ${largePrimaryButtonClassName}`} onClick={saveForm}>
             Enregistrer la fiche
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {isCapturing && (
         <div className="fixed inset-0 z-[9999] flex h-screen flex-col bg-black">
