@@ -35,6 +35,7 @@ function persistUpdatedCard(updatedCard: CytodexCard) {
 
 export function useCytodexApp() {
   const [screen, setScreen] = useState<Screen>("cover");
+  const [isBooting, setIsBooting] = useState(false);
   const [cards, setCards] = useState<CytodexCard[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
@@ -71,6 +72,9 @@ export function useCytodexApp() {
   }, [categories, selectedCategory]);
 
   const refreshUserData = async (currentUser: SupabaseUser) => {
+    const bootStart = Date.now();
+    setIsBooting(true);
+
     try {
       const userCards = await loadCards(currentUser.id);
 
@@ -86,10 +90,19 @@ export function useCytodexApp() {
 
       setCards(userCards);
       setProfile(profileData);
+
+      const elapsed = Date.now() - bootStart;
+      const remaining = Math.max(0, 1600 - elapsed);
+      if (remaining > 0) {
+        await new Promise((resolve) => window.setTimeout(resolve, remaining));
+      }
+
       setScreen("home");
     } catch (error: unknown) {
       console.error("Error refreshing user data:", error);
       alert("Erreur chargement cartes: " + JSON.stringify(error));
+    } finally {
+      setIsBooting(false);
     }
   };
 
@@ -116,6 +129,7 @@ export function useCytodexApp() {
         setProfile(null);
         setSelectedCategory("");
         setSelectedCardId(null);
+        setIsBooting(false);
         setScreen("cover");
       }
     });
@@ -282,6 +296,7 @@ export function useCytodexApp() {
 
   return {
     screen,
+    isBooting,
     user,
     profile,
     cards,

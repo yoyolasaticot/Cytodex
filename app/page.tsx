@@ -1,6 +1,7 @@
 "use client";
 
 import CardDetailScreen from "@/components/cytodex/CardDetailScreen";
+import BootScreen from "@/components/cytodex/BootScreen";
 import CardListScreen from "@/components/cytodex/CardListScreen";
 import CategoryScreen from "@/components/cytodex/CategoryScreen";
 import CoverScreen from "@/components/cytodex/CoverScreen";
@@ -10,6 +11,7 @@ import { useCytodexApp } from "@/components/cytodex/useCytodexApp";
 export default function Page() {
   const {
     screen,
+    isBooting,
     user,
     profile,
     cards,
@@ -55,6 +57,19 @@ export default function Page() {
         onLogin={handleLogin}
         onSignup={handleSignup}
         onSetMode={setCoverMode}
+      />
+    );
+  }
+
+  if (isBooting) {
+    return (
+      <BootScreen
+        username={
+          profile?.username ||
+          (user.user_metadata?.display_name as string | undefined) ||
+          user.email?.split("@")[0] ||
+          null
+        }
       />
     );
   }
