@@ -25,7 +25,7 @@ export function getBadgeDisplay(level: BadgeLevel) {
     return {
       label: "Or",
       className:
-        "bg-[radial-gradient(circle_at_30%_30%,#fff7bf,#e0b100_68%,#a66b00)] border-[#7a5200] shadow-[0_0_18px_rgba(255,215,0,0.35)]",
+        "bg-[radial-gradient(circle_at_30%_30%,#fff4bf,#ffcc59_48%,#8c5a00_100%)] border-[#ffd166]/70 text-[#261500] shadow-[0_0_20px_rgba(255,209,102,0.35)]",
     };
   }
 
@@ -33,7 +33,7 @@ export function getBadgeDisplay(level: BadgeLevel) {
     return {
       label: "Argent",
       className:
-        "bg-[radial-gradient(circle_at_30%_30%,#ffffff,#cfd5dd_68%,#7a8794)] border-[#5f6872] shadow-[0_0_14px_rgba(220,220,230,0.28)]",
+        "bg-[radial-gradient(circle_at_30%_30%,#eefcff,#a6dfff_52%,#32536a_100%)] border-[#86e7ff]/65 text-[#03131d] shadow-[0_0_18px_rgba(134,231,255,0.28)]",
     };
   }
 
@@ -41,13 +41,13 @@ export function getBadgeDisplay(level: BadgeLevel) {
     return {
       label: "Bronze",
       className:
-        "bg-[radial-gradient(circle_at_30%_30%,#f6d2b1,#b87333_68%,#6c3d18)] border-[#5b3215] shadow-[0_0_14px_rgba(184,115,51,0.25)]",
+        "bg-[radial-gradient(circle_at_30%_30%,#ffd9bf,#f38a54_52%,#6f2f17_100%)] border-[#f7a26e]/65 text-[#240d07] shadow-[0_0_16px_rgba(243,111,69,0.26)]",
     };
   }
 
   return {
     label: "Vide",
     className:
-      "bg-[radial-gradient(circle_at_30%_30%,#cfcfcf,#a9a9a9_68%,#7d7d7d)] border-[#6b6b6b] opacity-75",
+      "bg-[linear-gradient(180deg,rgba(15,33,49,0.92),rgba(8,18,28,0.92))] border-[#86e7ff]/20 text-[#89a7b3] opacity-85",
   };
 }

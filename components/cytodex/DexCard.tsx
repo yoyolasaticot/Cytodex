@@ -265,18 +265,19 @@ export default function DexCard({
   if (!card.found) {
     return (
       <>
-        <Card className="overflow-hidden rounded-[30px] border border-[#1f1f24]/10 bg-white/92 text-[#1f1f24] shadow-[0_22px_54px_rgba(31,31,36,0.1)]">
-          <div className="relative flex aspect-[4/3] items-center justify-center border-b border-[#1f1f24]/8 bg-[linear-gradient(135deg,#fff7ea_0%,#eef5ff_65%,#ffe1d7_100%)]">
-            <div className="pointer-events-none absolute left-8 top-8 h-16 w-16 rounded-full bg-[#ffd66b]/40 blur-xl" />
-            <div className="pointer-events-none absolute right-8 bottom-8 h-20 w-20 rounded-full bg-[#7aa2ff]/25 blur-2xl" />
+        <Card className="overflow-hidden rounded-[30px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(10,24,38,0.94),rgba(8,19,31,0.94))] text-[#eafcff] shadow-[0_22px_54px_rgba(1,7,15,0.34)]">
+          <div className="relative flex aspect-[4/3] items-center justify-center border-b border-[#86e7ff]/12 bg-[linear-gradient(135deg,#09131f_0%,#143049_58%,#1e4a69_100%)]">
+            <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:24px_24px]" />
+            <div className="pointer-events-none absolute left-8 top-8 h-16 w-16 rounded-full bg-[#ffd166]/18 blur-xl" />
+            <div className="pointer-events-none absolute right-8 bottom-8 h-20 w-20 rounded-full bg-[#86e7ff]/18 blur-2xl" />
 
             <div className="p-6 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-[#1f1f24]/10 bg-white/70 shadow-[0_12px_30px_rgba(31,31,36,0.08)]">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-[#86e7ff]/24 bg-[#09131f]/58 shadow-[0_12px_30px_rgba(1,8,18,0.26)]">
                 <Lock className="h-8 w-8" />
               </div>
-              <p className="font-semibold">Fiche non trouvee</p>
-              <p className="mt-2 text-sm text-[#5f6472]">
-                La fiche se debloque uniquement apres une photo prise en direct.
+              <p className="font-semibold">Fiche non detectee</p>
+              <p className="mt-2 text-sm text-[#a6c8d5]">
+                La console s&apos;ouvre apres acquisition d&apos;une photo prise en direct.
               </p>
 
               <Button
@@ -291,13 +292,13 @@ export default function DexCard({
 
           <CardContent className="space-y-3 p-6">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#5f6472]">
-                Anomalie
+              <p className="text-[11px] uppercase tracking-[0.2em] text-[#9fe9ff]">
+                Echantillon
               </p>
               <h3 className="mt-2 text-2xl font-semibold">{card.title}</h3>
             </div>
-            <div className="rounded-[22px] border border-dashed border-[#1f1f24]/15 bg-[linear-gradient(180deg,#fff7ea,#fffdf8)] p-4 text-sm text-[#5f6472]">
-              Champs verrouilles jusqu&apos;a validation d&apos;une image prise en direct.
+            <div className="rounded-[22px] border border-dashed border-[#86e7ff]/22 bg-[linear-gradient(180deg,rgba(11,24,38,0.9),rgba(8,19,31,0.9))] p-4 text-sm text-[#a6c8d5]">
+              Champs verrouilles jusqu&apos;a validation d&apos;une image acquise en direct.
             </div>
           </CardContent>
         </Card>
@@ -336,22 +337,24 @@ export default function DexCard({
 
   return (
     <>
-      <Card className="overflow-hidden rounded-[30px] border border-[#1f1f24]/10 bg-white/92 shadow-[0_22px_54px_rgba(31,31,36,0.1)]">
-        <div className="aspect-[4/3] overflow-hidden border-b border-[#1f1f24]/8 bg-[linear-gradient(135deg,#fff7ea_0%,#eef5ff_65%,#ffe1d7_100%)]">
+      <Card className="overflow-hidden rounded-[30px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(10,24,38,0.94),rgba(8,19,31,0.94))] shadow-[0_22px_54px_rgba(1,7,15,0.34)]">
+        <div className="relative aspect-[4/3] overflow-hidden border-b border-[#86e7ff]/12 bg-[linear-gradient(135deg,#09131f_0%,#143049_58%,#1e4a69_100%)]">
+          <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:24px_24px]" />
           {signedImageUrls[0] ? (
             <button
               type="button"
               onClick={() => openFullscreenImage(signedImageUrls[0])}
-              className="h-full w-full"
+              className="relative h-full w-full"
             >
               <img
                 src={signedImageUrls[0]}
                 alt={card.title}
                 className="h-full w-full object-cover transition duration-300 hover:scale-[1.02]"
               />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(3,8,16,0.7))]" />
             </button>
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-sm text-[#5f6472]">
+            <div className="flex h-full w-full items-center justify-center text-sm text-[#a6c8d5]">
               Aucune image
             </div>
           )}
@@ -360,22 +363,22 @@ export default function DexCard({
         <CardContent className="space-y-5 p-6">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#5f6472]">
-                Anomalie
+              <p className="text-[11px] uppercase tracking-[0.2em] text-[#9fe9ff]">
+                Echantillon
               </p>
-              <h3 className="mt-2 text-2xl font-semibold">{card.title}</h3>
-              <p className="mt-1 text-sm text-[#5f6472]">{card.category}</p>
+              <h3 className="mt-2 text-2xl font-semibold text-white">{card.title}</h3>
+              <p className="mt-1 text-sm text-[#a6c8d5]">{card.category}</p>
             </div>
 
             {card.completed ? (
-              <Badge className="rounded-full border border-[#1f1f24]/10 bg-[#dff1d7] px-3 py-1.5 text-sm text-[#23431b]">
+              <Badge className="rounded-full border border-[#86e7ff]/24 bg-[linear-gradient(180deg,rgba(14,62,74,0.96),rgba(8,28,37,0.96))] px-3 py-1.5 text-sm text-[#b5f5ff]">
                 <CheckCircle2 className="mr-1 h-4 w-4" />
                 Completee
               </Badge>
             ) : (
               <Badge
                 variant="secondary"
-                className="rounded-full border border-[#1f1f24]/10 bg-[#fff6dd] px-3 py-1.5 text-sm text-[#6f5612]"
+                className="rounded-full border border-[#ffd166]/24 bg-[linear-gradient(180deg,rgba(63,45,18,0.96),rgba(27,20,10,0.96))] px-3 py-1.5 text-sm text-[#ffe7ad]"
               >
                 A completer
               </Badge>
@@ -384,7 +387,7 @@ export default function DexCard({
 
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <label className="text-sm font-medium">
+              <label className="text-sm font-medium text-[#eafcff]">
                 Photographies prises en direct
               </label>
 
@@ -399,11 +402,11 @@ export default function DexCard({
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {signedImageUrls.map((imageUrl, index) => (
                 <div
                   key={`${card.id}-${index}`}
-                  className="overflow-hidden rounded-[24px] border border-[#1f1f24]/10 bg-[linear-gradient(180deg,#fff9ee,#ffffff)] shadow-[0_14px_30px_rgba(31,31,36,0.06)]"
+                  className="overflow-hidden rounded-[24px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(11,24,38,0.94),rgba(8,19,31,0.94))] shadow-[0_14px_30px_rgba(1,8,18,0.22)]"
                 >
                   <div className="aspect-square overflow-hidden">
                     <button
@@ -454,11 +457,11 @@ export default function DexCard({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">
+            <label className="text-sm font-medium text-[#eafcff]">
               Caracteristiques de l&apos;anomalie
             </label>
             <textarea
-              className="min-h-[120px] w-full rounded-[22px] border border-[#1f1f24]/12 bg-white/90 p-4 text-base outline-none ring-0 transition focus:border-[#ff7a59] focus:shadow-[0_0_0_4px_rgba(255,122,89,0.12)]"
+              className="min-h-[120px] w-full rounded-[22px] border border-[#86e7ff]/18 bg-[linear-gradient(180deg,rgba(10,24,38,0.96),rgba(8,19,31,0.96))] p-4 text-base text-[#eafcff] outline-none ring-0 transition placeholder:text-[#7594a1] focus:border-[#ffd166]/40 focus:shadow-[0_0_0_4px_rgba(255,209,102,0.12)]"
               value={characteristics}
               onChange={(e) => setCharacteristics(e.target.value)}
               placeholder="Decrire les caracteristiques morphologiques..."
@@ -466,9 +469,11 @@ export default function DexCard({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Pathologies associees</label>
+            <label className="text-sm font-medium text-[#eafcff]">
+              Pathologies associees
+            </label>
             <textarea
-              className="min-h-[110px] w-full rounded-[22px] border border-[#1f1f24]/12 bg-white/90 p-4 text-base outline-none ring-0 transition focus:border-[#7aa2ff] focus:shadow-[0_0_0_4px_rgba(122,162,255,0.14)]"
+              className="min-h-[110px] w-full rounded-[22px] border border-[#86e7ff]/18 bg-[linear-gradient(180deg,rgba(10,24,38,0.96),rgba(8,19,31,0.96))] p-4 text-base text-[#eafcff] outline-none ring-0 transition placeholder:text-[#7594a1] focus:border-[#86e7ff]/42 focus:shadow-[0_0_0_4px_rgba(134,231,255,0.12)]"
               value={pathologies}
               onChange={(e) => setPathologies(e.target.value)}
               placeholder="Renseigner les pathologies dans lesquelles cette anomalie est rencontree..."

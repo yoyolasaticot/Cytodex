@@ -90,24 +90,25 @@ export default function HomeScreen({
   const avatarKey = profile?.avatar_key || "avatar-1";
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#fdf7ef_0%,#fffdf8_48%,#eef6ff_100%)] px-4 py-4 sm:px-5 sm:py-6">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#15314c_0%,#09131f_44%,#050b14_100%)] px-4 py-4 sm:px-5 sm:py-6">
       <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl flex-col gap-4">
         <div className="flex justify-end">
           <Button
             type="button"
             onClick={onLogout}
-            className="rounded-full border border-[#1f1f24] bg-[#fff6dd] px-5 py-2.5 text-sm font-semibold text-[#1f1f24] shadow-[0_10px_30px_rgba(31,31,36,0.12)] transition hover:-translate-y-0.5 hover:bg-[#ffeebd]"
+            className="rounded-full border border-[#86e7ff]/34 bg-[#09131f]/68 px-5 py-2.5 text-sm font-semibold text-[#eafcff] shadow-[0_14px_30px_rgba(2,8,18,0.28)] backdrop-blur transition hover:-translate-y-0.5 hover:border-[#ffd166]/55 hover:text-[#fff3cf]"
           >
             <LogOut className="mr-2 h-4 w-4" />
             Deconnexion
           </Button>
         </div>
 
-        <div className="relative overflow-hidden rounded-[30px] border border-[#1f1f24]/10 bg-[linear-gradient(135deg,#1e2030_0%,#2f4764_52%,#ff7a59_100%)] p-6 text-white shadow-[0_24px_80px_rgba(31,31,36,0.16)]">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.24),transparent_34%),radial-gradient(circle_at_78%_22%,rgba(255,214,107,0.24),transparent_24%)]" />
+        <div className="relative overflow-hidden rounded-[30px] border border-[#86e7ff]/20 bg-[linear-gradient(135deg,#081624_0%,#173853_44%,#f36f45_100%)] p-6 text-white shadow-[0_24px_80px_rgba(1,8,18,0.34)]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,231,255,0.24),transparent_34%),radial-gradient(circle_at_78%_22%,rgba(255,209,102,0.2),transparent_24%)]" />
+          <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:28px_28px]" />
 
           <div className="relative flex items-center gap-5">
-            <div className="shrink-0 rounded-[24px] border border-white/20 bg-white/10 p-3 backdrop-blur">
+            <div className="shrink-0 rounded-[24px] border border-[#86e7ff]/24 bg-[#09131f]/32 p-3 backdrop-blur">
               <img
                 src={`/Avatars/${avatarKey}.png`}
                 alt="avatar"
@@ -116,24 +117,25 @@ export default function HomeScreen({
             </div>
 
             <div className="flex-1 overflow-hidden">
-              <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-white/70">
-                Microscopeur
+              <p className="mb-2 text-[11px] uppercase tracking-[0.22em] text-[#9fe9ff]">
+                Operateur Cytodex
               </p>
               <h1 className="text-3xl font-semibold leading-tight text-white sm:text-4xl">
                 {displayName}
               </h1>
               <p className="mt-2 max-w-xl text-sm text-white/78 sm:text-base">
-                Ton espace Cytodex, entre collection scientifique et petit clin
-                d&apos;oeil aux interfaces cultes des annees 80-90.
+                Tableau de bord du labo retro-futuriste pour repertorier,
+                verifier et completer tes fiches d&apos;observation.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="relative flex-1 overflow-hidden rounded-[32px] border border-[#1f1f24]/10 bg-[linear-gradient(160deg,#fffdf8_0%,#fff7ea_52%,#f2f7ff_100%)] px-6 py-8 shadow-[0_22px_54px_rgba(31,31,36,0.1)]">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,122,89,0.09),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(76,130,255,0.08),transparent_26%)]" />
-          <div className="pointer-events-none absolute left-[4%] top-[8%] h-20 w-20 rounded-full border border-[#1f1f24]/8 bg-white/55" />
-          <div className="pointer-events-none absolute right-[8%] top-[12%] h-3 w-24 rounded-full bg-[#ffd66b]/50" />
+        <div className="relative flex-1 overflow-hidden rounded-[32px] border border-[#86e7ff]/14 bg-[linear-gradient(180deg,#08131f_0%,#0b1726_52%,#0d1e30_100%)] px-6 py-8 shadow-[0_24px_54px_rgba(1,7,15,0.38)]">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(transparent_0%,rgba(134,231,255,0.02)_48%,transparent_100%),radial-gradient(circle_at_top_left,rgba(134,231,255,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(243,111,69,0.08),transparent_26%)]" />
+          <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:24px_24px]" />
+          <div className="pointer-events-none absolute left-[4%] top-[8%] h-20 w-20 rounded-full border border-[#86e7ff]/14 bg-[#0e2031]" />
+          <div className="pointer-events-none absolute right-[8%] top-[12%] h-3 w-24 rounded-full bg-[#ffd166]/40" />
 
           <div className="relative flex h-full min-h-[320px] items-center justify-center">
             <div className="grid w-full grid-cols-2 gap-6 sm:gap-8">
@@ -143,17 +145,17 @@ export default function HomeScreen({
                 return (
                   <div
                     key={category}
-                    className="flex flex-col items-center justify-center rounded-[26px] border border-[#1f1f24]/8 bg-white/72 p-5 text-center shadow-[0_14px_30px_rgba(31,31,36,0.05)] backdrop-blur"
+                    className="flex flex-col items-center justify-center rounded-[26px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(10,24,38,0.94),rgba(8,19,31,0.92))] p-5 text-center shadow-[0_16px_30px_rgba(1,6,14,0.28)] backdrop-blur"
                   >
                     <div
-                      className={`flex h-24 w-24 items-center justify-center rounded-full border-[3px] text-center text-sm font-semibold text-black ${badgeDisplay.className}`}
+                      className={`flex h-24 w-24 items-center justify-center rounded-full border-[3px] text-center text-sm font-semibold ${badgeDisplay.className}`}
                       title={`${category} - ${badgeDisplay.label}`}
                     >
                       <span className="px-2 leading-tight">
                         {badge ? badgeDisplay.label : ""}
                       </span>
                     </div>
-                    <p className="mt-4 text-sm font-medium text-[#1f1f24]">
+                    <p className="mt-4 text-sm font-medium text-[#eafcff]">
                       {category}
                     </p>
                   </div>
@@ -167,7 +169,7 @@ export default function HomeScreen({
           <Button
             type="button"
             onClick={onOpenDex}
-            className="min-h-[72px] w-full rounded-full border border-[#1f1f24] bg-[#fff6dd] text-2xl font-semibold text-[#1f1f24] shadow-[0_18px_40px_rgba(31,31,36,0.12)] transition hover:-translate-y-0.5 hover:bg-[#ffeebd]"
+            className="min-h-[72px] w-full rounded-full border border-[#86e7ff]/34 bg-[linear-gradient(180deg,#10273a,#0d1e2e)] text-2xl font-semibold text-[#e6fbff] shadow-[0_18px_40px_rgba(1,7,15,0.34)] transition hover:-translate-y-0.5 hover:border-[#ffd166]/55 hover:text-[#fff3cf]"
           >
             Acceder aux fiches
           </Button>

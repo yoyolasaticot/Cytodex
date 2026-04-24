@@ -36,7 +36,7 @@ export default function CategoryScreen({
     <ScreenFrame
       eyebrow="CytoDex"
       title="Themes des fiches"
-      description="Choisir un grand cadre nosologique avant de feuilleter les fiches."
+      description="Choisir un secteur d'analyse du labo avant d'ouvrir les fiches d'observation."
       onBack={onBack}
       backLabel="Retour a l'accueil"
     >
@@ -49,12 +49,14 @@ export default function CategoryScreen({
               key={category}
               type="button"
               onClick={() => onOpenCategory(category)}
-              className="group flex h-full flex-col rounded-[28px] border border-[#1f1f24]/10 bg-white/90 p-5 text-left text-[#1f1f24] shadow-[0_18px_44px_rgba(31,31,36,0.08)] transition hover:-translate-y-1 hover:shadow-[0_24px_54px_rgba(31,31,36,0.12)]"
+              className="group relative flex h-full flex-col overflow-hidden rounded-[28px] border border-[#86e7ff]/18 bg-[linear-gradient(180deg,rgba(10,24,38,0.94),rgba(8,19,31,0.94))] p-5 text-left text-[#eafcff] shadow-[0_18px_44px_rgba(1,8,18,0.3)] transition hover:-translate-y-1 hover:border-[#86e7ff]/30 hover:shadow-[0_24px_54px_rgba(1,10,20,0.4)]"
             >
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,231,255,0.09),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(243,111,69,0.08),transparent_24%)]" />
+              <div className="relative">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-[#5f6472]">
-                    Categorie
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-[#9fe9ff]">
+                    Secteur
                   </p>
                   <h2 className="mt-2 text-2xl font-semibold leading-tight">
                     {category}
@@ -70,27 +72,28 @@ export default function CategoryScreen({
               </div>
 
               <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="rounded-[22px] border border-[#1f1f24]/10 bg-[linear-gradient(180deg,#fff7ea,#fffdf8)] p-4">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-[#5f6472]">
+                <div className="rounded-[22px] border border-[#86e7ff]/14 bg-[linear-gradient(180deg,rgba(13,30,47,0.96),rgba(9,20,31,0.96))] p-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-[#89c9db]">
                     Trouvees
                   </p>
-                  <p className="mt-2 text-xl font-semibold text-[#1f1f24]">
+                  <p className="mt-2 text-xl font-semibold text-white">
                     {found} / {total}
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-[#1f1f24]/10 bg-[linear-gradient(180deg,#eef5ff,#fffdf8)] p-4">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-[#5f6472]">
+                <div className="rounded-[22px] border border-[#ffd166]/18 bg-[linear-gradient(180deg,rgba(37,26,16,0.96),rgba(16,12,8,0.96))] p-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-[#ffdca0]">
                     Completees
                   </p>
-                  <p className="mt-2 text-xl font-semibold text-[#1f1f24]">
+                  <p className="mt-2 text-xl font-semibold text-white">
                     {completed} / {total}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-5 flex items-center justify-between rounded-full border border-[#1f1f24]/10 bg-[#fff6dd] px-4 py-3 text-sm font-semibold text-[#1f1f24]">
+              <div className="mt-5 flex items-center justify-between rounded-full border border-[#86e7ff]/18 bg-[#09131f]/58 px-4 py-3 text-sm font-semibold text-[#eafcff]">
                 <span>Ouvrir la categorie</span>
                 <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </div>
               </div>
             </button>
           );

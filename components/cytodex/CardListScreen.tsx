@@ -23,13 +23,13 @@ export default function CardListScreen({
     <ScreenFrame
       eyebrow="CytoDex"
       title={category}
-      description="Selectionner une fiche pour l'ouvrir."
+      description="Selectionner une fiche dans ce secteur d'analyse."
       onBack={onBack}
       backLabel="Retour aux themes"
     >
       <div className="space-y-3">
         {filteredCards.length === 0 ? (
-          <div className="rounded-[28px] border border-[#1f1f24]/10 bg-white/90 p-8 text-center text-[#1f1f24] shadow-[0_18px_44px_rgba(31,31,36,0.08)]">
+          <div className="rounded-[28px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(10,24,38,0.94),rgba(8,19,31,0.94))] p-8 text-center text-[#eafcff] shadow-[0_18px_44px_rgba(1,8,18,0.28)]">
             Aucune fiche dans cette categorie.
           </div>
         ) : (
@@ -40,31 +40,34 @@ export default function CardListScreen({
                 ? "Trouvee"
                 : "Non trouvee";
             const statusClassName = card.completed
-              ? "bg-[#dff1d7] text-[#23431b]"
+              ? "border-[#86e7ff]/30 bg-[linear-gradient(180deg,rgba(14,62,74,0.96),rgba(8,28,37,0.96))] text-[#b5f5ff]"
               : card.found
-                ? "bg-[#fff2cb] text-[#6f5612]"
-                : "bg-[#eef1f6] text-[#4c5563]";
+                ? "border-[#ffd166]/30 bg-[linear-gradient(180deg,rgba(63,45,18,0.96),rgba(27,20,10,0.96))] text-[#ffe7ad]"
+                : "border-[#86e7ff]/18 bg-[linear-gradient(180deg,rgba(21,33,46,0.96),rgba(11,17,24,0.96))] text-[#8ea8b6]";
 
             return (
               <button
                 key={card.id}
                 type="button"
                 onClick={() => onOpenCard(card.id)}
-                className="group flex w-full items-center justify-between gap-4 rounded-[28px] border border-[#1f1f24]/10 bg-white/92 p-5 text-left text-[#1f1f24] shadow-[0_18px_44px_rgba(31,31,36,0.08)] transition hover:-translate-y-1 hover:shadow-[0_24px_54px_rgba(31,31,36,0.12)]"
+                className="group relative flex w-full items-center justify-between gap-4 overflow-hidden rounded-[28px] border border-[#86e7ff]/18 bg-[linear-gradient(180deg,rgba(10,24,38,0.94),rgba(8,19,31,0.94))] p-5 text-left text-[#eafcff] shadow-[0_18px_44px_rgba(1,8,18,0.3)] transition hover:-translate-y-1 hover:border-[#86e7ff]/30 hover:shadow-[0_24px_54px_rgba(1,10,20,0.4)]"
               >
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,231,255,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(243,111,69,0.08),transparent_24%)]" />
+                <div className="relative">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-[#5f6472]">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-[#9fe9ff]">
                     Fiche
                   </p>
                   <p className="mt-2 text-xl font-semibold">{card.title}</p>
                   <span
-                    className={`mt-3 inline-flex rounded-full border border-[#1f1f24]/10 px-3 py-1.5 text-xs font-semibold shadow-[0_8px_20px_rgba(31,31,36,0.06)] ${statusClassName}`}
+                    className={`mt-3 inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold shadow-[0_8px_20px_rgba(1,8,18,0.16)] ${statusClassName}`}
                   >
                     {statusLabel}
                   </span>
                 </div>
+                </div>
 
-                <ChevronRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" />
+                <ChevronRight className="relative h-5 w-5 shrink-0 text-[#ffd166] transition-transform group-hover:translate-x-1" />
               </button>
             );
           })
