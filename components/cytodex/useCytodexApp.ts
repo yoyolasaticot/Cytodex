@@ -1,0 +1,313 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { User as SupabaseUser } from "@supabase/supabase-js";
+import {
+  loginWithEmail,
+  logoutUser,
+  signupWithEmail,
+  validateCredentials,
+  validateProfile,
+} from "@/lib/auth";
+import { CytodexCard, loadCards, saveCard } from "@/lib/cards";
+import { uploadCardImages } from "@/lib/card-images";
+import { supabase } from "@/lib/supabase";
+import { CardUpdate } from "@/components/cytodex/dexTypes";
+
+export type Screen = "cover" | "home" | "categories" | "card_list" | "card_detail";
+
+export type UserProfile = {
+  username: string;
+  avatar_key: string;
+};
+
+function persistUpdatedCard(updatedCard: CytodexCard) {
+  void saveCard(updatedCard).catch((error) => {
+    console.error("Error saving card:", error);
+    alert(
+      "Erreur sauvegarde carte " +
+        updatedCard.id +
+        ": " +
+        JSON.stringify(error)
+    );
+  });
+}
+
+export function useCytodexApp() {
+  const [screen, setScreen] = useState<Screen>("cover");
+  const [cards, setCards] = useState<CytodexCard[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [avatarKey, setAvatarKey] = useState("avatar-1");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [coverMode, setCoverMode] = useState<"menu" | "login" | "signup">("menu");
+
+  const categories = useMemo(() => {
+    return Array.from(new Set(cards.map((card) => card.category)));
+  }, [cards]);
+
+  const selectedCard = useMemo(() => {
+    return cards.find((card) => card.id === selectedCardId) ?? null;
+  }, [cards, selectedCardId]);
+
+  useEffect(() => {
+    if (!selectedCategory && categories.length > 0) {
+      setSelectedCategory(categories[0]);
+    }
+
+    if (
+      selectedCategory &&
+      categories.length > 0 &&
+      !categories.includes(selectedCategory)
+    ) {
+      setSelectedCategory(categories[0]);
+    }
+  }, [categories, selectedCategory]);
+
+  const refreshUserData = async (currentUser: SupabaseUser) => {
+    try {
+      const userCards = await loadCards(currentUser.id);
+
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("username, avatar_key")
+        .eq("id", currentUser.id)
+        .single();
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      setCards(userCards);
+      setProfile(profileData);
+      setScreen("home");
+    } catch (error: unknown) {
+      console.error("Error refreshing user data:", error);
+      alert("Erreur chargement cartes: " + JSON.stringify(error));
+    }
+  };
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data }) => {
+      const currentUser = data.user ?? null;
+      setUser(currentUser);
+
+      if (currentUser) {
+        await refreshUserData(currentUser);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+
+      if (currentUser) {
+        await refreshUserData(currentUser);
+      } else {
+        setCards([]);
+        setProfile(null);
+        setSelectedCategory("");
+        setSelectedCardId(null);
+        setScreen("cover");
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleLogin = async (): Promise<void> => {
+    const validationError = validateCredentials(email, password);
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
+
+    setAuthLoading(true);
+    const { error } = await loginWithEmail(email, password);
+
+    if (error) {
+      alert(error.message);
+    }
+
+    setAuthLoading(false);
+  };
+
+  const handleSignup = async (): Promise<void> => {
+    const credentialsError = validateCredentials(email, password);
+    if (credentialsError) {
+      alert(credentialsError);
+      return;
+    }
+
+    const profileError = validateProfile(username, avatarKey);
+    if (profileError) {
+      alert(profileError);
+      return;
+    }
+
+    setAuthLoading(true);
+
+    const { error } = await signupWithEmail(
+      email,
+      password,
+      username,
+      avatarKey
+    );
+
+    if (error) {
+      alert(error.message);
+    } else {
+      alert("Compte créé. Tu peux maintenant te connecter.");
+      setUsername("");
+      setAvatarKey("avatar-1");
+    }
+
+    setAuthLoading(false);
+  };
+
+  const handleLogout = async (): Promise<void> => {
+    setCoverMode("menu");
+    setProfile(null);
+    await logoutUser();
+  };
+
+  const addPhotos = async (id: number, files: FileList | null): Promise<void> => {
+    if (!user) {
+      alert("Vous devez être connecté pour ajouter des photos.");
+      return;
+    }
+
+    const newUrls = await uploadCardImages(files, user.id);
+    if (newUrls.length === 0) return;
+
+    setCards((prev) => {
+      const updatedCards = prev.map((card) =>
+        card.id === id
+          ? { ...card, found: true, images: [...card.images, ...newUrls] }
+          : card
+      );
+
+      const updatedCard = updatedCards.find((card) => card.id === id);
+      if (updatedCard) {
+        persistUpdatedCard(updatedCard);
+      }
+
+      return updatedCards;
+    });
+  };
+
+  const replacePhoto = async (
+    id: number,
+    index: number,
+    files: FileList | null
+  ): Promise<void> => {
+    if (!user) {
+      alert("Vous devez être connecté pour remplacer une photo.");
+      return;
+    }
+
+    const newUrls = await uploadCardImages(files, user.id);
+    if (newUrls.length === 0) return;
+
+    setCards((prev) => {
+      const updatedCards = prev.map((card) => {
+        if (card.id !== id) return card;
+
+        const nextImages = [...card.images];
+        nextImages[index] = newUrls[0];
+        return { ...card, images: nextImages };
+      });
+
+      const updatedCard = updatedCards.find((card) => card.id === id);
+      if (updatedCard) {
+        persistUpdatedCard(updatedCard);
+      }
+
+      return updatedCards;
+    });
+  };
+
+  const removePhoto = (id: number, index: number): void => {
+    setCards((prev) => {
+      const updatedCards = prev.map((card) => {
+        if (card.id !== id) return card;
+
+        const nextImages = card.images.filter(
+          (_, currentIndex) => currentIndex !== index
+        );
+
+        return {
+          ...card,
+          images: nextImages,
+          found: nextImages.length > 0,
+          completed:
+            nextImages.length > 0 &&
+            Boolean(card.characteristics.trim() && card.pathologies.trim()),
+        };
+      });
+
+      const updatedCard = updatedCards.find((card) => card.id === id);
+      if (updatedCard) {
+        persistUpdatedCard(updatedCard);
+      }
+
+      return updatedCards;
+    });
+  };
+
+  const updateCard = (id: number, patch: CardUpdate): void => {
+    setCards((prev) => {
+      const updatedCards = prev.map((card) =>
+        card.id === id ? { ...card, ...patch } : card
+      );
+
+      const updatedCard = updatedCards.find((card) => card.id === id);
+      if (updatedCard) {
+        persistUpdatedCard(updatedCard);
+      }
+
+      return updatedCards;
+    });
+  };
+
+  return {
+    screen,
+    user,
+    profile,
+    cards,
+    categories,
+    selectedCategory,
+    selectedCard,
+    email,
+    password,
+    username,
+    avatarKey,
+    authLoading,
+    coverMode,
+    setEmail,
+    setPassword,
+    setUsername,
+    setAvatarKey,
+    setCoverMode,
+    setScreen,
+    setSelectedCategory,
+    setSelectedCardId,
+    handleLogin,
+    handleSignup,
+    handleLogout,
+    addPhotos,
+    replacePhoto,
+    removePhoto,
+    updateCard,
+  };
+}
