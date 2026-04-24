@@ -275,7 +275,7 @@ export default function DexCard({
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-[#86e7ff]/24 bg-[#09131f]/58 shadow-[0_12px_30px_rgba(1,8,18,0.26)]">
                 <Lock className="h-8 w-8" />
               </div>
-              <p className="font-semibold">Fiche non detectee</p>
+              <p className="font-semibold leading-snug">Fiche non detectee</p>
               <p className="mt-2 text-sm text-[#a6c8d5]">
                 La console s&apos;ouvre apres acquisition d&apos;une photo prise en direct.
               </p>
@@ -295,7 +295,7 @@ export default function DexCard({
               <p className="text-[11px] uppercase tracking-[0.2em] text-[#9fe9ff]">
                 Echantillon
               </p>
-              <h3 className="mt-2 text-2xl font-semibold">{card.title}</h3>
+              <h3 className="mt-2 break-words text-2xl font-semibold leading-snug">{card.title}</h3>
             </div>
             <div className="rounded-[16px] border border-dashed border-[#86e7ff]/18 bg-[#0b1827]/70 p-4 text-sm text-[#a6c8d5]">
               Champs verrouilles jusqu&apos;a validation d&apos;une image acquise en direct.
@@ -361,13 +361,13 @@ export default function DexCard({
         </div>
 
         <CardContent className="space-y-5 p-5 sm:p-6">
-          <div className="flex items-start justify-between gap-3">
-            <div>
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
+            <div className="min-w-0 flex-1">
               <p className="text-[11px] uppercase tracking-[0.2em] text-[#9fe9ff]">
                 Echantillon
               </p>
-              <h3 className="mt-2 text-2xl font-semibold text-white">{card.title}</h3>
-              <p className="mt-1 text-sm text-[#a6c8d5]">{card.category}</p>
+              <h3 className="mt-2 break-words text-2xl font-semibold leading-snug text-white">{card.title}</h3>
+              <p className="mt-1 break-words text-sm text-[#a6c8d5]">{card.category}</p>
             </div>
 
             {card.completed ? (
@@ -402,7 +402,7 @@ export default function DexCard({
               </Button>
             </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {signedImageUrls.map((imageUrl, index) => (
                 <div
                   key={`${card.id}-${index}`}

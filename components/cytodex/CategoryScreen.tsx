@@ -52,13 +52,13 @@ export default function CategoryScreen({
               className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(10,24,38,0.8),rgba(8,19,31,0.86))] p-4 text-left text-[#eafcff] shadow-[0_14px_32px_rgba(1,8,18,0.24)] transition hover:-translate-y-1 hover:border-[#86e7ff]/26 hover:shadow-[0_20px_42px_rgba(1,10,20,0.3)]"
             >
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,231,255,0.09),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(243,111,69,0.08),transparent_24%)]" />
-              <div className="relative">
+              <div className="relative min-w-0">
               <div className="flex items-start justify-between gap-4">
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-[11px] uppercase tracking-[0.22em] text-[#9fe9ff]">
                     Secteur
                   </p>
-                  <h2 className="mt-2 text-2xl font-semibold leading-tight">
+                  <h2 className="mt-2 break-words text-2xl font-semibold leading-snug">
                     {category}
                   </h2>
                 </div>
@@ -90,8 +90,8 @@ export default function CategoryScreen({
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center justify-between rounded-full bg-[#09131f]/44 px-4 py-3 text-sm font-semibold text-[#eafcff]">
-                <span>Ouvrir la categorie</span>
+              <div className="mt-4 flex items-center justify-between gap-3 rounded-full bg-[#09131f]/44 px-4 py-3 text-sm font-semibold text-[#eafcff]">
+                <span className="min-w-0 break-words">Ouvrir la categorie</span>
                 <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </div>
               </div>

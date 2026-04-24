@@ -107,7 +107,7 @@ export default function HomeScreen({
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,231,255,0.24),transparent_34%),radial-gradient(circle_at_78%_22%,rgba(255,209,102,0.2),transparent_24%)]" />
           <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:28px_28px]" />
 
-          <div className="relative flex items-center gap-5">
+          <div className="relative flex flex-col items-start gap-5 sm:flex-row sm:items-center">
             <div className="shrink-0 rounded-[24px] border border-[#86e7ff]/24 bg-[#09131f]/32 p-3 backdrop-blur shadow-[0_0_24px_rgba(67,190,255,0.12)]">
               <img
                 src={`/Avatars/${avatarKey}.png`}
@@ -116,11 +116,11 @@ export default function HomeScreen({
               />
             </div>
 
-            <div className="flex-1 overflow-hidden">
+            <div className="min-w-0 flex-1">
               <p className="mb-2 text-[11px] uppercase tracking-[0.22em] text-[#9fe9ff]">
                 Operateur Cytodex
               </p>
-              <h1 className="font-heading text-3xl font-semibold uppercase leading-tight text-white sm:text-4xl">
+              <h1 className="font-heading break-words text-3xl font-semibold leading-snug text-white sm:text-4xl">
                 {displayName}
               </h1>
               <p className="mt-2 max-w-xl text-sm text-white/78 sm:text-base">
@@ -136,7 +136,7 @@ export default function HomeScreen({
           <div className="pointer-events-none absolute inset-0 opacity-12 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:28px_28px]" />
 
           <div className="relative flex h-full min-h-[280px] items-center justify-center">
-            <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-5">
+            <div className="grid w-full grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-5">
               {badgeData.map(({ category, badge }) => {
                 const badgeDisplay = getBadgeDisplay(badge);
 
@@ -153,7 +153,7 @@ export default function HomeScreen({
                         {badge ? badgeDisplay.label : ""}
                       </span>
                     </div>
-                    <p className="mt-3 text-sm font-medium text-[#eafcff]">
+                    <p className="mt-3 break-words text-sm leading-snug font-medium text-[#eafcff]">
                       {category}
                     </p>
                   </div>
@@ -167,7 +167,7 @@ export default function HomeScreen({
           <Button
             type="button"
             onClick={onOpenDex}
-            className="min-h-[72px] w-full rounded-full border border-[#86e7ff]/34 bg-[linear-gradient(180deg,#10273a,#0d1e2e)] font-heading text-2xl font-semibold uppercase tracking-[0.14em] text-[#e6fbff] shadow-[0_0_0_1px_rgba(134,231,255,0.08),0_18px_40px_rgba(1,7,15,0.34)] transition hover:-translate-y-0.5 hover:border-[#ffd166]/55 hover:text-[#fff3cf]"
+            className="min-h-[72px] w-full rounded-full border border-[#86e7ff]/34 bg-[linear-gradient(180deg,#10273a,#0d1e2e)] font-heading text-xl font-semibold leading-snug text-[#e6fbff] shadow-[0_0_0_1px_rgba(134,231,255,0.08),0_18px_40px_rgba(1,7,15,0.34)] transition hover:-translate-y-0.5 hover:border-[#ffd166]/55 hover:text-[#fff3cf] sm:text-2xl"
           >
             Acceder aux fiches
           </Button>

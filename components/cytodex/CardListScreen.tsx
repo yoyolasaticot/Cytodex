@@ -53,12 +53,12 @@ export default function CardListScreen({
                 className="group relative flex w-full items-center justify-between gap-4 overflow-hidden rounded-[22px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(10,24,38,0.8),rgba(8,19,31,0.86))] p-4 text-left text-[#eafcff] shadow-[0_14px_32px_rgba(1,8,18,0.24)] transition hover:-translate-y-1 hover:border-[#86e7ff]/26 hover:shadow-[0_20px_42px_rgba(1,10,20,0.3)]"
               >
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,231,255,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(243,111,69,0.08),transparent_24%)]" />
-                <div className="relative">
-                <div>
+                <div className="relative min-w-0 flex-1">
+                <div className="min-w-0">
                   <p className="text-[11px] uppercase tracking-[0.18em] text-[#9fe9ff]">
                     Fiche
                   </p>
-                  <p className="mt-2 text-xl font-semibold">{card.title}</p>
+                  <p className="mt-2 break-words text-xl font-semibold leading-snug">{card.title}</p>
                   <span
                     className={`mt-3 inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold shadow-[0_8px_20px_rgba(1,8,18,0.16)] ${statusClassName}`}
                   >
