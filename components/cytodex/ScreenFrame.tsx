@@ -4,17 +4,17 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 
 export const primaryButtonClassName =
-  "rounded-none border-[3px] border-black bg-[#efe8d2] px-4 py-2 text-sm font-medium text-black shadow-[3px_3px_0_#000] hover:bg-[#e3dbc2]";
+  "inline-flex items-center justify-center rounded-full border border-[#1f1f24] bg-[#fff6dd] px-5 py-2.5 text-sm font-semibold text-[#1f1f24] shadow-[0_10px_30px_rgba(31,31,36,0.12)] transition hover:-translate-y-0.5 hover:bg-[#ffeebd]";
 
 export const largePrimaryButtonClassName =
-  "min-h-[56px] rounded-none border-[4px] border-black bg-[#efe8d2] px-4 text-base font-medium text-black shadow-[4px_4px_0_#000] hover:bg-[#e3dbc2]";
+  "min-h-[56px] rounded-full border border-[#1f1f24] bg-[#fff6dd] px-6 text-base font-semibold text-[#1f1f24] shadow-[0_14px_34px_rgba(31,31,36,0.14)] transition hover:-translate-y-0.5 hover:bg-[#ffeebd]";
 
 const appShellClassName =
-  "min-h-screen bg-[#faf8f1] px-4 py-4 sm:px-5 sm:py-5";
+  "min-h-screen bg-[linear-gradient(180deg,#fdf7ef_0%,#fffdf8_48%,#eef6ff_100%)] px-4 py-4 sm:px-5 sm:py-6";
 const outerPanelClassName =
-  "mx-auto flex max-w-6xl flex-col gap-4 rounded-[6px] border-[4px] border-[#3a2414] bg-[linear-gradient(180deg,#8a5a35,#5c3821)] p-3 shadow-[8px_8px_0_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.16),inset_0_-2px_0_rgba(0,0,0,0.24)]";
+  "mx-auto flex max-w-6xl flex-col gap-4 rounded-[32px] border border-[#1f1f24]/10 bg-[linear-gradient(140deg,rgba(255,255,255,0.94),rgba(255,248,234,0.92))] p-3 shadow-[0_24px_80px_rgba(31,31,36,0.12)] backdrop-blur";
 const innerPanelClassName =
-  "relative overflow-hidden rounded-[2px] border-[3px] border-[#2f2f2f] bg-[linear-gradient(180deg,#2a2c2f,#191a1d)] p-4 text-[#f3ead8] shadow-[inset_0_0_26px_rgba(255,255,255,0.08)]";
+  "relative overflow-hidden rounded-[26px] border border-[#1f1f24]/8 bg-[linear-gradient(160deg,#fffdf8_0%,#fff7ea_55%,#f2f7ff_100%)] p-4 text-[#1f1f24] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]";
 
 type ScreenFrameProps = {
   eyebrow: string;
@@ -36,31 +36,36 @@ export default function ScreenFrame({
   return (
     <div className={appShellClassName}>
       <div className={outerPanelClassName}>
-        <div className="border-[4px] border-black bg-[#e9e2cf] p-4 shadow-[inset_0_0_0_3px_rgba(0,0,0,0.18)]">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="relative overflow-hidden rounded-[24px] border border-[#1f1f24]/10 bg-[linear-gradient(135deg,#1e2030_0%,#2f4764_52%,#ff7a59_100%)] p-5 text-white shadow-[0_16px_48px_rgba(31,31,36,0.18)]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.22),transparent_34%),radial-gradient(circle_at_78%_24%,rgba(255,214,107,0.24),transparent_28%)]" />
+
+          <div className="relative flex flex-wrap items-start justify-between gap-4">
             <div className="max-w-3xl">
-              <p className="mb-2 text-[11px] uppercase tracking-[0.22em] text-black/70">
+              <p className="mb-2 text-[11px] uppercase tracking-[0.22em] text-white/70">
                 {eyebrow}
               </p>
-              <h1 className="text-2xl font-semibold leading-tight text-black sm:text-3xl">
+              <h1 className="text-2xl font-semibold leading-tight text-white sm:text-3xl">
                 {title}
               </h1>
-              <p className="mt-2 text-sm text-black/70 sm:text-base">
+              <p className="mt-2 max-w-2xl text-sm text-white/78 sm:text-base">
                 {description}
               </p>
             </div>
 
-            <Button type="button" onClick={onBack} className={primaryButtonClassName}>
+            <Button
+              type="button"
+              onClick={onBack}
+              className="rounded-full border border-white/35 bg-white/12 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/18"
+            >
               {backLabel}
             </Button>
           </div>
         </div>
 
         <div className={innerPanelClassName}>
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(125deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.08)_16%,rgba(255,255,255,0.03)_30%,transparent_44%)]" />
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,transparent_18%,transparent_72%,rgba(255,255,255,0.05)_100%)]" />
-          <div className="pointer-events-none absolute left-[-12%] top-[8%] h-[14%] w-[65%] rotate-[-14deg] bg-white/10 blur-sm" />
-          <div className="pointer-events-none absolute right-[8%] top-[12%] h-[20%] w-[20%] rounded-full bg-white/6 blur-xl" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,122,89,0.09),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(76,130,255,0.08),transparent_26%)]" />
+          <div className="pointer-events-none absolute left-[3%] top-[4%] h-20 w-20 rounded-full border border-[#1f1f24]/8 bg-white/55" />
+          <div className="pointer-events-none absolute right-[5%] top-[8%] h-3 w-24 rounded-full bg-[#ffd66b]/45" />
           <div className="relative">{children}</div>
         </div>
       </div>

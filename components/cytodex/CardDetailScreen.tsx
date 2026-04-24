@@ -48,7 +48,7 @@ export default function CardDetailScreen({
           onUpdate={onUpdate}
         />
       ) : (
-        <div className="border-[4px] border-black bg-[#efe8d2] p-8 text-center text-black shadow-[4px_4px_0_#000]">
+        <div className="rounded-[28px] border border-[#1f1f24]/10 bg-white/90 p-8 text-center text-[#1f1f24] shadow-[0_18px_44px_rgba(31,31,36,0.08)]">
           Fiche introuvable.
         </div>
       )}

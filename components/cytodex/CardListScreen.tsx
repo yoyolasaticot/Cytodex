@@ -29,7 +29,7 @@ export default function CardListScreen({
     >
       <div className="space-y-3">
         {filteredCards.length === 0 ? (
-          <div className="border-[4px] border-black bg-[#efe8d2] p-6 text-center text-black shadow-[4px_4px_0_#000]">
+          <div className="rounded-[28px] border border-[#1f1f24]/10 bg-white/90 p-8 text-center text-[#1f1f24] shadow-[0_18px_44px_rgba(31,31,36,0.08)]">
             Aucune fiche dans cette categorie.
           </div>
         ) : (
@@ -40,25 +40,25 @@ export default function CardListScreen({
                 ? "Trouvee"
                 : "Non trouvee";
             const statusClassName = card.completed
-              ? "bg-[#d7e7c4] text-[#243616]"
+              ? "bg-[#dff1d7] text-[#23431b]"
               : card.found
-                ? "bg-[#e8ddbc] text-[#4d3316]"
-                : "bg-[#d9d9d9] text-[#3a3a3a]";
+                ? "bg-[#fff2cb] text-[#6f5612]"
+                : "bg-[#eef1f6] text-[#4c5563]";
 
             return (
               <button
                 key={card.id}
                 type="button"
                 onClick={() => onOpenCard(card.id)}
-                className="group flex w-full items-center justify-between gap-4 rounded-[2px] border-[4px] border-black bg-[#efe8d2] p-4 text-left text-black shadow-[4px_4px_0_#000] transition-transform hover:-translate-y-0.5 hover:bg-[#f5efdd]"
+                className="group flex w-full items-center justify-between gap-4 rounded-[28px] border border-[#1f1f24]/10 bg-white/92 p-5 text-left text-[#1f1f24] shadow-[0_18px_44px_rgba(31,31,36,0.08)] transition hover:-translate-y-1 hover:shadow-[0_24px_54px_rgba(31,31,36,0.12)]"
               >
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-black/60">
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-[#5f6472]">
                     Fiche
                   </p>
                   <p className="mt-2 text-xl font-semibold">{card.title}</p>
                   <span
-                    className={`mt-3 inline-flex border-[2px] border-black px-2 py-1 text-xs font-semibold ${statusClassName}`}
+                    className={`mt-3 inline-flex rounded-full border border-[#1f1f24]/10 px-3 py-1.5 text-xs font-semibold shadow-[0_8px_20px_rgba(31,31,36,0.06)] ${statusClassName}`}
                   >
                     {statusLabel}
                   </span>

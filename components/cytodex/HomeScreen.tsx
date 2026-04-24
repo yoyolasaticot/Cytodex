@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { User as SupabaseUser } from "@supabase/supabase-js";
-import { LogOut, Medal } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { CytodexCard } from "@/lib/cards";
 import { Button } from "@/components/ui/button";
 
@@ -58,7 +58,7 @@ function getBadgeDisplay(level: BadgeLevel) {
     label: "Vide",
     className:
       "bg-[radial-gradient(circle_at_30%_30%,#cfcfcf,#a9a9a9_68%,#7d7d7d)] border-[#6b6b6b] opacity-75",
-    };
+  };
 }
 
 export default function HomeScreen({
@@ -81,99 +81,98 @@ export default function HomeScreen({
     });
   }, [cards, categories]);
 
-const displayName =
-  profile?.username ||
-  (user.user_metadata?.display_name as string | undefined) ||
-  user.email?.split("@")[0] ||
-  "Microscopeur";
+  const displayName =
+    profile?.username ||
+    (user.user_metadata?.display_name as string | undefined) ||
+    user.email?.split("@")[0] ||
+    "Microscopeur";
 
-const avatarKey = profile?.avatar_key || "avatar-1";
+  const avatarKey = profile?.avatar_key || "avatar-1";
 
   return (
-    <div className="min-h-screen bg-[#fafafa] px-4 py-3 flex flex-col min-h-0">
-        <div className="mb-3 flex justify-end">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#fdf7ef_0%,#fffdf8_48%,#eef6ff_100%)] px-4 py-4 sm:px-5 sm:py-6">
+      <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl flex-col gap-4">
+        <div className="flex justify-end">
           <Button
             type="button"
             onClick={onLogout}
-            className="rounded-none border-[3px] border-black bg-[#efe8d2] px-4 py-2 text-sm font-medium text-black shadow-[3px_3px_0_#000] hover:bg-[#e3dbc2]"
+            className="rounded-full border border-[#1f1f24] bg-[#fff6dd] px-5 py-2.5 text-sm font-semibold text-[#1f1f24] shadow-[0_10px_30px_rgba(31,31,36,0.12)] transition hover:-translate-y-0.5 hover:bg-[#ffeebd]"
           >
             <LogOut className="mr-2 h-4 w-4" />
-            Déconnexion
+            Deconnexion
           </Button>
         </div>
 
-        <div className="border-[5px] border-black bg-[#e9e2cf] p-4 shadow-[inset_0_0_0_3px_rgba(0,0,0,0.18)]">
-          <div className="flex items-center gap-4">
-            <div className="shrink-0">
-  <img
-  src={`/Avatars/${avatarKey}.png`}
-  alt="avatar"
-  className="h-28 w-28 object-contain drop-shadow-[3px_3px_0_rgba(0,0,0,0.5)]"
-/>
-</div>
+        <div className="relative overflow-hidden rounded-[30px] border border-[#1f1f24]/10 bg-[linear-gradient(135deg,#1e2030_0%,#2f4764_52%,#ff7a59_100%)] p-6 text-white shadow-[0_24px_80px_rgba(31,31,36,0.16)]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.24),transparent_34%),radial-gradient(circle_at_78%_22%,rgba(255,214,107,0.24),transparent_24%)]" />
+
+          <div className="relative flex items-center gap-5">
+            <div className="shrink-0 rounded-[24px] border border-white/20 bg-white/10 p-3 backdrop-blur">
+              <img
+                src={`/Avatars/${avatarKey}.png`}
+                alt="avatar"
+                className="h-24 w-24 object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,0.22)]"
+              />
+            </div>
 
             <div className="flex-1 overflow-hidden">
-              <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-black/70">
+              <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-white/70">
                 Microscopeur
               </p>
-              <h1 className="text-2xl font-semibold leading-tight text-black whitespace-nowrap">
+              <h1 className="text-3xl font-semibold leading-tight text-white sm:text-4xl">
                 {displayName}
               </h1>
+              <p className="mt-2 max-w-xl text-sm text-white/78 sm:text-base">
+                Ton espace Cytodex, entre collection scientifique et petit clin
+                d&apos;oeil aux interfaces cultes des annees 80-90.
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="relative mt-4 flex-1 min-h-0 flex flex-col rounded-[6px] border-[4px] border-[#3a2414] bg-[linear-gradient(180deg,#8a5a35,#5c3821)] p-3 shadow-[6px_6px_0_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.18),inset_0_-2px_0_rgba(0,0,0,0.22)]">
-         <div className="relative flex-1 min-h-0 overflow-hidden rounded-[2px] border-[3px] border-[#2f2f2f] bg-[linear-gradient(180deg,#2a2c2f,#191a1d)] px-5 py-6 flex items-center justify-center">
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(125deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.10)_16%,rgba(255,255,255,0.03)_30%,transparent_44%)]" />
+        <div className="relative flex-1 overflow-hidden rounded-[32px] border border-[#1f1f24]/10 bg-[linear-gradient(160deg,#fffdf8_0%,#fff7ea_52%,#f2f7ff_100%)] px-6 py-8 shadow-[0_22px_54px_rgba(31,31,36,0.1)]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,122,89,0.09),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(76,130,255,0.08),transparent_26%)]" />
+          <div className="pointer-events-none absolute left-[4%] top-[8%] h-20 w-20 rounded-full border border-[#1f1f24]/8 bg-white/55" />
+          <div className="pointer-events-none absolute right-[8%] top-[12%] h-3 w-24 rounded-full bg-[#ffd66b]/50" />
 
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.10)_0%,transparent_18%,transparent_72%,rgba(255,255,255,0.05)_100%)]" />
+          <div className="relative flex h-full min-h-[320px] items-center justify-center">
+            <div className="grid w-full grid-cols-2 gap-6 sm:gap-8">
+              {badgeData.map(({ category, badge }) => {
+                const badgeDisplay = getBadgeDisplay(badge);
 
-              <div className="pointer-events-none absolute left-[8%] top-[10%] h-[38%] w-[55%] rotate-[-8deg] rounded-full bg-white/10 blur-2xl" />
-
-             <div className="pointer-events-none absolute right-[10%] top-[18%] h-[24%] w-[20%] rounded-full bg-white/6 blur-xl" />
-             <div className="pointer-events-none absolute left-[-18%] top-[10%] h-[16%] w-[72%] rotate-[-18deg] bg-white/14 blur-sm" />
-
-<div className="pointer-events-none absolute left-[-10%] top-[18%] h-[8%] w-[58%] rotate-[-18deg] bg-white/8 blur-md" />
-
-             <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_26px_rgba(255,255,255,0.08)]" />
-
-           <div className="relative w-full h-full flex items-center justify-center">
-             
-             <div className="grid grid-cols-2 gap-10 justify-items-center w-full">
-                {badgeData.map(({ category, badge }) => {
-                  const badgeDisplay = getBadgeDisplay(badge);
-
-                  return (
+                return (
+                  <div
+                    key={category}
+                    className="flex flex-col items-center justify-center rounded-[26px] border border-[#1f1f24]/8 bg-white/72 p-5 text-center shadow-[0_14px_30px_rgba(31,31,36,0.05)] backdrop-blur"
+                  >
                     <div
-                      key={category}
-                      className="flex flex-col items-center justify-center"
+                      className={`flex h-24 w-24 items-center justify-center rounded-full border-[3px] text-center text-sm font-semibold text-black ${badgeDisplay.className}`}
+                      title={`${category} - ${badgeDisplay.label}`}
                     >
-                      <div
-                        className={`flex h-28 w-28 items-center justify-center rounded-full border-[3px] text-center text-sm font-semibold text-black ${badgeDisplay.className}`}
-                        title={`${category} — ${badgeDisplay.label}`}
-                      >
-                        <span className="px-2 leading-tight">
-                          {badge ? badgeDisplay.label : ""}
-                        </span>
-                      </div>
+                      <span className="px-2 leading-tight">
+                        {badge ? badgeDisplay.label : ""}
+                      </span>
                     </div>
-                  );
-                })}
-              </div>
+                    <p className="mt-4 text-sm font-medium text-[#1f1f24]">
+                      {category}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
 
-        <div className="mt-5">
+        <div>
           <Button
             type="button"
             onClick={onOpenDex}
-            className="min-h-[72px] w-full rounded-none border-[5px] border-black bg-[#efe8d2] text-2xl font-medium text-black shadow-[5px_5px_0_#000] hover:bg-[#e3dbc2]"
+            className="min-h-[72px] w-full rounded-full border border-[#1f1f24] bg-[#fff6dd] text-2xl font-semibold text-[#1f1f24] shadow-[0_18px_40px_rgba(31,31,36,0.12)] transition hover:-translate-y-0.5 hover:bg-[#ffeebd]"
           >
-            Accéder aux fiches
+            Acceder aux fiches
           </Button>
         </div>
+      </div>
     </div>
   );
 }

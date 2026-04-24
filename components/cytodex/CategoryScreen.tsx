@@ -49,17 +49,18 @@ export default function CategoryScreen({
               key={category}
               type="button"
               onClick={() => onOpenCategory(category)}
-              className="group flex h-full flex-col rounded-[2px] border-[4px] border-black bg-[#efe8d2] p-4 text-left text-black shadow-[4px_4px_0_#000] transition-transform hover:-translate-y-0.5 hover:bg-[#f5efdd]"
+              className="group flex h-full flex-col rounded-[28px] border border-[#1f1f24]/10 bg-white/90 p-5 text-left text-[#1f1f24] shadow-[0_18px_44px_rgba(31,31,36,0.08)] transition hover:-translate-y-1 hover:shadow-[0_24px_54px_rgba(31,31,36,0.12)]"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-black/60">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-[#5f6472]">
                     Categorie
                   </p>
                   <h2 className="mt-2 text-2xl font-semibold leading-tight">
                     {category}
                   </h2>
                 </div>
+
                 <div
                   className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-[3px] text-xs font-semibold ${badgeDisplay.className}`}
                   title={`${category} - ${badgeDisplay.label}`}
@@ -69,25 +70,25 @@ export default function CategoryScreen({
               </div>
 
               <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="border-[3px] border-[#3a2414] bg-[#e6dcc2] p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-black/60">
+                <div className="rounded-[22px] border border-[#1f1f24]/10 bg-[linear-gradient(180deg,#fff7ea,#fffdf8)] p-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-[#5f6472]">
                     Trouvees
                   </p>
-                  <p className="mt-2 text-xl font-semibold">
+                  <p className="mt-2 text-xl font-semibold text-[#1f1f24]">
                     {found} / {total}
                   </p>
                 </div>
-                <div className="border-[3px] border-[#3a2414] bg-[#e6dcc2] p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-black/60">
+                <div className="rounded-[22px] border border-[#1f1f24]/10 bg-[linear-gradient(180deg,#eef5ff,#fffdf8)] p-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-[#5f6472]">
                     Completees
                   </p>
-                  <p className="mt-2 text-xl font-semibold">
+                  <p className="mt-2 text-xl font-semibold text-[#1f1f24]">
                     {completed} / {total}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-5 flex items-center justify-between border-[3px] border-black bg-[#d9ceb0] px-4 py-3 text-sm font-medium shadow-[inset_0_0_0_1px_rgba(0,0,0,0.18)]">
+              <div className="mt-5 flex items-center justify-between rounded-full border border-[#1f1f24]/10 bg-[#fff6dd] px-4 py-3 text-sm font-semibold text-[#1f1f24]">
                 <span>Ouvrir la categorie</span>
                 <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </div>

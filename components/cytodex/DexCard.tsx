@@ -105,7 +105,7 @@ export default function DexCard({
       setIsCapturing(true);
       if (index !== undefined) setReplacingIndex(index);
     } catch (err) {
-      alert("Erreur d'accès à la caméra : " + String(err));
+      alert("Erreur d'acces a la camera : " + String(err));
     }
   };
 
@@ -265,12 +265,17 @@ export default function DexCard({
   if (!card.found) {
     return (
       <>
-        <Card className="overflow-hidden rounded-[2px] border-[4px] border-black bg-[#ddd3b8] text-black shadow-[4px_4px_0_#000]">
-          <div className="flex aspect-[4/3] items-center justify-center border-b-[4px] border-black bg-[repeating-linear-gradient(-45deg,#d5cfbf,#d5cfbf_12px,#cbc4b1_12px,#cbc4b1_24px)]">
+        <Card className="overflow-hidden rounded-[30px] border border-[#1f1f24]/10 bg-white/92 text-[#1f1f24] shadow-[0_22px_54px_rgba(31,31,36,0.1)]">
+          <div className="relative flex aspect-[4/3] items-center justify-center border-b border-[#1f1f24]/8 bg-[linear-gradient(135deg,#fff7ea_0%,#eef5ff_65%,#ffe1d7_100%)]">
+            <div className="pointer-events-none absolute left-8 top-8 h-16 w-16 rounded-full bg-[#ffd66b]/40 blur-xl" />
+            <div className="pointer-events-none absolute right-8 bottom-8 h-20 w-20 rounded-full bg-[#7aa2ff]/25 blur-2xl" />
+
             <div className="p-6 text-center">
-              <Lock className="mx-auto mb-3 h-10 w-10" />
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-[#1f1f24]/10 bg-white/70 shadow-[0_12px_30px_rgba(31,31,36,0.08)]">
+                <Lock className="h-8 w-8" />
+              </div>
               <p className="font-semibold">Fiche non trouvee</p>
-              <p className="mt-1 text-sm">
+              <p className="mt-2 text-sm text-[#5f6472]">
                 La fiche se debloque uniquement apres une photo prise en direct.
               </p>
 
@@ -284,12 +289,14 @@ export default function DexCard({
             </div>
           </div>
 
-          <CardContent className="space-y-3 p-5">
+          <CardContent className="space-y-3 p-6">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em]">Anomalie</p>
-              <h3 className="mt-1 text-2xl font-bold">{card.title}</h3>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-[#5f6472]">
+                Anomalie
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold">{card.title}</h3>
             </div>
-            <div className="border-[3px] border-dashed border-black/35 bg-[#e6dcc2] p-4 text-sm">
+            <div className="rounded-[22px] border border-dashed border-[#1f1f24]/15 bg-[linear-gradient(180deg,#fff7ea,#fffdf8)] p-4 text-sm text-[#5f6472]">
               Champs verrouilles jusqu&apos;a validation d&apos;une image prise en direct.
             </div>
           </CardContent>
@@ -329,8 +336,8 @@ export default function DexCard({
 
   return (
     <>
-      <Card className="overflow-hidden rounded-[2px] border-[4px] border-black bg-[#efe8d2] shadow-[4px_4px_0_#000]">
-        <div className="aspect-[4/3] overflow-hidden border-b-[4px] border-black bg-[#d7d0bc]">
+      <Card className="overflow-hidden rounded-[30px] border border-[#1f1f24]/10 bg-white/92 shadow-[0_22px_54px_rgba(31,31,36,0.1)]">
+        <div className="aspect-[4/3] overflow-hidden border-b border-[#1f1f24]/8 bg-[linear-gradient(135deg,#fff7ea_0%,#eef5ff_65%,#ffe1d7_100%)]">
           {signedImageUrls[0] ? (
             <button
               type="button"
@@ -340,33 +347,36 @@ export default function DexCard({
               <img
                 src={signedImageUrls[0]}
                 alt={card.title}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover transition duration-300 hover:scale-[1.02]"
               />
             </button>
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-sm text-[#6f6758]">
+            <div className="flex h-full w-full items-center justify-center text-sm text-[#5f6472]">
               Aucune image
             </div>
           )}
         </div>
 
-        <CardContent className="space-y-4 p-5">
+        <CardContent className="space-y-5 p-6">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-[#6f6758]">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-[#5f6472]">
                 Anomalie
               </p>
-              <h3 className="mt-1 text-2xl font-bold">{card.title}</h3>
-              <p className="mt-1 text-sm text-[#6f6758]">{card.category}</p>
+              <h3 className="mt-2 text-2xl font-semibold">{card.title}</h3>
+              <p className="mt-1 text-sm text-[#5f6472]">{card.category}</p>
             </div>
 
             {card.completed ? (
-              <Badge className="rounded-full px-3 py-1.5 text-sm">
+              <Badge className="rounded-full border border-[#1f1f24]/10 bg-[#dff1d7] px-3 py-1.5 text-sm text-[#23431b]">
                 <CheckCircle2 className="mr-1 h-4 w-4" />
                 Completee
               </Badge>
             ) : (
-              <Badge variant="secondary" className="rounded-full px-3 py-1.5 text-sm">
+              <Badge
+                variant="secondary"
+                className="rounded-full border border-[#1f1f24]/10 bg-[#fff6dd] px-3 py-1.5 text-sm text-[#6f5612]"
+              >
                 A completer
               </Badge>
             )}
@@ -393,7 +403,7 @@ export default function DexCard({
               {signedImageUrls.map((imageUrl, index) => (
                 <div
                   key={`${card.id}-${index}`}
-                  className="overflow-hidden border-[3px] border-black bg-[#e6dcc2]"
+                  className="overflow-hidden rounded-[24px] border border-[#1f1f24]/10 bg-[linear-gradient(180deg,#fff9ee,#ffffff)] shadow-[0_14px_30px_rgba(31,31,36,0.06)]"
                 >
                   <div className="aspect-square overflow-hidden">
                     <button
@@ -404,7 +414,7 @@ export default function DexCard({
                       <img
                         src={imageUrl}
                         alt={`${card.title} ${index + 1}`}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover transition duration-300 hover:scale-[1.03]"
                       />
                     </button>
                   </div>
@@ -448,7 +458,7 @@ export default function DexCard({
               Caracteristiques de l&apos;anomalie
             </label>
             <textarea
-              className="min-h-[120px] w-full border-[3px] border-black bg-[#f7f1e3] p-3 text-base outline-none"
+              className="min-h-[120px] w-full rounded-[22px] border border-[#1f1f24]/12 bg-white/90 p-4 text-base outline-none ring-0 transition focus:border-[#ff7a59] focus:shadow-[0_0_0_4px_rgba(255,122,89,0.12)]"
               value={characteristics}
               onChange={(e) => setCharacteristics(e.target.value)}
               placeholder="Decrire les caracteristiques morphologiques..."
@@ -458,7 +468,7 @@ export default function DexCard({
           <div className="space-y-2">
             <label className="text-sm font-medium">Pathologies associees</label>
             <textarea
-              className="min-h-[110px] w-full border-[3px] border-black bg-[#f7f1e3] p-3 text-base outline-none"
+              className="min-h-[110px] w-full rounded-[22px] border border-[#1f1f24]/12 bg-white/90 p-4 text-base outline-none ring-0 transition focus:border-[#7aa2ff] focus:shadow-[0_0_0_4px_rgba(122,162,255,0.14)]"
               value={pathologies}
               onChange={(e) => setPathologies(e.target.value)}
               placeholder="Renseigner les pathologies dans lesquelles cette anomalie est rencontree..."
