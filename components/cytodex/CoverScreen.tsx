@@ -145,8 +145,10 @@ const goToMenu = () => {
 };
 
   useEffect(() => {
+    const music = musicRef.current;
+
     return () => {
-      musicRef.current?.pause();
+      music?.pause();
     };
   }, []);
   return (  

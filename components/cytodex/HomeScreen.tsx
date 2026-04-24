@@ -108,7 +108,7 @@ export default function HomeScreen({
           <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:28px_28px]" />
 
           <div className="relative flex items-center gap-5">
-            <div className="shrink-0 rounded-[24px] border border-[#86e7ff]/24 bg-[#09131f]/32 p-3 backdrop-blur">
+            <div className="shrink-0 rounded-[24px] border border-[#86e7ff]/24 bg-[#09131f]/32 p-3 backdrop-blur shadow-[0_0_24px_rgba(67,190,255,0.12)]">
               <img
                 src={`/Avatars/${avatarKey}.png`}
                 alt="avatar"
@@ -120,7 +120,7 @@ export default function HomeScreen({
               <p className="mb-2 text-[11px] uppercase tracking-[0.22em] text-[#9fe9ff]">
                 Operateur Cytodex
               </p>
-              <h1 className="text-3xl font-semibold leading-tight text-white sm:text-4xl">
+              <h1 className="font-heading text-3xl font-semibold uppercase leading-tight text-white sm:text-4xl">
                 {displayName}
               </h1>
               <p className="mt-2 max-w-xl text-sm text-white/78 sm:text-base">
@@ -134,6 +134,7 @@ export default function HomeScreen({
         <div className="relative flex-1 overflow-hidden rounded-[32px] border border-[#86e7ff]/14 bg-[linear-gradient(180deg,#08131f_0%,#0b1726_52%,#0d1e30_100%)] px-6 py-8 shadow-[0_24px_54px_rgba(1,7,15,0.38)]">
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(transparent_0%,rgba(134,231,255,0.02)_48%,transparent_100%),radial-gradient(circle_at_top_left,rgba(134,231,255,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(243,111,69,0.08),transparent_26%)]" />
           <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(134,231,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(134,231,255,0.18)_1px,transparent_1px)] [background-size:24px_24px]" />
+          <div className="pointer-events-none absolute inset-x-10 top-8 h-px bg-[linear-gradient(90deg,transparent,rgba(134,231,255,0.34),transparent)]" />
           <div className="pointer-events-none absolute left-[4%] top-[8%] h-20 w-20 rounded-full border border-[#86e7ff]/14 bg-[#0e2031]" />
           <div className="pointer-events-none absolute right-[8%] top-[12%] h-3 w-24 rounded-full bg-[#ffd166]/40" />
 
@@ -145,7 +146,7 @@ export default function HomeScreen({
                 return (
                   <div
                     key={category}
-                    className="flex flex-col items-center justify-center rounded-[26px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(10,24,38,0.94),rgba(8,19,31,0.92))] p-5 text-center shadow-[0_16px_30px_rgba(1,6,14,0.28)] backdrop-blur"
+                    className="flex flex-col items-center justify-center rounded-[26px] border border-[#86e7ff]/16 bg-[linear-gradient(180deg,rgba(10,24,38,0.94),rgba(8,19,31,0.92))] p-5 text-center shadow-[0_0_0_1px_rgba(134,231,255,0.05),0_16px_30px_rgba(1,6,14,0.28)] backdrop-blur"
                   >
                     <div
                       className={`flex h-24 w-24 items-center justify-center rounded-full border-[3px] text-center text-sm font-semibold ${badgeDisplay.className}`}
@@ -169,7 +170,7 @@ export default function HomeScreen({
           <Button
             type="button"
             onClick={onOpenDex}
-            className="min-h-[72px] w-full rounded-full border border-[#86e7ff]/34 bg-[linear-gradient(180deg,#10273a,#0d1e2e)] text-2xl font-semibold text-[#e6fbff] shadow-[0_18px_40px_rgba(1,7,15,0.34)] transition hover:-translate-y-0.5 hover:border-[#ffd166]/55 hover:text-[#fff3cf]"
+            className="min-h-[72px] w-full rounded-full border border-[#86e7ff]/34 bg-[linear-gradient(180deg,#10273a,#0d1e2e)] font-heading text-2xl font-semibold uppercase tracking-[0.14em] text-[#e6fbff] shadow-[0_0_0_1px_rgba(134,231,255,0.08),0_18px_40px_rgba(1,7,15,0.34)] transition hover:-translate-y-0.5 hover:border-[#ffd166]/55 hover:text-[#fff3cf]"
           >
             Acceder aux fiches
           </Button>
