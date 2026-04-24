@@ -54,20 +54,6 @@ type DexCardProps = {
   onUpdate: (id: number, patch: CardUpdate) => void;
 };
 
-type DexScreenProps = {
-  cards: CytodexCard[];
-  category: string;
-  onBack: () => void;
-  onAddPhotos: (id: number, files: FileList | null) => Promise<void>;
-  onReplacePhoto: (
-    id: number,
-    index: number,
-    files: FileList | null
-  ) => Promise<void>;
-  onRemovePhoto: (id: number, index: number) => void;
-  onUpdate: (id: number, patch: CardUpdate) => void;
-};
-
 type CardListScreenProps = {
   cards: CytodexCard[];
   category: string;
@@ -104,13 +90,97 @@ function computeBadge(completed: number, total: number): BadgeLevel {
   return null;
 }
 
-function badgeStyle(level: BadgeLevel): string {
-  if (level === "Or") return "bg-yellow-100 text-yellow-900 border-yellow-300";
-  if (level === "Argent") {
-    return "bg-slate-100 text-slate-800 border-slate-300";
+function getBadgeDisplay(level: BadgeLevel) {
+  if (level === "Or") {
+    return {
+      label: "Or",
+      className:
+        "bg-[radial-gradient(circle_at_30%_30%,#fff7bf,#e0b100_68%,#a66b00)] border-[#7a5200] shadow-[0_0_18px_rgba(255,215,0,0.35)]",
+    };
   }
-  if (level === "Bronze") return "bg-amber-100 text-amber-900 border-amber-300";
-  return "bg-muted text-[#6f6758] border-dashed";
+
+  if (level === "Argent") {
+    return {
+      label: "Argent",
+      className:
+        "bg-[radial-gradient(circle_at_30%_30%,#ffffff,#cfd5dd_68%,#7a8794)] border-[#5f6872] shadow-[0_0_14px_rgba(220,220,230,0.28)]",
+    };
+  }
+
+  if (level === "Bronze") {
+    return {
+      label: "Bronze",
+      className:
+        "bg-[radial-gradient(circle_at_30%_30%,#f6d2b1,#b87333_68%,#6c3d18)] border-[#5b3215] shadow-[0_0_14px_rgba(184,115,51,0.25)]",
+    };
+  }
+
+  return {
+    label: "Vide",
+    className:
+      "bg-[radial-gradient(circle_at_30%_30%,#cfcfcf,#a9a9a9_68%,#7d7d7d)] border-[#6b6b6b] opacity-75",
+  };
+}
+
+const appShellClassName =
+  "min-h-screen bg-[#faf8f1] px-4 py-4 sm:px-5 sm:py-5";
+const outerPanelClassName =
+  "mx-auto flex max-w-6xl flex-col gap-4 rounded-[6px] border-[4px] border-[#3a2414] bg-[linear-gradient(180deg,#8a5a35,#5c3821)] p-3 shadow-[8px_8px_0_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.16),inset_0_-2px_0_rgba(0,0,0,0.24)]";
+const innerPanelClassName =
+  "relative overflow-hidden rounded-[2px] border-[3px] border-[#2f2f2f] bg-[linear-gradient(180deg,#2a2c2f,#191a1d)] p-4 text-[#f3ead8] shadow-[inset_0_0_26px_rgba(255,255,255,0.08)]";
+const primaryButtonClassName =
+  "rounded-none border-[3px] border-black bg-[#efe8d2] px-4 py-2 text-sm font-medium text-black shadow-[3px_3px_0_#000] hover:bg-[#e3dbc2]";
+const largePrimaryButtonClassName =
+  "min-h-[56px] rounded-none border-[4px] border-black bg-[#efe8d2] px-4 text-base font-medium text-black shadow-[4px_4px_0_#000] hover:bg-[#e3dbc2]";
+
+function ScreenFrame({
+  eyebrow,
+  title,
+  description,
+  onBack,
+  backLabel,
+  children,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+  onBack: () => void;
+  backLabel: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={appShellClassName}>
+      <div className={outerPanelClassName}>
+        <div className="border-[4px] border-black bg-[#e9e2cf] p-4 shadow-[inset_0_0_0_3px_rgba(0,0,0,0.18)]">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="max-w-3xl">
+              <p className="mb-2 text-[11px] uppercase tracking-[0.22em] text-black/70">
+                {eyebrow}
+              </p>
+              <h1 className="text-2xl font-semibold leading-tight text-black sm:text-3xl">
+                {title}
+              </h1>
+              <p className="mt-2 text-sm text-black/70 sm:text-base">
+                {description}
+              </p>
+            </div>
+
+            <Button type="button" onClick={onBack} className={primaryButtonClassName}>
+              {backLabel}
+            </Button>
+          </div>
+        </div>
+
+        <div className={innerPanelClassName}>
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(125deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.08)_16%,rgba(255,255,255,0.03)_30%,transparent_44%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,transparent_18%,transparent_72%,rgba(255,255,255,0.05)_100%)]" />
+          <div className="pointer-events-none absolute left-[-12%] top-[8%] h-[14%] w-[65%] rotate-[-14deg] bg-white/10 blur-sm" />
+          <div className="pointer-events-none absolute right-[8%] top-[12%] h-[20%] w-[20%] rounded-full bg-white/6 blur-xl" />
+          <div className="relative">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 async function fileListToUrls(
@@ -166,7 +236,6 @@ function CategoryScreen({
     const categoryCards = cards.filter((card) => card.category === category);
     const completed = categoryCards.filter((card) => card.completed).length;
     const found = categoryCards.filter((card) => card.found).length;
-
     return {
       category,
       total: categoryCards.length,
@@ -175,76 +244,67 @@ function CategoryScreen({
       badge: computeBadge(completed, categoryCards.length),
     };
   });
-
   return (
-<div className="min-h-screen bg-[#8f9785] p-3 sm:p-6 md:p-8 pb-24">
-  <div className="mx-auto max-w-5xl rounded-[2rem] border border-[#c9bfa8] bg-[#f4ecd8] p-4 sm:p-6 md:p-8 space-y-6 shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <p className="text-sm uppercase tracking-[0.25em] text-[#6f6758]">
-              CytoDex
-            </p>
-            <h2 className="text-3xl font-bold mt-2">Thèmes des fiches</h2>
-            <p className="text-[#6f6758] mt-2">
-              Choisir un grand cadre nosologique avant de feuilleter les fiches.
-            </p>
-          </div>
-
-          <Button variant="outline" className="rounded-2xl" onClick={onBack}>
-            Retour à l’accueil
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          {categoryStats.map(({ category, total, completed, found, badge }) => (
-            <Card
+    <ScreenFrame
+      eyebrow="CytoDex"
+      title="Themes des fiches"
+      description="Choisir un grand cadre nosologique avant de feuilleter les fiches."
+      onBack={onBack}
+      backLabel="Retour a l'accueil"
+    >
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {categoryStats.map(({ category, total, completed, found, badge }) => {
+          const badgeDisplay = getBadgeDisplay(badge);
+          return (
+            <button
               key={category}
-              className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+              type="button"
               onClick={() => onOpenCategory(category)}
+              className="group flex h-full flex-col rounded-[2px] border-[4px] border-black bg-[#efe8d2] p-4 text-left text-black shadow-[4px_4px_0_#000] transition-transform hover:-translate-y-0.5 hover:bg-[#f5efdd]"
             >
-              <CardContent className="p-6 space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-[#6f6758]">
-                      Catégorie
-                    </p>
-                    <h3 className="text-2xl font-bold mt-1">{category}</h3>
-                  </div>
-
-                  <Badge
-                    variant="secondary"
-                    className={`rounded-full px-3 py-1.5 text-sm ${badgeStyle(
-                      badge
-                    )}`}
-                  >
-                    {badge ?? "Aucun badge"}
-                  </Badge>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-black/60">
+                    Categorie
+                  </p>
+                  <h2 className="mt-2 text-2xl font-semibold leading-tight">
+                    {category}
+                  </h2>
                 </div>
-
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-2xl bg-slate-50 p-4 border">
-                    <p className="text-[#6f6758]">Fiches trouvées</p>
-                    <p className="text-xl font-semibold mt-1">
-                      {found} / {total}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl bg-slate-50 p-4 border">
-                    <p className="text-[#6f6758]">Fiches complétées</p>
-                    <p className="text-xl font-semibold mt-1">
-                      {completed} / {total}
-                    </p>
-                  </div>
+                <div
+                  className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-[3px] text-xs font-semibold ${badgeDisplay.className}`}
+                  title={`${category} - ${badgeDisplay.label}`}
+                >
+                  {badge ? badgeDisplay.label : ""}
                 </div>
-
-                <Button className="w-full rounded-2xl min-h-11">
-                  Ouvrir la catégorie <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="border-[3px] border-[#3a2414] bg-[#e6dcc2] p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-black/60">
+                    Trouvees
+                  </p>
+                  <p className="mt-2 text-xl font-semibold">
+                    {found} / {total}
+                  </p>
+                </div>
+                <div className="border-[3px] border-[#3a2414] bg-[#e6dcc2] p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-black/60">
+                    Completees
+                  </p>
+                  <p className="mt-2 text-xl font-semibold">
+                    {completed} / {total}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 flex items-center justify-between border-[3px] border-black bg-[#d9ceb0] px-4 py-3 text-sm font-medium shadow-[inset_0_0_0_1px_rgba(0,0,0,0.18)]">
+                <span>Ouvrir la categorie</span>
+                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </div>
+            </button>
+          );
+        })}
       </div>
-    </div>
+    </ScreenFrame>
   );
 }
 
@@ -495,8 +555,8 @@ const handleViewerTouchEnd = () => {
   if (!card.found) {
     return (
       <>
-        <Card className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border-slate-300 bg-slate-200 text-slate-600">
-          <div className="aspect-[4/3] flex items-center justify-center border-b border-dashed border-slate-400 bg-slate-300">
+        <Card className="overflow-hidden rounded-[2px] border-[4px] border-black bg-[#ddd3b8] text-black shadow-[4px_4px_0_#000]">
+          <div className="flex aspect-[4/3] items-center justify-center border-b-[4px] border-black bg-[repeating-linear-gradient(-45deg,#d5cfbf,#d5cfbf_12px,#cbc4b1_12px,#cbc4b1_24px)]">
             <div className="text-center p-6">
               <Lock className="mx-auto h-10 w-10 mb-3" />
               <p className="font-semibold">Fiche non trouvée</p>
@@ -505,8 +565,7 @@ const handleViewerTouchEnd = () => {
               </p>
 
               <Button
-                className="mt-4 rounded-2xl min-h-11 w-full sm:w-auto"
-                variant="secondary"
+                className={`mt-4 w-full sm:w-auto ${largePrimaryButtonClassName}`}
                 onClick={() => startCamera()}
               >
                 <Camera className="mr-2 h-4 w-4" />
@@ -515,12 +574,12 @@ const handleViewerTouchEnd = () => {
             </div>
           </div>
 
-          <CardContent className="p-5 space-y-3">
+          <CardContent className="space-y-3 p-5">
             <div>
               <p className="text-xs uppercase tracking-[0.2em]">Anomalie</p>
               <h3 className="text-2xl font-bold mt-1">{card.title}</h3>
             </div>
-            <div className="rounded-xl border border-dashed border-slate-400 p-4 text-sm">
+            <div className="border-[3px] border-dashed border-black/35 bg-[#e6dcc2] p-4 text-sm">
               Champs verrouillés jusqu’à validation d’une image prise en direct.
             </div>
           </CardContent>
@@ -560,8 +619,8 @@ const handleViewerTouchEnd = () => {
 
   return (
     <>
-      <Card className="rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
-        <div className="aspect-[4/3] bg-slate-100 overflow-hidden">
+      <Card className="overflow-hidden rounded-[2px] border-[4px] border-black bg-[#efe8d2] shadow-[4px_4px_0_#000]">
+        <div className="aspect-[4/3] overflow-hidden border-b-[4px] border-black bg-[#d7d0bc]">
           {signedImageUrls[0] ? (
   <button
     type="button"
@@ -581,7 +640,7 @@ const handleViewerTouchEnd = () => {
           )}
         </div>
 
-        <CardContent className="p-5 space-y-4">
+        <CardContent className="space-y-4 p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-[#6f6758]">
@@ -617,7 +676,7 @@ const handleViewerTouchEnd = () => {
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-2xl min-h-11"
+                className={primaryButtonClassName}
                 onClick={() => startCamera()}
               >
                 <Camera className="mr-2 h-4 w-4" />
@@ -629,7 +688,7 @@ const handleViewerTouchEnd = () => {
               {signedImageUrls.map((imageUrl, index) => (
                 <div
                   key={`${card.id}-${index}`}
-                  className="rounded-2xl overflow-hidden border bg-slate-50"
+                  className="overflow-hidden border-[3px] border-black bg-[#e6dcc2]"
                 >
                   <div className="aspect-square overflow-hidden">
   <button
@@ -649,7 +708,7 @@ const handleViewerTouchEnd = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full rounded-xl min-h-10 text-xs"
+                      className={primaryButtonClassName}
                       onClick={() => startCamera(index)}
                     >
                       <RefreshCw className="mr-2 h-3.5 w-3.5" />
@@ -659,7 +718,7 @@ const handleViewerTouchEnd = () => {
                     <Button
   type="button"
   variant="outline"
-  className="w-full rounded-xl min-h-10 text-xs"
+  className={primaryButtonClassName}
   onClick={() => {
     const confirmed = window.confirm(
       "Voulez-vous vraiment supprimer cette photo ?"
@@ -684,7 +743,7 @@ const handleViewerTouchEnd = () => {
               Caractéristiques de l’anomalie
             </label>
             <textarea
-              className="min-h-[120px] w-full rounded-2xl border bg-background p-3 text-base sm:text-sm outline-none"
+              className="min-h-[120px] w-full border-[3px] border-black bg-[#f7f1e3] p-3 text-base outline-none"
               value={characteristics}
               onChange={(e) => setCharacteristics(e.target.value)}
               placeholder="Décrire les caractéristiques morphologiques..."
@@ -694,14 +753,14 @@ const handleViewerTouchEnd = () => {
           <div className="space-y-2">
             <label className="text-sm font-medium">Pathologies associées</label>
             <textarea
-              className="min-h-[110px] w-full rounded-2xl border bg-background p-3 text-base sm:text-sm outline-none"
+              className="min-h-[110px] w-full border-[3px] border-black bg-[#f7f1e3] p-3 text-base outline-none"
               value={pathologies}
               onChange={(e) => setPathologies(e.target.value)}
               placeholder="Renseigner les pathologies dans lesquelles cette anomalie est rencontrée..."
             />
           </div>
 
-          <Button className="w-full rounded-2xl min-h-11" onClick={saveForm}>
+          <Button className={`w-full ${largePrimaryButtonClassName}`} onClick={saveForm}>
             Enregistrer la fiche
           </Button>
         </CardContent>
@@ -796,58 +855,56 @@ function CardListScreen({
   onOpenCard,
 }: CardListScreenProps) {
   const filteredCards = cards.filter((c) => c.category === category);
-
   return (
-<div className="min-h-screen bg-[#8f9785] p-3 sm:p-6 md:p-8 pb-24">
-  <div className="mx-auto max-w-5xl rounded-[2rem] border border-[#c9bfa8] bg-[#f4ecd8] p-4 sm:p-6 md:p-8 space-y-6 shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <p className="text-sm uppercase tracking-[0.25em] text-[#6f6758]">
-              CytoDex
-            </p>
-            <h2 className="text-3xl font-bold mt-2">{category}</h2>
-            <p className="text-[#6f6758] mt-2">
-              Sélectionner une fiche pour l’ouvrir.
-            </p>
+    <ScreenFrame
+      eyebrow="CytoDex"
+      title={category}
+      description="Selectionner une fiche pour l'ouvrir."
+      onBack={onBack}
+      backLabel="Retour aux themes"
+    >
+      <div className="space-y-3">
+        {filteredCards.length === 0 ? (
+          <div className="border-[4px] border-black bg-[#efe8d2] p-6 text-center text-black shadow-[4px_4px_0_#000]">
+            Aucune fiche dans cette categorie.
           </div>
-
-          <Button variant="outline" className="rounded-2xl" onClick={onBack}>
-            Retour aux thèmes
-          </Button>
-        </div>
-
-        <Card className="rounded-[1.5rem] sm:rounded-[2rem]">
-          <CardContent className="p-6 space-y-3">
-            {filteredCards.length === 0 ? (
-              <p className="text-[#6f6758]">Aucune fiche dans cette catégorie.</p>
-            ) : (
-              filteredCards.map((card) => (
-                <button
-                  key={card.id}
-                  type="button"
-                  onClick={() => onOpenCard(card.id)}
-                  className="w-full text-left rounded-2xl border bg-white p-4 hover:bg-slate-50 transition"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="font-semibold">{card.title}</p>
-                      <p className="text-sm text-[#6f6758] mt-1">
-                        {card.completed
-                          ? "✅ Complétée"
-                          : card.found
-                          ? "📷 Trouvée"
-                          : "🔒 Non trouvée"}
-                      </p>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-[#6f6758]" />
-                  </div>
-                </button>
-              ))
-            )}
-          </CardContent>
-        </Card>
+        ) : (
+          filteredCards.map((card) => {
+            const statusLabel = card.completed
+              ? "Completee"
+              : card.found
+              ? "Trouvee"
+              : "Non trouvee";
+            const statusClassName = card.completed
+              ? "bg-[#d7e7c4] text-[#243616]"
+              : card.found
+              ? "bg-[#e8ddbc] text-[#4d3316]"
+              : "bg-[#d9d9d9] text-[#3a3a3a]";
+            return (
+              <button
+                key={card.id}
+                type="button"
+                onClick={() => onOpenCard(card.id)}
+                className="group flex w-full items-center justify-between gap-4 rounded-[2px] border-[4px] border-black bg-[#efe8d2] p-4 text-left text-black shadow-[4px_4px_0_#000] transition-transform hover:-translate-y-0.5 hover:bg-[#f5efdd]"
+              >
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-black/60">
+                    Fiche
+                  </p>
+                  <p className="mt-2 text-xl font-semibold">{card.title}</p>
+                  <span
+                    className={`mt-3 inline-flex border-[2px] border-black px-2 py-1 text-xs font-semibold ${statusClassName}`}
+                  >
+                    {statusLabel}
+                  </span>
+                </div>
+                <ChevronRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" />
+              </button>
+            );
+          })
+        )}
       </div>
-    </div>
+    </ScreenFrame>
   );
 }
 
@@ -860,30 +917,32 @@ function CardDetailScreen({
   onUpdate,
 }: CardDetailScreenProps) {
   return (
-<div className="min-h-screen bg-[#8f9785] p-3 sm:p-6 md:p-8 pb-24">
-  <div className="mx-auto max-w-4xl rounded-[2rem] border border-[#c9bfa8] bg-[#f4ecd8] p-4 sm:p-6 md:p-8 space-y-6 shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
-        <Button variant="outline" className="rounded-2xl" onClick={onBack}>
-          Retour à la liste des fiches
-        </Button>
-
-        {card ? (
-          <DexCard
-            key={card.id}
-            card={card}
-            onAddPhotos={onAddPhotos}
-            onReplacePhoto={onReplacePhoto}
-            onRemovePhoto={onRemovePhoto}
-            onUpdate={onUpdate}
-          />
-        ) : (
-          <Card className="rounded-[1.5rem] sm:rounded-[2rem]">
-            <CardContent className="p-8 text-center text-[#6f6758]">
-              Fiche introuvable.
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </div>
+    <ScreenFrame
+      eyebrow="CytoDex"
+      title={card?.title ?? "Fiche detail"}
+      description={
+        card
+          ? `Categorie : ${card.category}`
+          : "La fiche demandee n'a pas pu etre chargee."
+      }
+      onBack={onBack}
+      backLabel="Retour a la liste"
+    >
+      {card ? (
+        <DexCard
+          key={card.id}
+          card={card}
+          onAddPhotos={onAddPhotos}
+          onReplacePhoto={onReplacePhoto}
+          onRemovePhoto={onRemovePhoto}
+          onUpdate={onUpdate}
+        />
+      ) : (
+        <div className="border-[4px] border-black bg-[#efe8d2] p-8 text-center text-black shadow-[4px_4px_0_#000]">
+          Fiche introuvable.
+        </div>
+      )}
+    </ScreenFrame>
   );
 }
 
@@ -937,7 +996,7 @@ const refreshUserData = async (currentUser: SupabaseUser) => {
     setCards(userCards);
     setProfile(profileData);
     setScreen("home");
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error refreshing user data:", error);
     alert("Erreur chargement cartes: " + JSON.stringify(error));
   }
@@ -1243,3 +1302,6 @@ return (
   />
 );
 }
+
+
+
