@@ -2,8 +2,9 @@
 
 import { ChevronRight } from "lucide-react";
 import { CytodexCard } from "@/lib/cards";
+import CategoryBadge from "@/components/cytodex/CategoryBadge";
 import ScreenFrame from "@/components/cytodex/ScreenFrame";
-import { computeBadge, getBadgeDisplay } from "@/components/cytodex/dexTypes";
+import { computeBadge } from "@/components/cytodex/dexTypes";
 
 type CategoryScreenProps = {
   cards: CytodexCard[];
@@ -42,8 +43,6 @@ export default function CategoryScreen({
     >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {categoryStats.map(({ category, total, completed, found, badge }) => {
-          const badgeDisplay = getBadgeDisplay(badge);
-
           return (
             <button
               key={category}
@@ -63,12 +62,7 @@ export default function CategoryScreen({
                   </h2>
                 </div>
 
-                <div
-                  className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-[3px] text-xs font-semibold ${badgeDisplay.className}`}
-                  title={`${category} - ${badgeDisplay.label}`}
-                >
-                  {badge ? badgeDisplay.label : ""}
-                </div>
+                <CategoryBadge category={category} level={badge} />
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-3">
