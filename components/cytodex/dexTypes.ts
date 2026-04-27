@@ -15,22 +15,22 @@ type BadgeImageSet = Record<Exclude<BadgeLevel, null> | "Vide", string>;
 
 const categoryBadgeImages: Record<string, BadgeImageSet> = {
   globulerouge: {
-    Vide: "/badges/globule-rouge/ombre.png",
-    Bronze: "/badges/globule-rouge/bronze.jpg",
-    Argent: "/badges/globule-rouge/argent.jpg",
-    Or: "/badges/globule-rouge/or.jpg",
+    Vide: "/badges/globule-rouge/ombre-cutout.png",
+    Bronze: "/badges/globule-rouge/bronze-cutout.png",
+    Argent: "/badges/globule-rouge/argent-cutout.png",
+    Or: "/badges/globule-rouge/or-cutout.png",
   },
   lymphocyte: {
-    Vide: "/badges/lymphocyte/ombre.png",
-    Bronze: "/badges/lymphocyte/bronze.jpg",
-    Argent: "/badges/lymphocyte/argent.jpg",
-    Or: "/badges/lymphocyte/or.jpg",
+    Vide: "/badges/lymphocyte/ombre-cutout.png",
+    Bronze: "/badges/lymphocyte/bronze-cutout.png",
+    Argent: "/badges/lymphocyte/argent-cutout.png",
+    Or: "/badges/lymphocyte/or-cutout.png",
   },
   myeloide: {
-    Vide: "/badges/myeloide/ombre.jpg",
-    Bronze: "/badges/myeloide/bronze.jpg",
-    Argent: "/badges/myeloide/argent.jpg",
-    Or: "/badges/myeloide/or.jpg",
+    Vide: "/badges/myeloide/ombre-cutout.png",
+    Bronze: "/badges/myeloide/bronze-cutout.png",
+    Argent: "/badges/myeloide/argent-cutout.png",
+    Or: "/badges/myeloide/or-cutout.png",
   },
 };
 

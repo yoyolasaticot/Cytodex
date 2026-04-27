@@ -23,6 +23,15 @@ const sizeClasses = {
   },
 };
 
+const imageGlowFilters: Record<Exclude<BadgeLevel, null> | "Vide", string> = {
+  Vide: "drop-shadow(0 8px 14px rgba(0,0,0,0.32))",
+  Bronze:
+    "drop-shadow(0 0 10px rgba(214,118,52,0.36)) drop-shadow(0 10px 18px rgba(0,0,0,0.34))",
+  Argent:
+    "drop-shadow(0 0 14px rgba(188,224,255,0.46)) drop-shadow(0 0 24px rgba(134,231,255,0.22)) drop-shadow(0 12px 20px rgba(0,0,0,0.34))",
+  Or: "drop-shadow(0 0 16px rgba(255,215,87,0.62)) drop-shadow(0 0 34px rgba(255,183,48,0.36)) drop-shadow(0 14px 24px rgba(0,0,0,0.36))",
+};
+
 export default function CategoryBadge({
   category,
   level,
@@ -30,6 +39,7 @@ export default function CategoryBadge({
 }: CategoryBadgeProps) {
   const badgeDisplay = getBadgeDisplay(level, category);
   const classes = sizeClasses[size];
+  const glowFilter = imageGlowFilters[level ?? "Vide"];
   const [imageAvailable, setImageAvailable] = useState(Boolean(badgeDisplay.imageSrc));
 
   useEffect(() => {
@@ -48,7 +58,8 @@ export default function CategoryBadge({
           width={classes.image}
           height={classes.image}
           unoptimized
-          className="h-full w-full object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]"
+          className={`h-full w-full object-contain ${level ? "" : "opacity-75"}`}
+          style={{ filter: glowFilter }}
           onError={() => setImageAvailable(false)}
         />
       </div>
