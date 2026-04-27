@@ -39,11 +39,23 @@ function normalizeCategoryKey(category: string) {
     .replace(/[^a-z0-9]+/g, "");
 }
 
+function getCategoryBadgeImages(category: string) {
+  const categoryKey = normalizeCategoryKey(category);
+
+  if (categoryBadgeImages[categoryKey]) {
+    return categoryBadgeImages[categoryKey];
+  }
+
+  if (categoryKey.includes("myeloide")) {
+    return categoryBadgeImages.myeloide;
+  }
+
+  return undefined;
+}
+
 export function getBadgeDisplay(level: BadgeLevel, category?: string) {
   const label = level ?? "Vide";
-  const imageSrc = category
-    ? categoryBadgeImages[normalizeCategoryKey(category)]?.[label]
-    : undefined;
+  const imageSrc = category ? getCategoryBadgeImages(category)?.[label] : undefined;
 
   if (level === "Or") {
     return {
