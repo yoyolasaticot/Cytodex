@@ -14,11 +14,23 @@ export type BadgeLevel = "Bronze" | "Argent" | "Or" | null;
 type BadgeImageSet = Record<Exclude<BadgeLevel, null> | "Vide", string>;
 
 const categoryBadgeImages: Record<string, BadgeImageSet> = {
+  globulerouge: {
+    Vide: "/badges/globule-rouge/ombre.png",
+    Bronze: "/badges/globule-rouge/bronze.jpg",
+    Argent: "/badges/globule-rouge/argent.jpg",
+    Or: "/badges/globule-rouge/or.jpg",
+  },
+  lymphocyte: {
+    Vide: "/badges/lymphocyte/ombre.png",
+    Bronze: "/badges/lymphocyte/bronze.jpg",
+    Argent: "/badges/lymphocyte/argent.jpg",
+    Or: "/badges/lymphocyte/or.jpg",
+  },
   myeloide: {
-    Vide: "/badges/myeloide/ombre.jfif",
-    Bronze: "/badges/myeloide/bronze.jfif",
-    Argent: "/badges/myeloide/argent.jfif",
-    Or: "/badges/myeloide/or.jfif",
+    Vide: "/badges/myeloide/ombre.jpg",
+    Bronze: "/badges/myeloide/bronze.jpg",
+    Argent: "/badges/myeloide/argent.jpg",
+    Or: "/badges/myeloide/or.jpg",
   },
 };
 
@@ -44,6 +56,24 @@ function getCategoryBadgeImages(category: string) {
 
   if (categoryBadgeImages[categoryKey]) {
     return categoryBadgeImages[categoryKey];
+  }
+
+  if (
+    categoryKey.includes("globulerouge") ||
+    categoryKey.includes("globulesrouges") ||
+    categoryKey.includes("hematie") ||
+    categoryKey.includes("erythro")
+  ) {
+    return categoryBadgeImages.globulerouge;
+  }
+
+  if (
+    categoryKey.includes("lymphocyte") ||
+    categoryKey.includes("lymphocytes") ||
+    categoryKey.includes("lymhocyte") ||
+    categoryKey.includes("lymhocytes")
+  ) {
+    return categoryBadgeImages.lymphocyte;
   }
 
   if (categoryKey.includes("myeloide")) {

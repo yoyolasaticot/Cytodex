@@ -47,6 +47,7 @@ export default function CategoryBadge({
           alt={`${category} - badge ${badgeDisplay.label}`}
           width={classes.image}
           height={classes.image}
+          unoptimized
           className="h-full w-full object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]"
           onError={() => setImageAvailable(false)}
         />
