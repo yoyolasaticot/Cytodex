@@ -26,17 +26,31 @@ const sizeClasses = {
 const imageGlowFilters: Record<Exclude<BadgeLevel, null> | "Vide", string> = {
   Vide: "drop-shadow(0 8px 14px rgba(0,0,0,0.32))",
   Bronze:
-    "drop-shadow(0 0 10px rgba(214,118,52,0.36)) drop-shadow(0 10px 18px rgba(0,0,0,0.34))",
+    "drop-shadow(0 0 12px rgba(255,146,72,0.56)) drop-shadow(0 0 24px rgba(255,111,43,0.24)) drop-shadow(0 10px 18px rgba(0,0,0,0.34))",
   Argent:
-    "drop-shadow(0 0 14px rgba(188,224,255,0.46)) drop-shadow(0 0 24px rgba(134,231,255,0.22)) drop-shadow(0 12px 20px rgba(0,0,0,0.34))",
-  Or: "drop-shadow(0 0 16px rgba(255,215,87,0.62)) drop-shadow(0 0 34px rgba(255,183,48,0.36)) drop-shadow(0 14px 24px rgba(0,0,0,0.36))",
+    "drop-shadow(0 0 14px rgba(236,249,255,0.72)) drop-shadow(0 0 28px rgba(146,232,255,0.34)) drop-shadow(0 0 42px rgba(255,211,151,0.16)) drop-shadow(0 12px 20px rgba(0,0,0,0.34))",
+  Or: "drop-shadow(0 0 18px rgba(255,235,132,0.86)) drop-shadow(0 0 38px rgba(255,188,48,0.54)) drop-shadow(0 0 58px rgba(255,120,36,0.28)) drop-shadow(0 14px 24px rgba(0,0,0,0.36))",
 };
 
 const imageToneFilters: Record<Exclude<BadgeLevel, null> | "Vide", string> = {
   Vide: "grayscale(1) saturate(0.55) brightness(0.72) contrast(1.08)",
-  Bronze: "sepia(0.82) saturate(1.45) hue-rotate(342deg) brightness(0.92) contrast(1.08)",
-  Argent: "grayscale(1) sepia(0.22) saturate(0.78) hue-rotate(170deg) brightness(1.18) contrast(1.04)",
-  Or: "sepia(0.95) saturate(1.72) hue-rotate(356deg) brightness(1.08) contrast(1.08)",
+  Bronze: "sepia(0.9) saturate(1.95) hue-rotate(342deg) brightness(1.06) contrast(1.13)",
+  Argent: "grayscale(0.9) sepia(0.28) saturate(1.05) hue-rotate(174deg) brightness(1.28) contrast(1.08)",
+  Or: "sepia(0.98) saturate(2.15) hue-rotate(356deg) brightness(1.2) contrast(1.12)",
+};
+
+const badgeShimmerClassNames: Record<Exclude<BadgeLevel, null>, string> = {
+  Bronze:
+    "from-transparent via-[#ffd0a1]/55 to-transparent opacity-75 mix-blend-screen",
+  Argent:
+    "from-transparent via-[#f5fdff]/70 to-transparent opacity-80 mix-blend-screen",
+  Or: "from-transparent via-[#fff2a8]/80 to-transparent opacity-90 mix-blend-screen",
+};
+
+const badgeSparkleClassNames: Record<Exclude<BadgeLevel, null>, string> = {
+  Bronze: "bg-[#ffd0a1] shadow-[0_0_10px_rgba(255,146,72,0.85)]",
+  Argent: "bg-[#f5fdff] shadow-[0_0_12px_rgba(160,232,255,0.9)]",
+  Or: "bg-[#fff2a8] shadow-[0_0_14px_rgba(255,210,72,0.95)]",
 };
 
 export default function CategoryBadge({
@@ -48,6 +62,8 @@ export default function CategoryBadge({
   const classes = sizeClasses[size];
   const badgeLevel = level ?? "Vide";
   const imageFilter = `${imageToneFilters[badgeLevel]} ${imageGlowFilters[badgeLevel]}`;
+  const shimmerClassName = level ? badgeShimmerClassNames[level] : "";
+  const sparkleClassName = level ? badgeSparkleClassNames[level] : "";
   const [imageAvailable, setImageAvailable] = useState(Boolean(badgeDisplay.imageSrc));
 
   useEffect(() => {
@@ -57,7 +73,7 @@ export default function CategoryBadge({
   if (badgeDisplay.imageSrc && imageAvailable) {
     return (
       <div
-        className={`relative shrink-0 ${classes.frame}`}
+        className={`relative shrink-0 overflow-visible ${classes.frame}`}
         title={`${category} - ${badgeDisplay.label}`}
       >
         <Image
@@ -70,6 +86,50 @@ export default function CategoryBadge({
           style={{ filter: imageFilter }}
           onError={() => setImageAvailable(false)}
         />
+        {level ? (
+          <>
+            <span
+              className={`pointer-events-none absolute inset-[-18%] -translate-x-full rotate-12 bg-gradient-to-r ${shimmerClassName} animate-[cytodex-badge-shimmer_2.8s_ease-in-out_infinite]`}
+              aria-hidden="true"
+            />
+            <span
+              className={`pointer-events-none absolute left-[17%] top-[18%] h-1.5 w-1.5 rotate-45 ${sparkleClassName} animate-[cytodex-badge-sparkle_1.9s_ease-in-out_infinite]`}
+              aria-hidden="true"
+            />
+            <span
+              className={`pointer-events-none absolute right-[16%] top-[33%] h-1 w-1 rotate-45 ${sparkleClassName} animate-[cytodex-badge-sparkle_2.25s_ease-in-out_0.45s_infinite]`}
+              aria-hidden="true"
+            />
+            <span
+              className={`pointer-events-none absolute bottom-[18%] left-[30%] h-1 w-1 rotate-45 ${sparkleClassName} animate-[cytodex-badge-sparkle_2.1s_ease-in-out_0.9s_infinite]`}
+              aria-hidden="true"
+            />
+            <style jsx>{`
+              @keyframes cytodex-badge-shimmer {
+                0%,
+                42% {
+                  transform: translateX(-115%) rotate(12deg);
+                }
+                76%,
+                100% {
+                  transform: translateX(115%) rotate(12deg);
+                }
+              }
+
+              @keyframes cytodex-badge-sparkle {
+                0%,
+                100% {
+                  opacity: 0;
+                  transform: scale(0.35) rotate(45deg);
+                }
+                48% {
+                  opacity: 1;
+                  transform: scale(1.35) rotate(45deg);
+                }
+              }
+            `}</style>
+          </>
+        ) : null}
       </div>
     );
   }
