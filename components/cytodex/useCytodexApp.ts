@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import {
   loginWithEmail,
@@ -48,6 +48,8 @@ export function useCytodexApp() {
   const [avatarKey, setAvatarKey] = useState("avatar-1");
   const [authLoading, setAuthLoading] = useState(false);
   const [coverMode, setCoverMode] = useState<"menu" | "login" | "signup">("menu");
+  const activeRefreshIdRef = useRef(0);
+  const hasLoadedUserDataRef = useRef(false);
 
   const categories = useMemo(() => {
     return Array.from(new Set(cards.map((card) => card.category)));
@@ -71,60 +73,95 @@ export function useCytodexApp() {
     }
   }, [categories, selectedCategory]);
 
-  const refreshUserData = async (currentUser: SupabaseUser) => {
+  const refreshUserData = async (
+    currentUser: SupabaseUser,
+    options: { showBoot?: boolean } = {}
+  ) => {
+    const refreshId = activeRefreshIdRef.current + 1;
+    activeRefreshIdRef.current = refreshId;
     const bootStart = Date.now();
-    setIsBooting(true);
+    const showBoot = options.showBoot ?? !hasLoadedUserDataRef.current;
+
+    if (showBoot) {
+      setIsBooting(true);
+    }
 
     try {
-      const userCards = await loadCards(currentUser.id);
+      const [userCards, profileResult] = await Promise.all([
+        loadCards(currentUser.id),
+        supabase
+          .from("profiles")
+          .select("username, avatar_key")
+          .eq("id", currentUser.id)
+          .single(),
+      ]);
 
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("username, avatar_key")
-        .eq("id", currentUser.id)
-        .single();
-
-      if (profileError) {
-        throw profileError;
+      if (profileResult.error) {
+        throw profileResult.error;
       }
+
+      if (refreshId !== activeRefreshIdRef.current) return;
 
       setCards(userCards);
-      setProfile(profileData);
+      setProfile(profileResult.data);
+      hasLoadedUserDataRef.current = true;
 
-      const elapsed = Date.now() - bootStart;
-      const remaining = Math.max(0, 1600 - elapsed);
-      if (remaining > 0) {
-        await new Promise((resolve) => window.setTimeout(resolve, remaining));
+      if (showBoot) {
+        const elapsed = Date.now() - bootStart;
+        const remaining = Math.max(0, 1600 - elapsed);
+        if (remaining > 0) {
+          await new Promise((resolve) => window.setTimeout(resolve, remaining));
+        }
       }
 
-      setScreen("home");
+      if (refreshId !== activeRefreshIdRef.current) return;
+
+      setScreen((currentScreen) =>
+        currentScreen === "cover" ? "home" : currentScreen
+      );
     } catch (error: unknown) {
+      if (refreshId !== activeRefreshIdRef.current) return;
+
       console.error("Error refreshing user data:", error);
-      alert("Erreur chargement cartes: " + JSON.stringify(error));
+      if (!hasLoadedUserDataRef.current) {
+        alert("Erreur chargement cartes: " + JSON.stringify(error));
+      }
     } finally {
-      setIsBooting(false);
+      if (refreshId === activeRefreshIdRef.current && showBoot) {
+        setIsBooting(false);
+      }
     }
   };
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      const currentUser = data.user ?? null;
+    let isMounted = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!isMounted) return;
+
+      const currentUser = data.session?.user ?? null;
       setUser(currentUser);
 
       if (currentUser) {
-        await refreshUserData(currentUser);
+        void refreshUserData(currentUser, { showBoot: !hasLoadedUserDataRef.current });
       }
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
       if (currentUser) {
-        await refreshUserData(currentUser);
+        window.setTimeout(() => {
+          void refreshUserData(currentUser, {
+            showBoot: !hasLoadedUserDataRef.current,
+          });
+        }, 0);
       } else {
+        activeRefreshIdRef.current += 1;
+        hasLoadedUserDataRef.current = false;
         setCards([]);
         setProfile(null);
         setSelectedCategory("");
@@ -135,6 +172,7 @@ export function useCytodexApp() {
     });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
