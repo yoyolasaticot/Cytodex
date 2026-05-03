@@ -77,15 +77,11 @@ export default function HomeScreen({
 
             <div className="min-w-0 flex-1">
               <p className="mb-2 text-[11px] uppercase tracking-[0.22em] text-[#9fe9ff]">
-                Operateur Cytodex
+                Microscopeur
               </p>
               <h1 className="font-heading break-words text-3xl font-semibold leading-snug text-white sm:text-4xl">
                 {displayName}
               </h1>
-              <p className="mt-2 max-w-xl text-sm text-white/78 sm:text-base">
-                Tableau de bord du labo retro-futuriste pour repertorier,
-                verifier et completer tes fiches d&apos;observation.
-              </p>
             </div>
           </div>
         </div>
