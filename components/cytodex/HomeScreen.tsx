@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { LogOut } from "lucide-react";
 import { CytodexCard } from "@/lib/cards";
@@ -28,6 +28,10 @@ export default function HomeScreen({
   onOpenDex,
   onLogout,
 }: HomeScreenProps) {
+  const nameFrameRef = useRef<HTMLDivElement>(null);
+  const nameTextRef = useRef<HTMLHeadingElement>(null);
+  const [nameFontSize, setNameFontSize] = useState(30);
+
   const badgeData = useMemo(() => {
     return categories.map((category) => {
       const inCategory = cards.filter((c) => c.category === category);
@@ -47,6 +51,40 @@ export default function HomeScreen({
     "Microscopeur";
 
   const avatarKey = profile?.avatar_key || "avatar-1";
+
+  useLayoutEffect(() => {
+    const nameFrame = nameFrameRef.current;
+    const nameText = nameTextRef.current;
+    if (!nameFrame || !nameText) return;
+
+    const updateNameSize = () => {
+      const maxFontSize = window.matchMedia("(min-width: 640px)").matches
+        ? 36
+        : 30;
+      const minFontSize = 16;
+
+      nameText.style.fontSize = `${maxFontSize}px`;
+      const availableWidth = nameFrame.clientWidth;
+      const neededWidth = nameText.scrollWidth;
+      const nextFontSize =
+        neededWidth > availableWidth
+          ? Math.max(minFontSize, Math.floor((maxFontSize * availableWidth) / neededWidth))
+          : maxFontSize;
+
+      setNameFontSize(nextFontSize);
+    };
+
+    updateNameSize();
+
+    const resizeObserver = new ResizeObserver(updateNameSize);
+    resizeObserver.observe(nameFrame);
+    window.addEventListener("resize", updateNameSize);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateNameSize);
+    };
+  }, [displayName]);
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,#15314c_0%,#09131f_44%,#050b14_100%)] px-4 py-4 sm:px-5 sm:py-6">
@@ -74,11 +112,15 @@ export default function HomeScreen({
             />
           </div>
 
-          <div className="relative min-w-0 pr-36 sm:pr-48">
+          <div ref={nameFrameRef} className="relative min-w-0 pr-36 sm:pr-48">
             <p className="mb-2 text-[11px] uppercase tracking-[0.22em] text-[#9fe9ff]">
               Microscopeur
             </p>
-            <h1 className="font-heading break-words text-3xl font-semibold leading-snug text-white sm:text-4xl">
+            <h1
+              ref={nameTextRef}
+              className="font-heading overflow-hidden whitespace-nowrap font-semibold leading-snug text-white"
+              style={{ fontSize: nameFontSize }}
+            >
               {displayName}
             </h1>
           </div>
