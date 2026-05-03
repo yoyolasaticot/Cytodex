@@ -20,6 +20,12 @@ const categoryBadgeImages: Record<string, BadgeImageSet> = {
     Argent: "/badges/globule-rouge/argent-cutout.png",
     Or: "/badges/globule-rouge/or-cutout.png",
   },
+  plaquette: {
+    Vide: "/badges/plaquette/ombre-cutout.png",
+    Bronze: "/badges/plaquette/bronze-cutout.png",
+    Argent: "/badges/plaquette/argent-cutout.png",
+    Or: "/badges/plaquette/or-cutout.png",
+  },
   lymphocyte: {
     Vide: "/badges/lymphocyte/ombre-cutout.png",
     Bronze: "/badges/lymphocyte/bronze-cutout.png",
@@ -78,6 +84,15 @@ function getCategoryBadgeImages(category: string) {
 
   if (categoryKey.includes("myeloide")) {
     return categoryBadgeImages.myeloide;
+  }
+
+  if (
+    categoryKey.includes("plaquette") ||
+    categoryKey.includes("plaquettes") ||
+    categoryKey.includes("platelet") ||
+    categoryKey.includes("thrombocyte")
+  ) {
+    return categoryBadgeImages.plaquette;
   }
 
   return undefined;

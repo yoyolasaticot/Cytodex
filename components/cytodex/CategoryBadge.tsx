@@ -26,10 +26,17 @@ const sizeClasses = {
 const imageGlowFilters: Record<Exclude<BadgeLevel, null> | "Vide", string> = {
   Vide: "drop-shadow(0 8px 14px rgba(0,0,0,0.32))",
   Bronze:
-    "drop-shadow(0 0 12px rgba(214,118,52,0.58)) drop-shadow(0 0 24px rgba(255,146,64,0.28)) drop-shadow(0 10px 18px rgba(0,0,0,0.34))",
+    "drop-shadow(0 0 10px rgba(214,118,52,0.36)) drop-shadow(0 10px 18px rgba(0,0,0,0.34))",
   Argent:
-    "drop-shadow(0 0 16px rgba(220,242,255,0.68)) drop-shadow(0 0 30px rgba(134,231,255,0.38)) drop-shadow(0 0 44px rgba(188,224,255,0.18)) drop-shadow(0 12px 20px rgba(0,0,0,0.34))",
-  Or: "drop-shadow(0 0 18px rgba(255,235,132,0.9)) drop-shadow(0 0 38px rgba(255,196,48,0.58)) drop-shadow(0 0 64px rgba(255,145,31,0.34)) drop-shadow(0 14px 24px rgba(0,0,0,0.36))",
+    "drop-shadow(0 0 14px rgba(188,224,255,0.46)) drop-shadow(0 0 24px rgba(134,231,255,0.22)) drop-shadow(0 12px 20px rgba(0,0,0,0.34))",
+  Or: "drop-shadow(0 0 16px rgba(255,215,87,0.62)) drop-shadow(0 0 34px rgba(255,183,48,0.36)) drop-shadow(0 14px 24px rgba(0,0,0,0.36))",
+};
+
+const imageToneFilters: Record<Exclude<BadgeLevel, null> | "Vide", string> = {
+  Vide: "grayscale(1) saturate(0.55) brightness(0.72) contrast(1.08)",
+  Bronze: "sepia(0.82) saturate(1.45) hue-rotate(342deg) brightness(0.92) contrast(1.08)",
+  Argent: "grayscale(1) sepia(0.22) saturate(0.78) hue-rotate(170deg) brightness(1.18) contrast(1.04)",
+  Or: "sepia(0.95) saturate(1.72) hue-rotate(356deg) brightness(1.08) contrast(1.08)",
 };
 
 export default function CategoryBadge({
@@ -39,7 +46,8 @@ export default function CategoryBadge({
 }: CategoryBadgeProps) {
   const badgeDisplay = getBadgeDisplay(level, category);
   const classes = sizeClasses[size];
-  const glowFilter = imageGlowFilters[level ?? "Vide"];
+  const badgeLevel = level ?? "Vide";
+  const imageFilter = `${imageToneFilters[badgeLevel]} ${imageGlowFilters[badgeLevel]}`;
   const [imageAvailable, setImageAvailable] = useState(Boolean(badgeDisplay.imageSrc));
 
   useEffect(() => {
@@ -59,7 +67,7 @@ export default function CategoryBadge({
           height={classes.image}
           unoptimized
           className={`h-full w-full object-contain ${level ? "" : "opacity-75"}`}
-          style={{ filter: glowFilter }}
+          style={{ filter: imageFilter }}
           onError={() => setImageAvailable(false)}
         />
       </div>
