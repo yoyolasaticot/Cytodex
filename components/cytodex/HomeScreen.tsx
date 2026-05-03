@@ -66,23 +66,21 @@ export default function HomeScreen({
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,231,255,0.24),transparent_34%),radial-gradient(circle_at_78%_22%,rgba(255,209,102,0.2),transparent_24%)]" />
           <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:28px_28px]" />
 
-          <div className="relative flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-            <div className="shrink-0 rounded-[24px] border border-[#86e7ff]/24 bg-[#09131f]/32 p-3 backdrop-blur shadow-[0_0_24px_rgba(67,190,255,0.12)]">
-              <img
-                src={`/Avatars/${avatarKey}.png`}
-                alt="avatar"
-                className="h-24 w-24 object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,0.22)]"
-              />
-            </div>
+          <div className="absolute right-4 top-4 z-10 rounded-[26px] border border-[#86e7ff]/24 bg-[#09131f]/32 p-2.5 shadow-[0_0_28px_rgba(67,190,255,0.14)] backdrop-blur sm:right-6 sm:top-6 sm:p-3">
+            <img
+              src={`/Avatars/${avatarKey}.png`}
+              alt="avatar"
+              className="h-28 w-28 object-contain drop-shadow-[0_14px_28px_rgba(0,0,0,0.24)] sm:h-36 sm:w-36"
+            />
+          </div>
 
-            <div className="min-w-0 flex-1">
-              <p className="mb-2 text-[11px] uppercase tracking-[0.22em] text-[#9fe9ff]">
-                Microscopeur
-              </p>
-              <h1 className="font-heading break-words text-3xl font-semibold leading-snug text-white sm:text-4xl">
-                {displayName}
-              </h1>
-            </div>
+          <div className="relative min-w-0 pr-36 sm:pr-48">
+            <p className="mb-2 text-[11px] uppercase tracking-[0.22em] text-[#9fe9ff]">
+              Microscopeur
+            </p>
+            <h1 className="font-heading break-words text-3xl font-semibold leading-snug text-white sm:text-4xl">
+              {displayName}
+            </h1>
           </div>
         </div>
 
