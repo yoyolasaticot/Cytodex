@@ -39,14 +39,6 @@ const imageToneFilters: Record<Exclude<BadgeLevel, null> | "Vide", string> = {
   Or: "sepia(0.98) saturate(2.15) hue-rotate(356deg) brightness(1.2) contrast(1.12)",
 };
 
-const badgeShimmerClassNames: Record<Exclude<BadgeLevel, null>, string> = {
-  Bronze:
-    "from-transparent via-[#ffd0a1]/55 to-transparent opacity-75 mix-blend-screen",
-  Argent:
-    "from-transparent via-[#f5fdff]/70 to-transparent opacity-80 mix-blend-screen",
-  Or: "from-transparent via-[#fff2a8]/80 to-transparent opacity-90 mix-blend-screen",
-};
-
 const badgeSparkleClassNames: Record<Exclude<BadgeLevel, null>, string> = {
   Bronze: "bg-[#ffd0a1] shadow-[0_0_10px_rgba(255,146,72,0.85)]",
   Argent: "bg-[#f5fdff] shadow-[0_0_12px_rgba(160,232,255,0.9)]",
@@ -62,7 +54,6 @@ export default function CategoryBadge({
   const classes = sizeClasses[size];
   const badgeLevel = level ?? "Vide";
   const imageFilter = `${imageToneFilters[badgeLevel]} ${imageGlowFilters[badgeLevel]}`;
-  const shimmerClassName = level ? badgeShimmerClassNames[level] : "";
   const sparkleClassName = level ? badgeSparkleClassNames[level] : "";
   const [imageAvailable, setImageAvailable] = useState(Boolean(badgeDisplay.imageSrc));
 
@@ -89,10 +80,6 @@ export default function CategoryBadge({
         {level ? (
           <>
             <span
-              className={`pointer-events-none absolute inset-[-18%] -translate-x-full rotate-12 bg-gradient-to-r ${shimmerClassName} animate-[cytodex-badge-shimmer_2.8s_ease-in-out_infinite]`}
-              aria-hidden="true"
-            />
-            <span
               className={`pointer-events-none absolute left-[17%] top-[18%] h-1.5 w-1.5 rotate-45 ${sparkleClassName} animate-[cytodex-badge-sparkle_1.9s_ease-in-out_infinite]`}
               aria-hidden="true"
             />
@@ -105,17 +92,6 @@ export default function CategoryBadge({
               aria-hidden="true"
             />
             <style jsx>{`
-              @keyframes cytodex-badge-shimmer {
-                0%,
-                42% {
-                  transform: translateX(-115%) rotate(12deg);
-                }
-                76%,
-                100% {
-                  transform: translateX(115%) rotate(12deg);
-                }
-              }
-
               @keyframes cytodex-badge-sparkle {
                 0%,
                 100% {
