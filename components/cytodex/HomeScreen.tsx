@@ -61,16 +61,28 @@ export default function HomeScreen({
       const maxFontSize = window.matchMedia("(min-width: 640px)").matches
         ? 36
         : 30;
-      const minFontSize = 16;
-
-      nameText.style.fontSize = `${maxFontSize}px`;
+      const minFontSize = 10;
       const availableWidth = nameFrame.clientWidth;
-      const neededWidth = nameText.scrollWidth;
-      const nextFontSize =
-        neededWidth > availableWidth
-          ? Math.max(minFontSize, Math.floor((maxFontSize * availableWidth) / neededWidth))
-          : maxFontSize;
 
+      if (availableWidth <= 0) return;
+
+      let low = minFontSize;
+      let high = maxFontSize;
+      let nextFontSize = minFontSize;
+
+      while (low <= high) {
+        const middle = Math.floor((low + high) / 2);
+        nameText.style.fontSize = `${middle}px`;
+
+        if (nameText.scrollWidth <= availableWidth) {
+          nextFontSize = middle;
+          low = middle + 1;
+        } else {
+          high = middle - 1;
+        }
+      }
+
+      nameText.style.fontSize = `${nextFontSize}px`;
       setNameFontSize(nextFontSize);
     };
 
@@ -79,6 +91,7 @@ export default function HomeScreen({
     const resizeObserver = new ResizeObserver(updateNameSize);
     resizeObserver.observe(nameFrame);
     window.addEventListener("resize", updateNameSize);
+    document.fonts?.ready.then(updateNameSize);
 
     return () => {
       resizeObserver.disconnect();
@@ -111,7 +124,7 @@ export default function HomeScreen({
               </p>
               <h1
                 ref={nameTextRef}
-                className="font-heading overflow-hidden whitespace-nowrap font-semibold leading-snug text-white"
+                className="font-heading block max-w-full overflow-hidden whitespace-nowrap font-semibold leading-snug text-white"
                 style={{ fontSize: nameFontSize }}
               >
                 {displayName}
