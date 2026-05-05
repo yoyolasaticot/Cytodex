@@ -118,6 +118,7 @@ const avatars = [
   "avatar-2",
   "avatar-3",
   "avatar-4",
+  "avatar-5",
 ];
 
 const currentIndex = Math.max(
