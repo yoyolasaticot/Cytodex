@@ -104,26 +104,28 @@ export default function HomeScreen({
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,231,255,0.24),transparent_34%),radial-gradient(circle_at_78%_22%,rgba(255,209,102,0.2),transparent_24%)]" />
           <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:28px_28px]" />
 
-          <div className="absolute right-4 top-4 z-10 rounded-[26px] border border-[#86e7ff]/24 bg-[#09131f]/32 p-2.5 shadow-[0_0_28px_rgba(67,190,255,0.14)] backdrop-blur sm:right-6 sm:top-6 sm:p-3">
-            <img
-              src={`/Avatars/${avatarKey}.png`}
-              alt="avatar"
-              className="h-28 w-28 object-contain drop-shadow-[0_14px_28px_rgba(0,0,0,0.24)] sm:h-36 sm:w-36"
-            />
-          </div>
-
-          <div ref={nameFrameRef} className="relative min-w-0 pr-36 sm:pr-48">
-            <p className="mb-2 text-[11px] uppercase tracking-[0.22em] text-[#9fe9ff]">
-              Microscopeur
-            </p>
-            <h1
-              ref={nameTextRef}
-              className="font-heading overflow-hidden whitespace-nowrap font-semibold leading-snug text-white"
-              style={{ fontSize: nameFontSize }}
-            >
-              {displayName}
-            </h1>
+          <div className="relative flex min-w-0 items-center justify-between gap-4 sm:gap-6">
+            <div ref={nameFrameRef} className="min-w-0 flex-1">
+              <p className="mb-2 text-[11px] uppercase tracking-[0.22em] text-[#9fe9ff]">
+                Microscopeur
+              </p>
+              <h1
+                ref={nameTextRef}
+                className="font-heading overflow-hidden whitespace-nowrap font-semibold leading-snug text-white"
+                style={{ fontSize: nameFontSize }}
+              >
+                {displayName}
+              </h1>
             </div>
+
+            <div className="z-10 shrink-0 rounded-[26px] border border-[#86e7ff]/24 bg-[#09131f]/32 p-2.5 shadow-[0_0_28px_rgba(67,190,255,0.14)] backdrop-blur sm:p-3">
+              <img
+                src={`/Avatars/${avatarKey}.png`}
+                alt="avatar"
+                className="h-24 w-24 object-contain drop-shadow-[0_14px_28px_rgba(0,0,0,0.24)] sm:h-36 sm:w-36"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="relative flex-1 overflow-hidden rounded-[24px] border border-[#86e7ff]/12 bg-[linear-gradient(180deg,rgba(8,19,31,0.82),rgba(11,23,38,0.92))] px-5 py-6 shadow-[0_20px_48px_rgba(1,7,15,0.3)] sm:px-6">
