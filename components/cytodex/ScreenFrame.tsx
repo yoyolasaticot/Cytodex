@@ -22,6 +22,7 @@ type ScreenFrameProps = {
   description: string;
   onBack: () => void;
   backLabel: string;
+  showHeaderText?: boolean;
   children: React.ReactNode;
 };
 
@@ -31,6 +32,7 @@ export default function ScreenFrame({
   description,
   onBack,
   backLabel,
+  showHeaderText = true,
   children,
 }: ScreenFrameProps) {
   return (
@@ -40,18 +42,24 @@ export default function ScreenFrame({
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,231,255,0.3),transparent_32%),radial-gradient(circle_at_78%_24%,rgba(255,209,102,0.24),transparent_24%),linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent)]" />
           <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:32px_32px]" />
 
-          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0 max-w-4xl flex-1">
-              <p className="mb-2 text-[11px] uppercase tracking-[0.26em] text-[#9fe9ff]">
-                {eyebrow}
-              </p>
-              <h1 className="font-heading text-2xl font-semibold leading-snug text-white sm:text-3xl">
-                {title}
-              </h1>
-              <p className="mt-2 max-w-2xl text-sm text-white/76 sm:text-base">
-                {description}
-              </p>
-            </div>
+          <div
+            className={`relative flex flex-col gap-4 sm:flex-row sm:items-start ${
+              showHeaderText ? "sm:justify-between" : "sm:justify-start"
+            }`}
+          >
+            {showHeaderText && (
+              <div className="min-w-0 max-w-4xl flex-1">
+                <p className="mb-2 text-[11px] uppercase tracking-[0.26em] text-[#9fe9ff]">
+                  {eyebrow}
+                </p>
+                <h1 className="font-heading text-2xl font-semibold leading-snug text-white sm:text-3xl">
+                  {title}
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm text-white/76 sm:text-base">
+                  {description}
+                </p>
+              </div>
+            )}
 
             <Button
               type="button"

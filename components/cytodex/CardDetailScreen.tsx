@@ -37,6 +37,7 @@ export default function CardDetailScreen({
       }
       onBack={onBack}
       backLabel="Retour a la liste"
+      showHeaderText={false}
     >
       {card ? (
         <DexCard
