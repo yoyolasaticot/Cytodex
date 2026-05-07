@@ -500,7 +500,6 @@ export default function DexCard({
                       Supprimer
                     </Button>
                   </div>
-                </div>
               ))}
             </div>
           </div>
