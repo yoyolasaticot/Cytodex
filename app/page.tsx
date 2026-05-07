@@ -70,6 +70,11 @@ export default function Page() {
           user.email?.split("@")[0] ||
           null
         }
+        avatarKey={
+          profile?.avatar_key ||
+          (user.user_metadata?.avatar_key as string | undefined) ||
+          "avatar-1"
+        }
       />
     );
   }
