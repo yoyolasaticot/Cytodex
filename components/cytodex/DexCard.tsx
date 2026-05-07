@@ -471,11 +471,11 @@ export default function DexCard({
               </Button>
             </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
               {signedImageUrls.map((imageUrl, index) => (
                 <div
                   key={`${card.id}-${index}`}
-                  className="overflow-hidden rounded-[16px] bg-[linear-gradient(180deg,rgba(11,24,38,0.72),rgba(8,19,31,0.8))] shadow-[0_10px_24px_rgba(1,8,18,0.18)]"
+                  className="w-[210px] flex-none snap-start overflow-hidden rounded-[16px] bg-[linear-gradient(180deg,rgba(11,24,38,0.72),rgba(8,19,31,0.8))] shadow-[0_10px_24px_rgba(1,8,18,0.18)] sm:w-[240px]"
                 >
                   <div className="aspect-square overflow-hidden">
                     <button
