@@ -429,9 +429,6 @@ export default function DexCard({
         <div className="space-y-5 px-1 pt-5 sm:px-0 sm:pt-6">
           <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#9fe9ff]">
-                Echantillon
-              </p>
               <h3 className="mt-2 break-words text-2xl font-semibold leading-snug text-white">{card.title}</h3>
               <p className="mt-1 break-words text-sm text-[#a6c8d5]">{card.category}</p>
             </div>
@@ -484,17 +481,6 @@ export default function DexCard({
                       />
                     </button>
                   </div>
-
-                  <div className="space-y-2 p-2.5">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className={primaryButtonClassName}
-                      onClick={() => void startCamera(index)}
-                    >
-                      <RefreshCw className="mr-2 h-3.5 w-3.5" />
-                      Remplacer
-                    </Button>
 
                     <Button
                       type="button"
