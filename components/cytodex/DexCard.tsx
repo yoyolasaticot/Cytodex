@@ -308,9 +308,6 @@ export default function DexCard({
 
           <div className="space-y-3 px-1 pt-5">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#9fe9ff]">
-                Echantillon
-              </p>
               <h3 className="mt-2 break-words text-2xl font-semibold leading-snug">{card.title}</h3>
             </div>
             <div className="rounded-[16px] border border-dashed border-[#86e7ff]/18 bg-[#0b1827]/70 p-4 text-sm text-[#a6c8d5]">
@@ -456,9 +453,6 @@ export default function DexCard({
 
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <label className="text-sm font-medium text-[#eafcff]">
-                Photographies prises en direct
-              </label>
 
               <Button
                 type="button"
