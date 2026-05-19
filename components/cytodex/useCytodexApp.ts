@@ -10,7 +10,7 @@ import {
   validateProfile,
 } from "@/lib/auth";
 import { CytodexCard, loadCards, saveCard } from "@/lib/cards";
-import { uploadCardImages } from "@/lib/card-images";
+import { removeLocalCardImage, saveCardImagesLocally } from "@/lib/card-images";
 import { supabase } from "@/lib/supabase";
 import { CardUpdate } from "@/components/cytodex/dexTypes";
 
@@ -239,7 +239,14 @@ export function useCytodexApp() {
       return;
     }
 
-    const newUrls = await uploadCardImages(files, user.id);
+    let newUrls: string[] = [];
+    try {
+      newUrls = await saveCardImagesLocally(files);
+    } catch (error) {
+      console.error("Error saving local photos:", error);
+      alert("Enregistrement local annule ou impossible.");
+      return;
+    }
     if (newUrls.length === 0) return;
 
     setCards((prev) => {
@@ -268,7 +275,14 @@ export function useCytodexApp() {
       return;
     }
 
-    const newUrls = await uploadCardImages(files, user.id);
+    let newUrls: string[] = [];
+    try {
+      newUrls = await saveCardImagesLocally(files);
+    } catch (error) {
+      console.error("Error saving local photo:", error);
+      alert("Enregistrement local annule ou impossible.");
+      return;
+    }
     if (newUrls.length === 0) return;
 
     setCards((prev) => {
@@ -276,6 +290,7 @@ export function useCytodexApp() {
         if (card.id !== id) return card;
 
         const nextImages = [...card.images];
+        void removeLocalCardImage(nextImages[index]);
         nextImages[index] = newUrls[0];
         return { ...card, images: nextImages };
       });
@@ -294,6 +309,7 @@ export function useCytodexApp() {
       const updatedCards = prev.map((card) => {
         if (card.id !== id) return card;
 
+        void removeLocalCardImage(card.images[index]);
         const nextImages = card.images.filter(
           (_, currentIndex) => currentIndex !== index
         );
