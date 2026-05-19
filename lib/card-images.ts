@@ -133,12 +133,35 @@ async function deleteFromStore(
   });
 }
 
-function buildSafeFileName(file: File): string {
+type SaveCardImagesOptions = {
+  cardTitle: string;
+  startIndex?: number;
+  totalImageCount?: number;
+};
+
+function buildSafeNamePart(value: string): string {
+  return (
+    value
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .toLowerCase() || "fiche"
+  );
+}
+
+function buildSafeFileName(
+  file: File,
+  cardTitle: string,
+  imageNumber: number,
+  shouldNumber: boolean
+): string {
   const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
   const safeExtension = extension.replace(/[^a-z0-9]/g, "") || "jpg";
-  return `cytodex-${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2)}.${safeExtension}`;
+  const safeTitle = buildSafeNamePart(cardTitle);
+  const suffix = shouldNumber ? `-${imageNumber}` : "";
+  return `${safeTitle}${suffix}.${safeExtension}`;
 }
 
 async function getStoredDirectoryHandle(): Promise<WritableDirectoryHandle | null> {
@@ -205,7 +228,8 @@ export function isLocalCardImage(path: string): boolean {
 }
 
 export async function saveCardImagesLocally(
-  files: FileList | null
+  files: FileList | null,
+  options: SaveCardImagesOptions
 ): Promise<string[]> {
   if (!files || files.length === 0) return [];
 
@@ -217,9 +241,19 @@ export async function saveCardImagesLocally(
     );
   }
   const savedKeys: string[] = [];
+  const fileArray = Array.from(files);
+  const startIndex = options.startIndex ?? 0;
+  const totalImageCount = options.totalImageCount ?? startIndex + fileArray.length;
+  const shouldNumber = totalImageCount > 1;
 
-  for (const file of Array.from(files)) {
-    const fileName = buildSafeFileName(file);
+  for (const [fileIndex, file] of fileArray.entries()) {
+    const imageNumber = startIndex + fileIndex + 1;
+    const fileName = buildSafeFileName(
+      file,
+      options.cardTitle,
+      imageNumber,
+      shouldNumber
+    );
     const key = localKeyFromFileName(fileName);
 
     if (directoryHandle) {

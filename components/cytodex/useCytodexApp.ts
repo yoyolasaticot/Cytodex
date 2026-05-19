@@ -239,9 +239,14 @@ export function useCytodexApp() {
       return;
     }
 
+    const currentCard = cards.find((card) => card.id === id);
     let newUrls: string[] = [];
     try {
-      newUrls = await saveCardImagesLocally(files);
+      newUrls = await saveCardImagesLocally(files, {
+        cardTitle: currentCard?.title ?? "fiche",
+        startIndex: currentCard?.images.length ?? 0,
+        totalImageCount: (currentCard?.images.length ?? 0) + (files?.length ?? 0),
+      });
     } catch (error) {
       console.error("Error saving local photos:", error);
       alert("Enregistrement local annule ou impossible.");
@@ -275,9 +280,14 @@ export function useCytodexApp() {
       return;
     }
 
+    const currentCard = cards.find((card) => card.id === id);
     let newUrls: string[] = [];
     try {
-      newUrls = await saveCardImagesLocally(files);
+      newUrls = await saveCardImagesLocally(files, {
+        cardTitle: currentCard?.title ?? "fiche",
+        startIndex: index,
+        totalImageCount: currentCard?.images.length ?? index + 1,
+      });
     } catch (error) {
       console.error("Error saving local photo:", error);
       alert("Enregistrement local annule ou impossible.");
@@ -290,8 +300,11 @@ export function useCytodexApp() {
         if (card.id !== id) return card;
 
         const nextImages = [...card.images];
-        void removeLocalCardImage(nextImages[index]);
+        const previousImage = nextImages[index];
         nextImages[index] = newUrls[0];
+        if (previousImage !== nextImages[index]) {
+          void removeLocalCardImage(previousImage);
+        }
         return { ...card, images: nextImages };
       });
 
